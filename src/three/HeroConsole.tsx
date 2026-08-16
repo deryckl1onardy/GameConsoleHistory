@@ -35,7 +35,13 @@ export function HeroConsole() {
   const spec = useActiveDiorama()
   const screen = useScene((s) => s.screen)
   const approach = useScene((s) => s.approach)
+  const focusedId = useScene((s) => s.focusedId)
+  const hallView = useScene((s) => s.hallView)
   const groupRef = useRef<Group>(null)
+
+  // The present step applies to the console actually being presented: the
+  // focused one, in the station view, when it IS the hero's console.
+  const presented = screen === 'shelf' && hallView === 'station' && focusedId === entry.id
 
   useEffect(() => {
     heroGroupRef.current = groupRef.current
@@ -68,13 +74,12 @@ export function HeroConsole() {
     if (!g) return
     // shelfWorldPose, not raw artifact.position: the hero lives OUTSIDE the
     // glided hall group, so its shelf pose must include whatever glide offset
-    // the hall is carrying (zero until Phase 4 — but the hero must already
-    // route through here, or the moment the hall glides it would sit at the
-    // un-glided spot).
-    const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id)
+    // the hall is carrying plus its present step when it is the focused
+    // console on the stage.
+    const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id, presented)
     g.position.set(...pose.position)
     g.rotation.set(...pose.rotation)
-  }, [entry.id, screen])
+  }, [entry.id, screen, presented])
 
   useEffect(() => {
     if (approach !== 'idle') return
@@ -89,14 +94,14 @@ export function HeroConsole() {
         }
         return
       }
-      const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id)
+      const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id, presented)
       g.position.set(...pose.position)
       g.rotation.set(...pose.rotation)
     } else {
       g.position.set(...spec.consolePosition)
       g.rotation.set(...(spec.consoleRotation ?? [0, 0, 0]))
     }
-  }, [entry.id, screen, approach, spec])
+  }, [entry.id, screen, approach, spec, presented])
 
   return (
     <group ref={groupRef}>

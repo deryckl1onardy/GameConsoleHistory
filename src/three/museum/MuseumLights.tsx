@@ -3,8 +3,10 @@ import type { AmbientLight, DirectionalLight, Object3D, SpotLight } from 'three'
 import gsap from 'gsap'
 import { useScene } from '@/store/scene'
 import { kelvinToColor } from '../lighting'
+import { STAGE_ANCHOR } from './hall-glide'
 import { MUSEUM_LAYOUT } from './layout'
 import { APPROACH_TIMING } from './approach'
+import { MUSEUM_SHELL_LAYER } from './layers'
 
 /**
  * Lighting for the hall.
@@ -16,7 +18,14 @@ import { APPROACH_TIMING } from './approach'
  * throughout, and a hard spotlight in one would read as a mistake rather than
  * as emphasis. So the levels are inverted: a high ambient that lifts the whole
  * hall, a soft key for form and contact shadows, and a *gentle* wash over the
- * current station rather than a theatrical pool.
+ * stage — the one fixed point every focused console presents on — rather
+ * than a theatrical pool.
+ *
+ * The rig is STATIC by design. The camera is bolted down while browsing and
+ * the hall glides consoles to the stage, so the lights never need to chase a
+ * station or a hovered artifact: one key angle and one accent pool, fixed on
+ * the stage, with the shadow frustum shrunk to match (6× the texel density on
+ * the one console anyone is looking at).
  *
  * The consoles do the contrasting. They are dark, saturated, plastic objects
  * against white plaster, which is exactly why a bright hall shows them off
@@ -36,9 +45,18 @@ const FILL_TEMP_K = 5600
 /** The accent is barely warmer than the key — a wash, not a stage light. */
 const ACCENT_TEMP_K = 4600
 
-/** Half-extents of the shadow frustum. Sized to the hall, not to one station. */
-const SHADOW_X = 5
-const SHADOW_Y = 5
+/**
+ * Half-extents of the shadow frustum. The hall used to need ±5/far-60 to
+ * cover every station at once; the rig is now STATIC, aimed at the stage —
+ * the one console anyone is looking at — so the frustum shrinks to about
+ * ±2/far-12, a roughly 6× gain in shadow texel density on the subject.
+ * (The rest of the hall renders without a key-light shadow term, which is
+ * fine: the stage is where the collection presents itself, and the ambient
+ * carries the rest of the room.)
+ */
+const SHADOW_X = 2
+const SHADOW_Y = 2
+const SHADOW_FAR = 12
 
 /*
   A white gallery's numbers are almost the inverse of the archive's: ambient
@@ -55,7 +73,6 @@ const FOCUS = { ambient: 1.5, key: 1.05, accent: 2.4 }
 const DARK = { ambient: 0, key: 0, accent: 0 }
 
 export function MuseumLights() {
-  const focusGeneration = useScene((s) => s.focusGeneration)
   const hoveredId = useScene((s) => s.hoveredId)
   const quality = useScene((s) => s.quality)
   const reducedMotion = useScene((s) => s.reducedMotion)
@@ -64,6 +81,7 @@ export function MuseumLights() {
   const ambientRef = useRef<AmbientLight>(null)
   const keyRef = useRef<DirectionalLight>(null)
   const keyTargetRef = useRef<Object3D>(null)
+  const fillRef = useRef<DirectionalLight>(null)
   const accentRef = useRef<SpotLight>(null)
   const accentTargetRef = useRef<Object3D>(null)
 
@@ -76,51 +94,29 @@ export function MuseumLights() {
     }
   }, [])
 
+  // Every museum light also carries the shell's own layer (see layers.ts) —
+  // ADDING it, not replacing, since these still need to illuminate the
+  // plinths and consoles sitting on the default layer too.
+  useEffect(() => {
+    for (const l of [ambientRef.current, keyRef.current, fillRef.current, accentRef.current]) {
+      l?.layers.enable(MUSEUM_SHELL_LAYER)
+    }
+  }, [])
+
   const { hall } = MUSEUM_LAYOUT
 
-  const bay =
-    MUSEUM_LAYOUT.bays.find((b) => b.generation === focusGeneration) ?? MUSEUM_LAYOUT.bays[0]
-  const bayFocus: [number, number, number] = [
-    bay.boardCenter[0],
-    bay.boardY + bay.tallest / 2,
-    bay.boardCenter[2],
+  // The rig is STATIC: the stage is where every focused console presents, so
+  // there is no per-focus or per-hover target to chase — one fixed point,
+  // one key angle, one accent pool. This is what lets the shadow frustum
+  // shrink to the stage (see SHADOW_X above) and what makes the focused
+  // console's lighting identical no matter which machine it is.
+  const stageFocus: [number, number, number] = [
+    STAGE_ANCHOR[0],
+    STAGE_ANCHOR[1] + 0.12,
+    STAGE_ANCHOR[2],
   ]
 
-  const hovered = hoveredId ? MUSEUM_LAYOUT.byId[hoveredId] : null
-  // Whichever the accent should sit over: a hovered artifact if there is one,
-  // otherwise the centre of the current station.
-  const accentTarget: [number, number, number] = hovered
-    ? [hovered.position[0], hovered.position[1] + hovered.size.height / 2, hovered.position[2]]
-    : bayFocus
-
-  /*
-    The accent follows the current station down the HALL now, not just up and
-    down a wall — so it tracks Z as well as X and Y. It is the one light in the
-    scene that visibly moves, so it is tweened rather than snapped, the same
-    GSAP-on-refs discipline as the artifact's own hover step.
-  */
-  useEffect(() => {
-    const target = accentTargetRef.current
-    const spot = accentRef.current
-    if (!target || !spot) return
-    const duration = reducedMotion ? 0 : 0.5
-    gsap.to(target.position, {
-      x: accentTarget[0],
-      y: accentTarget[1],
-      z: accentTarget[2],
-      duration,
-      ease: 'power2.inOut',
-    })
-    // Hangs from the ceiling just in front of whatever it is lighting.
-    gsap.to(spot.position, {
-      x: accentTarget[0] * 0.7,
-      y: hall.height - 0.25,
-      z: accentTarget[2] + 0.9,
-      duration,
-      ease: 'power2.inOut',
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accentTarget[0], accentTarget[1], accentTarget[2], reducedMotion, hall.height])
+  const hovered = Boolean(hoveredId)
 
   // Lift the accent on hover — never per frame, never a material. Runs once
   // per hover CHANGE, not per pointer move (BayHitPlane collapses that
@@ -207,10 +203,10 @@ export function MuseumLights() {
       */}
       <ambientLight ref={ambientRef} intensity={REST.ambient} color={kelvinToColor(FILL_TEMP_K)} />
 
-      <object3D ref={keyTargetRef} position={[0, 1, -8]} />
+      <object3D ref={keyTargetRef} position={stageFocus} />
 
       {/*
-        The key comes from high and slightly to one side, down the hall. Its
+        The key comes from high and slightly to one side of the stage. Its
         real job here is not brightness — ambient handles that — but SHAPE:
         without a directional source the consoles would sit in flat white with
         no contact shadow and no modelling, which is the failure mode of a
@@ -221,7 +217,7 @@ export function MuseumLights() {
         // silently no-ops without a remount.
         key={quality}
         ref={keyRef}
-        position={[-3.2, hall.height + 1.5, 4]}
+        position={[STAGE_ANCHOR[0] - 3.2, hall.height + 1.5, STAGE_ANCHOR[2] + 4]}
         intensity={REST.key}
         color={kelvinToColor(KEY_TEMP_K)}
         castShadow
@@ -230,34 +226,41 @@ export function MuseumLights() {
         shadow-normalBias={0.02}
       >
         {/*
-          The frustum has to cover the whole hall, not one station: geometry
-          outside a shadow camera's frustum samples the depth map out of range
-          and comes back FULLY SHADOWED, which in the previous version rendered
-          seven of eight bays black. Far plane runs the length of the hall.
+          The frustum is sized to the STAGE, the one console anyone is looking
+          at: ±2 × far-12 instead of the whole hall. This is the 6× texel
+          density win — but it is also a deliberate trade: geometry outside
+          the frustum samples the depth map out of range and comes back fully
+          shadowed, so the far consoles in the hall lose their key-light
+          shadow term and are carried by the ambient + fill. That is the
+          point of a stage: one subject, crisply lit; the collection recedes
+          around it.
         */}
         <orthographicCamera
           attach="shadow-camera"
-          args={[-SHADOW_X, SHADOW_X, SHADOW_Y, -SHADOW_Y, 0.1, 60]}
+          args={[-SHADOW_X, SHADOW_X, SHADOW_Y, -SHADOW_Y, 0.1, SHADOW_FAR]}
         />
       </directionalLight>
 
       {/* Counter-fill from the other side so no console face goes solid. */}
       <directionalLight
+        ref={fillRef}
         position={[3.6, hall.height, 2]}
         intensity={0.5}
         color={kelvinToColor(FILL_TEMP_K)}
       />
 
       {/*
-        The accent: a soft wash over whichever station (or, hovered, artifact)
-        currently has focus. This is what says "you are here" — and it is the
-        same mechanism the approach transition ramps to full, so there is only
-        ever one way a thing gets emphasised in this scene.
+        The accent: a soft wash over the stage, where every focused console
+        presents. Fixed, like the whole rig — this is what says \"you are
+        here\", and it is the same mechanism the approach transition ramps to
+        full, so there is only ever one way a thing gets emphasised in this
+        scene.
       */}
-      <object3D ref={accentTargetRef} position={bayFocus} />
+      <object3D ref={accentTargetRef} position={stageFocus} />
       <spotLight
         ref={accentRef}
-        position={[bayFocus[0] * 0.7, hall.height - 0.25, bayFocus[2] + 0.9]}
+        // Hangs from the ceiling just in front of the stage.
+        position={[STAGE_ANCHOR[0] * 0.7, hall.height - 0.25, STAGE_ANCHOR[2] + 0.9]}
         intensity={REST.accent}
         distance={7}
         angle={0.7}

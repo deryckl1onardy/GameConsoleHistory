@@ -1,5 +1,6 @@
 import type { ConsoleEntry, Generation } from '@/types/console'
 import { getConsole } from '@/data/consoles'
+import { mm } from '../lighting'
 import { SHELF_CONSTANTS, type MuseumLayout, type ShelfArtifact } from './shelf-layout'
 
 /**
@@ -58,6 +59,16 @@ const sub = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
 export const STAGE_ANCHOR: Vec3 = [0, SHELF_CONSTANTS.PLINTH_TOP, -4.6]
 
 /**
+ * The stage camera's standoff (the stage shot's distance at 16:9). The
+ * present step is measured from this: p = STAGE_STANDOFF_REF − standoff(id),
+ * so a console that wants a SHORTER standoff than the camera's default comes
+ * forward to get it. Kept here — not in museum-shots.ts — because present
+ * offsets are this module's job and museum-shots imports FROM here; one
+ * number, one owner.
+ */
+export const STAGE_STANDOFF_REF = 1.9
+
+/**
  * The LIVE glide offset — what the hall group's position is right now.
  *
  * Module-level, in the same spirit as `heroGroupRef`: the glide group is
@@ -102,9 +113,28 @@ export function hallOffsetFor(layout: MuseumLayout, id: string): Vec3 {
  * `ArtifactSlot`'s present group — one helper, one truth, so the two
  * implementations can never drift apart.
  */
-export function presentOffset(_id: string): Vec3 {
-  return [0, 0, 0]
+/**
+ * The per-console presenting step, in metres, added on top of the glide: the
+ * focused console steps forward (toward the fixed stage camera) so every
+ * machine lands at a comparable on-screen size — small ones come near, tall
+ * ones stay back.
+ *
+ * The standoff model is affine in console height, fitted to the two numbers
+ * the plan names: the PS4 (53mm) needs a 0.98m standoff and the PS5 (390mm)
+ * needs 1.97m. Both sides of the handoff — `stageWorldPos`/`shelfWorldPose`
+ * here, and `ArtifactSlot`'s present group — read THIS function, so the two
+ * implementations can never drift apart.
+ */
+export function presentOffset(id: string): Vec3 {
+  const entry = getConsole(id)
+  if (!entry) return [0, 0, 0]
+  const height = mm(entry.dimensions.height)
+  const standoff = clamp(0.82 + 2.94 * height, 0.55, 2.2)
+  const step = clamp(STAGE_STANDOFF_REF - standoff, -0.35, 0.55)
+  return [0, 0, step]
 }
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 
 /** Where the focused console presents, in world space. */
 export function stageWorldPos(id: string): Vec3 {
@@ -114,18 +144,26 @@ export function stageWorldPos(id: string): Vec3 {
 /**
  * An artifact's real world pose at this instant: its resting place on its
  * plinth, plus whatever the hall group is currently carrying, plus its
- * present step. Rotation is ALWAYS the artifact's own — the invariant.
+ * present step when it is actually presenting. Rotation is ALWAYS the
+ * artifact's own — the invariant.
+ *
+ * `presented` is a state of FOCUS, not a property of the id: the step only
+ * applies to the console the user is actually looking at on the stage (in
+ * the overview nothing presents, and an off-stage console does not lean
+ * forward on its own plinth).
  */
 export function shelfWorldPose(
   layout: MuseumLayout,
   id: string,
+  presented = false,
 ): { position: Vec3; rotation: Vec3 } {
   const artifact = layout.byId[id]
   if (!artifact) {
     throw new Error(`hall-glide: ${id} is not on any shelf`)
   }
+  const present: Vec3 = presented ? presentOffset(id) : [0, 0, 0]
   return {
-    position: add(add(artifact.position, getHallOffset()), presentOffset(id)),
+    position: add(add(artifact.position, getHallOffset()), present),
     rotation: artifact.rotation,
   }
 }

@@ -7,7 +7,8 @@ import { useScene } from '@/store/scene'
 import { MuseumLights } from './MuseumLights'
 import { ShelfBay } from './ShelfBay'
 import { MUSEUM_LAYOUT } from './layout'
-import { getHallOffset } from './hall-glide'
+import { STAGE_ANCHOR, getHallOffset } from './hall-glide'
+import { SHELF_CONSTANTS } from './shelf-layout'
 import { APPROACH_TIMING } from './approach'
 import { MUSEUM_SHELL_LAYER } from './layers'
 
@@ -197,6 +198,42 @@ function YearLine({ bays }: { bays: typeof MUSEUM_LAYOUT.bays }) {
 }
 
 /**
+ * The stage: a permanent pedestal at STAGE_ANCHOR, world-fixed (OUTSIDE the
+ * glided hall group), where every focused console presents itself.
+ *
+ * The hall glides a focused console to the stage on its own plinth, and the
+ * presenting step (Phase 6) carries it forward off that plinth onto this
+ * pedestal — so the pedestal is the destination surface the step needs
+ * under it, built in the hall's own plinth language (chamfered lip, tapered
+ * body, floor reveal) so it reads as furniture of the same room.
+ */
+function StagePedestal() {
+  const { PLINTH_TOP } = SHELF_CONSTANTS
+  const [x, , z] = STAGE_ANCHOR
+  const length = 1.9
+  const depth = 1.3
+  const chamfer = 0.02
+  const bodyHeight = PLINTH_TOP - chamfer
+
+  return (
+    <group>
+      <mesh position={[x, PLINTH_TOP - chamfer / 2, z]} receiveShadow castShadow>
+        <boxGeometry args={[length, chamfer, depth]} />
+        <meshStandardMaterial color="#fbfbf9" roughness={0.62} metalness={0} />
+      </mesh>
+      <mesh position={[x, bodyHeight / 2, z]} receiveShadow castShadow>
+        <boxGeometry args={[length - 0.06, bodyHeight, depth - 0.06]} />
+        <meshStandardMaterial color="#f1f1ee" roughness={0.7} metalness={0} />
+      </mesh>
+      <mesh position={[x, 0.0175, z]} receiveShadow>
+        <boxGeometry args={[length - 0.09, 0.035, depth - 0.09]} />
+        <meshStandardMaterial color="#a3a4a0" roughness={0.9} metalness={0} />
+      </mesh>
+    </group>
+  )
+}
+
+/**
  * The hall group CameraRig glides — the whole museum as one movable object.
  * The camera is bolted down while browsing, so the collection presents
  * itself by sliding this group in 2-D until the focused console stands on
@@ -234,9 +271,17 @@ export function MuseumScene() {
   }, [])
 
   return (
-    <group ref={hallGroupRef}>
+    <>
+      {/*
+        The lights and the stage pedestal live OUTSIDE the glided group on
+        purpose: the stage is the one world-fixed point the hall brings
+        consoles TO, so the rig that lights it and the pedestal that receives
+        it must not slide away when the hall moves (see MuseumLights).
+      */}
       <MuseumLights />
+      <StagePedestal />
 
+      <group ref={hallGroupRef}>
       {/* Floor. The surface the whole hall reads its depth against. */}
       <mesh
         ref={onShellMesh}
@@ -311,6 +356,7 @@ export function MuseumScene() {
       {bays.map((bay) => (
         <ShelfBay key={bay.generation} bay={bay} />
       ))}
-    </group>
+      </group>
+    </>
   )
 }

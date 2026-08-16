@@ -395,7 +395,11 @@ export function CameraRig() {
       if (!hero) return
       const current = useScene.getState()
       if (current.screen !== 'shelf') return
-      const pose = shelfWorldPose(MUSEUM_LAYOUT, current.consoleId)
+      const pose = shelfWorldPose(
+        MUSEUM_LAYOUT,
+        current.consoleId,
+        current.hallView === 'station' && current.focusedId === current.consoleId,
+      )
       hero.position.set(...pose.position)
       hero.rotation.set(...pose.rotation)
     }
@@ -529,7 +533,9 @@ export function CameraRig() {
           setHallOffset(target)
           const hero = heroGroupRef.current
           if (hero) {
-            const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id)
+            // The entered console is the focused one, standing on the stage:
+            // its pose includes the present step.
+            const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id, true)
             hero.position.set(...pose.position)
             hero.rotation.set(...pose.rotation)
           }
@@ -641,9 +647,11 @@ export function CameraRig() {
         const hero = heroGroupRef.current
         if (hero && artifact) {
           // shelfWorldPose, not raw artifact.position: the hall may be
-          // carrying a glide offset (zero today, live from Phase 4), and the
-          // retreat must land the hero exactly where the hall actually is.
-          const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id)
+          // carrying a glide offset, and the retreat must land the hero
+          // exactly where the hall actually is. The console is still the
+          // focused one at this point (selectArtifact mirrored it), so it
+          // presents on the stage.
+          const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id, true)
           hero.position.set(...pose.position)
           hero.rotation.set(...pose.rotation)
         } else if (import.meta.env.DEV) {

@@ -4,12 +4,15 @@ import gsap from 'gsap'
 import { getConsole } from '@/data/consoles'
 import { useScene } from '@/store/scene'
 import { ConsoleModel } from '../models/registry'
+import { presentOffset } from './hall-glide'
 import type { ShelfArtifact } from './shelf-layout'
 
 /** How far a hovered artifact steps forward, in metres. */
 const HOVER_FORWARD = 0.045
 const HOVER_SCALE = 1.03
 const HOVER_DURATION = 0.35
+/** How long the presenting step takes. */
+const PRESENT_DURATION = 0.6
 
 /**
  * One console on a board.
@@ -35,13 +38,17 @@ const HOVER_DURATION = 0.35
  *
  * THREE nested groups, and the nesting is load-bearing:
  *
- *   pose    carries the artifact's real position. Static.
- *   hover   the step-forward and scale. Starts at the ORIGIN, so its tween is
- *           a relative offset — and because its parent is unrotated, its +Z
- *           is the hall's +Z, which is what "steps toward the viewer" has to
- *           mean whatever yaw the console itself carries.
- *   yaw     the console's own room rotation. Innermost, so it cannot turn the
- *           hover direction with it.
+ *   pose     carries the artifact's real position. Static.
+ *   present  the per-console presenting step — the focused console steps
+ *            forward onto the stage (presentOffset in hall-glide.ts, the one
+ *            source of truth). A DEDICATED group on purpose: two GSAP tweens
+ *            on one position.z would fight.
+ *   hover    the step-forward and scale. Starts at the ORIGIN, so its tween is
+ *            a relative offset — and because its parent is unrotated, its +Z
+ *            is the hall's +Z, which is what "steps toward the viewer" has to
+ *            mean whatever yaw the console itself carries.
+ *   yaw      the console's own room rotation. Innermost, so it cannot turn the
+ *            hover direction with it.
  *
  * This used to be one group carrying pose, rotation and tween together, with
  * the tween writing `position.z` ABSOLUTELY — `z: hovered ? 0.045 : 0`. That
@@ -54,8 +61,16 @@ const HOVER_DURATION = 0.35
 export function ArtifactSlot({ artifact }: { artifact: ShelfArtifact }) {
   const entry = getConsole(artifact.id)
   const hovered = useScene((s) => s.hoveredId === artifact.id)
+  const focusedId = useScene((s) => s.focusedId)
+  const hallView = useScene((s) => s.hallView)
   const reducedMotion = useScene((s) => s.reducedMotion)
   const hoverRef = useRef<Group>(null)
+  const presentRef = useRef<Group>(null)
+
+  // Only the focused console presents, and only in the station view — in the
+  // overview nothing is on the stage, and an off-stage console does not lean
+  // forward on its own plinth.
+  const presenting = hallView === 'station' && focusedId === artifact.id
 
   useEffect(() => {
     const g = hoverRef.current
@@ -72,13 +87,26 @@ export function ArtifactSlot({ artifact }: { artifact: ShelfArtifact }) {
     })
   }, [hovered, reducedMotion])
 
+  // The presenting step: the SAME number shelfWorldPose/stageWorldPos read
+  // (presentOffset in hall-glide.ts), so the hero console and this slot can
+  // never drift apart about where the presented console stands.
+  useEffect(() => {
+    const g = presentRef.current
+    if (!g) return
+    const target = presenting ? presentOffset(artifact.id)[2] : 0
+    const duration = reducedMotion ? 0 : PRESENT_DURATION
+    gsap.to(g.position, { z: target, duration, ease: 'power2.out' })
+  }, [presenting, reducedMotion, artifact.id])
+
   if (!entry) return null
 
   return (
     <group position={artifact.position}>
-      <group ref={hoverRef}>
-        <group rotation={artifact.rotation}>
-          <ConsoleModel entry={entry} position={[0, 0, 0]} rotation={[0, 0, 0]} />
+      <group ref={presentRef}>
+        <group ref={hoverRef}>
+          <group rotation={artifact.rotation}>
+            <ConsoleModel entry={entry} position={[0, 0, 0]} rotation={[0, 0, 0]} />
+          </group>
         </group>
       </group>
     </group>

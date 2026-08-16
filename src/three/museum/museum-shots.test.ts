@@ -174,7 +174,8 @@ describe('the glide invariant', () => {
   it('sits on the stage when the hall is glided to its target', () => {
     for (const entry of CONSOLES) {
       setHallOffset(hallOffsetFor(layout, entry.id))
-      const pose = shelfWorldPose(layout, entry.id)
+      // presented: the focused console on the stage carries its present step.
+      const pose = shelfWorldPose(layout, entry.id, true)
       const stage = stageWorldPos(entry.id)
       pose.position.forEach((v, i) => {
         expect(v, `${entry.id} live stage[${i}]`).toBeCloseTo(stage[i], 9)
@@ -182,6 +183,20 @@ describe('the glide invariant', () => {
     }
     setHallOffset([0, 0, 0])
     expect(getHallOffset()).toEqual([0, 0, 0])
+  })
+
+  it('rests at the plain shelf pose when not presenting', () => {
+    // The present step is a state of FOCUS: an off-stage console (or any
+    // console in the overview) must not lean forward on its own plinth.
+    for (const entry of CONSOLES) {
+      setHallOffset(hallOffsetFor(layout, entry.id))
+      const pose = shelfWorldPose(layout, entry.id, false)
+      const artifact = layout.byId[entry.id]
+      pose.position.forEach((v, i) => {
+        expect(v, `${entry.id} rest[${i}]`).toBeCloseTo(artifact.position[i] + hallOffsetFor(layout, entry.id)[i], 9)
+      })
+    }
+    setHallOffset([0, 0, 0])
   })
 
   /**
@@ -192,7 +207,7 @@ describe('the glide invariant', () => {
    */
   it('never changes a console’s rotation on its way to the stage', () => {
     for (const entry of CONSOLES) {
-      const pose = shelfWorldPose(layout, entry.id)
+      const pose = shelfWorldPose(layout, entry.id, true)
       expect(pose.rotation, entry.id).toEqual(layout.byId[entry.id].rotation)
     }
   })
@@ -343,15 +358,28 @@ describe('the stage shot', () => {
     expect(s.maxDistance).toBeGreaterThan(s.distance)
   })
 
-  it('presents every console at the same stage point — per-console framing by construction', () => {
-    // The replacement for per-station framing: one fixed camera frames every
-    // console identically because the hall brings each of them to the same
-    // world point. (The present step in Phase 6 adds a per-console standoff
-    // on top; until then the stage pose is literally identical for all 22.)
-    const poses = CONSOLES.map((c) => stageWorldPos(c.id))
-    for (const pose of poses) {
-      expect(pose).toEqual(poses[0])
+  it('sizes the present step so every console keeps a readable standoff', () => {
+    // The replacement for per-station framing: one fixed stage camera frames
+    // every console because the hall brings each to the stage — and the
+    // present step then pulls the small machines forward so they read at a
+    // comparable size. The step must be monotonic in height (taller console
+    // -> shorter step -> further back) and stay inside the stage pedestal's
+    // reach (the bounds below match the clamps in hall-glide.ts's
+    // presentOffset).
+    const steps = CONSOLES.map((c) => presentOffset(c.id)[2])
+    const heights = CONSOLES.map((c) => c.dimensions.height)
+    const order = heights.map((_, i) => i).sort((a, b) => heights[a] - heights[b])
+    for (let i = 1; i < order.length; i += 1) {
+      expect(steps[order[i]], `console ${order[i]}`).toBeLessThanOrEqual(steps[order[i - 1]])
     }
+    for (const c of CONSOLES) {
+      const p = presentOffset(c.id)[2]
+      expect(p, `${c.id} step forward`).toBeGreaterThanOrEqual(-0.35)
+      expect(p, `${c.id} step forward`).toBeLessThanOrEqual(0.55)
+    }
+    // A console the plan names: the PS5 (390mm) stays back near the anchor,
+    // a short console comes well forward.
+    expect(presentOffset('ps5')[2]).toBeLessThan(presentOffset('ps4')[2])
   })
 
 })

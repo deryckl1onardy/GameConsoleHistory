@@ -1,6 +1,6 @@
 import type { ConsoleEntry, DioramaSpec } from '@/types/console'
 import { type Shot, shotsFor } from '../shots'
-import { STAGE_ANCHOR, hallOffsetFor, stageWorldPos } from './hall-glide'
+import { STAGE_ANCHOR, STAGE_STANDOFF_REF, hallOffsetFor, stageWorldPos } from './hall-glide'
 import type { MuseumLayout } from './shelf-layout'
 
 /**
@@ -93,7 +93,11 @@ export function approachShot(
  * read the hardware, far enough that the hall is still visibly around it.
  */
 export function stageShot(): Shot {
-  const distance = 1.9
+  // The stage shot's distance IS the standoff the present step is measured
+  // from (STAGE_STANDOFF_REF in hall-glide.ts) — the two must agree or a
+  // console's "step to its standoff" would land somewhere the camera does
+  // not expect.
+  const distance = STAGE_STANDOFF_REF
   const height = 0.1 // a mid-sized console's half-height, roughly
   return {
     id: 'stage',
