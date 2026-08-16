@@ -365,6 +365,133 @@ export const CONSOLE_FORMS: Record<string, ConsoleForm> = {
     ports: [{ mesh: 'sd_slot', position: [13, 22], widthMm: 14, heightMm: 7 }],
     vents: [],
   },
+
+  'wii-u': {
+    shell: {
+      kind: 'swept',
+      // A long, low, heavily rounded slab — deliberately close to the original
+      // Wii's silhouette, which is a large part of why so many people never
+      // realised it was a different console.
+      profile: [
+        [0, 0], // front-bottom
+        [0, 36], // front face
+        [10, 44], // front chamfer
+        [26, 46], // full height
+        [242, 46], // flat top
+        [258, 44],
+        [268.5, 36], // rear chamfer
+        [268.5, 0], // back face straight down
+      ],
+      cornerRadiusMm: 8,
+      bevelMm: 1.4,
+    },
+    finish: 'gloss',
+    // Glossy black (the Premium set); the disc slot glows the same pale blue
+    // the Wii used, which is the only colour on the shell.
+    palette: { shell: '#17171a', accent: '#4aa8d8', dark: '#0b0b0d' },
+    intake: {
+      kind: 'front-slot',
+      position: [-16, 26],
+      widthMm: 132,
+      heightMm: 14,
+    },
+    controls: [
+      { mesh: 'power_button', kind: 'round-button', position: [72, 22], sizeMm: 12, color: 'dark' },
+      { mesh: 'eject_button', kind: 'round-button', position: [72, 38], sizeMm: 10, color: 'dark' },
+      { mesh: 'reset_button', kind: 'round-button', position: [56, 22], sizeMm: 8, color: 'dark' },
+      { mesh: 'slot_led', kind: 'jewel', position: [-16, 14], sizeMm: 8, color: 'accent' },
+    ],
+    ports: [
+      { mesh: 'usb_port_1', position: [-72, 12], widthMm: 16, heightMm: 8 },
+      { mesh: 'usb_port_2', position: [-50, 12], widthMm: 16, heightMm: 8 },
+      { mesh: 'sd_slot', position: [40, 12], widthMm: 16, heightMm: 7 },
+    ],
+    vents: [],
+  },
+
+  'xbox-one': {
+    shell: {
+      kind: 'swept',
+      // A plain rectangular slab, and unusually literal about it: the launch
+      // console is a hard-edged box with almost no chamfer, which is exactly
+      // what made it read as a set-top box rather than a games machine.
+      profile: [
+        [0, 0], // front-bottom
+        [0, 74], // front face, near-vertical
+        [8, 79], // small top chamfer
+        [266, 79], // flat top, edge to edge
+        [274, 74], // rear chamfer
+        [274, 0], // back face straight down
+      ],
+      cornerRadiusMm: 3,
+      bevelMm: 1,
+    },
+    finish: 'matte',
+    // Half matte, half gloss on the real shell; matte is the dominant read.
+    // The accent is the white backlight behind the logo, not a colour.
+    palette: { shell: '#141416', accent: '#e8e8ea', dark: '#08080a' },
+    intake: {
+      kind: 'front-slot',
+      position: [-64, 40],
+      widthMm: 136,
+      heightMm: 14,
+    },
+    controls: [
+      // The touch-sensitive power logo — no travel, and the console's only
+      // light.
+      { mesh: 'power_button', kind: 'touch', position: [126, 40], sizeMm: 22, color: 'dark' },
+      { mesh: 'power_logo', kind: 'jewel', position: [126, 40], sizeMm: 16, color: 'accent' },
+      { mesh: 'eject_button', kind: 'round-button', position: [20, 22], sizeMm: 10, color: 'dark' },
+    ],
+    ports: [{ mesh: 'usb_port_1', position: [148, 18], widthMm: 16, heightMm: 8 }],
+    vents: [],
+  },
+
+  switch: {
+    shell: {
+      kind: 'swept',
+      // This form describes the DOCK — the part that lives in the living room
+      // and the object the diorama stages. The console is really two objects
+      // (a dock and a tablet that slides into it), and a single swept profile
+      // cannot express that split or the slot the tablet drops into; the
+      // tablet-in-dock assembly wants a bespoke registry override (see
+      // registry.tsx). The dock alone is a small rounded slab, and this is
+      // dimensionally correct for it.
+      profile: [
+        [0, 0], // front-bottom
+        [0, 96], // front face
+        [6, 104], // top front chamfer
+        [48, 104], // flat top — the tablet slot runs along this
+        [54, 96], // top rear chamfer
+        [54, 0], // back face straight down
+      ],
+      cornerRadiusMm: 6,
+      bevelMm: 1.2,
+    },
+    finish: 'matte',
+    // Matte near-black, with the Joy-Con neon red and blue as the accents the
+    // console is actually known by.
+    palette: { shell: '#1a1a1d', accent: '#ff3c28', dark: '#0c0c0e' },
+    intake: {
+      // The Game Card slot is on the TABLET, not the dock — but the tablet is
+      // what the insert sequence loads a card into, so the slot is placed on
+      // the top face where the tablet sits.
+      kind: 'dock',
+      position: [0, 26],
+      widthMm: 128,
+      heightMm: 12,
+    },
+    controls: [
+      { mesh: 'power_button', kind: 'round-button', position: [-64, 60], sizeMm: 10, color: 'dark' },
+      { mesh: 'card_slot', kind: 'rect-button', position: [0, 76], sizeMm: 26, aspect: 0.3, color: 'dark' },
+      { mesh: 'dock_led', kind: 'jewel', position: [-64, 44], sizeMm: 6, color: 'accent' },
+    ],
+    ports: [
+      { mesh: 'usb_port_1', position: [-58, 22], widthMm: 16, heightMm: 8 },
+      { mesh: 'usb_port_2', position: [-36, 22], widthMm: 16, heightMm: 8 },
+    ],
+    vents: [],
+  },
 }
 
 export function consoleForm(id: string): ConsoleForm | undefined {

@@ -552,6 +552,105 @@ export const CONTROLLER_FORMS: Record<string, ControllerForm> = {
     bevelMm: 1.5,
     palette: { shell: '#f2f1ed', accent: '#4aa8d8', dark: '#b9b7b1' },
   },
+
+  'wii-u-gamepad': {
+    // Not a pad but a tablet with handles: a wide, shallow rectangle carrying
+    // the 6.2-inch screen, with short grips at each end. Much wider relative
+    // to its depth than anything else in this kit — anchored to the 255 x
+    // 134mm footprint.
+    plan: [
+      [-110, -67],
+      [110, -67],
+      [122, -60],
+      [127.5, -46],
+      [127.5, 40],
+      [120, 56],
+      [104, 65],
+      [88, 67],
+      [76, 60],
+      [66, 46],
+      [-66, 46],
+      [-76, 60],
+      [-88, 67],
+      [-104, 65],
+      [-120, 56],
+      [-127.5, 40],
+      [-127.5, -46],
+      [-122, -60],
+    ],
+    thicknessMm: 26,
+    domeMm: 3,
+    bevelMm: 2,
+    palette: { shell: '#f2f1ed', accent: '#4aa8d8', dark: '#3a3a3d' },
+  },
+
+  'xbox-one-pad': {
+    // A near-iteration of the 360 pad: marginally smaller, with the grips
+    // squared off a little more and the shoulders straighter. Anchored to the
+    // ~152 x 103mm footprint.
+    plan: [
+      [-49, -51.5],
+      [49, -51.5],
+      [61, -47],
+      [70, -37],
+      [76, -21],
+      [76, -4],
+      [69, 14],
+      [56, 30],
+      [39, 43],
+      [21, 51],
+      [8, 54],
+      [-8, 54],
+      [-21, 51],
+      [-39, 43],
+      [-56, 30],
+      [-69, 14],
+      [-76, -4],
+      [-76, -21],
+      [-70, -37],
+      [-61, -47],
+    ],
+    thicknessMm: 60,
+    domeMm: 6,
+    bevelMm: 2,
+    palette: { shell: '#141416', accent: '#e8e8ea', dark: '#08080a' },
+  },
+
+  'joy-con-pair': {
+    // The two Joy-Cons seated in the supplied grip. The outline is squarer
+    // than a moulded pad because it is really three parts clipped together —
+    // two flat rectangular controllers either side of a central bridge — so
+    // the near edge stays much straighter than the DualShock's or the 360's.
+    // Anchored to the ~152 x 106mm footprint.
+    plan: [
+      [-52, -53],
+      [52, -53],
+      [64, -48],
+      [73, -38],
+      [76, -24],
+      [76, 22],
+      [70, 38],
+      [58, 48],
+      [44, 53],
+      [32, 50],
+      [26, 40],
+      [-26, 40],
+      [-32, 50],
+      [-44, 53],
+      [-58, 48],
+      [-70, 38],
+      [-76, 22],
+      [-76, -24],
+      [-73, -38],
+      [-64, -48],
+    ],
+    thicknessMm: 60,
+    domeMm: 4,
+    bevelMm: 2,
+    // Neon red and blue are the console's signature, so both accents are used
+    // rather than one — the two halves genuinely are different colours.
+    palette: { shell: '#3a3a3f', accent: '#ff3c28', accent2: '#0ab9e6', dark: '#1a1a1d' },
+  },
 }
 
 export function controllerForm(id: string): ControllerForm | undefined {

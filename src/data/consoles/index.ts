@@ -13,6 +13,9 @@ import { xbox } from './xbox'
 import { gamecube } from './gamecube'
 import { xbox360 } from './xbox-360'
 import { wii } from './wii'
+import { wiiU } from './wii-u'
+import { xboxOne } from './xbox-one'
+import { nintendoSwitch } from './switch'
 import { ps3 } from './ps3'
 import { ps4 } from './ps4'
 import { ps5 } from './ps5'
@@ -28,7 +31,7 @@ import { ps5 } from './ps5'
  *   gen 5  Saturn ✅, PlayStation ✅, Nintendo 64 ✅
  *   gen 6  Dreamcast ✅, PlayStation 2 ✅, Xbox ✅, GameCube ✅
  *   gen 7  Xbox 360 ✅, PlayStation 3 ✅, Wii ✅
- *   gen 8  Wii U, PlayStation 4 ✅, Xbox One, Switch
+ *   gen 8  Wii U ✅, PlayStation 4 ✅, Xbox One ✅, Switch ✅
  *   gen 9  PlayStation 5 ✅, Xbox Series X|S, Switch 2
  */
 export const CONSOLES: ConsoleEntry[] = [
@@ -47,7 +50,10 @@ export const CONSOLES: ConsoleEntry[] = [
   xbox360,
   ps3,
   wii,
+  wiiU,
   ps4,
+  xboxOne,
+  nintendoSwitch,
   ps5,
 ]
 
@@ -89,6 +95,9 @@ export {
   xbox360,
   ps3,
   wii,
+  wiiU,
   ps4,
+  xboxOne,
+  nintendoSwitch,
   ps5,
 }

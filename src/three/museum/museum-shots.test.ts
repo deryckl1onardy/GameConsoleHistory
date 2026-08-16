@@ -156,13 +156,41 @@ describe('bay shots', () => {
     }
   })
 
-  it('pulls back further for a taller bay than a wider one', () => {
-    // The PS5 bay is short but tall; a 3-console bay is long but flat. Both
-    // must be framed by whichever constraint actually binds.
+  it('frames by whichever constraint actually binds, height or width', () => {
+    /*
+      A bay is framed by max(width-fit, height-fit): a short-but-tall bay (one
+      standing console) and a long-but-flat one (four slabs) each have to be
+      pulled back by the term that actually binds them.
+
+      Tested on synthetic bays rather than two named consoles. The original
+      version compared the PS5's bay against the PS4's and asserted their board
+      lengths matched — which was only ever true by coincidence of how many
+      consoles happened to be built in each generation, and broke the moment
+      gen 8 gained a fourth. Holding one variable fixed by construction tests
+      the actual rule and cannot be invalidated by the roster growing.
+    */
+    const base = layout.bays[0]
+    const flat = { ...base, boardLength: 1.2, tallest: 0.08 }
+    const tall = { ...base, boardLength: 1.2, tallest: 0.42 }
+    const wide = { ...base, boardLength: 4.0, tallest: 0.08 }
+
+    // Same width, more height — the height term takes over.
+    expect(bayShot(tall).distance).toBeGreaterThan(bayShot(flat).distance)
+    // Same height, more width — the width term takes over.
+    expect(bayShot(wide).distance).toBeGreaterThan(bayShot(flat).distance)
+  })
+
+  it('pulls back for a standing console despite its narrow bay', () => {
+    // The roster-level consequence of the rule above: the PS5 stands upright,
+    // so its bay is framed by height even though it is among the narrowest.
     const ps5Bay = layout.bays.find((b) => b.artifacts.some((a) => a.id === 'ps5'))!
-    const ps4Bay = layout.bays.find((b) => b.artifacts.some((a) => a.id === 'ps4'))!
-    expect(ps5Bay.boardLength).toBeCloseTo(ps4Bay.boardLength, 9)
-    expect(bayShot(ps5Bay).distance).toBeGreaterThan(bayShot(ps4Bay).distance)
+    const narrowest = [...layout.bays].sort((a, b) => a.boardLength - b.boardLength)[0]
+    expect(ps5Bay.boardLength).toBeLessThanOrEqual(narrowest.boardLength + 1e-9)
+    // A flat bay of the same width would be framed by width alone; this one
+    // is not, so its distance must exceed that width-only framing.
+    expect(bayShot(ps5Bay).distance).toBeGreaterThan(
+      bayShot({ ...ps5Bay, tallest: 0.05 }).distance,
+    )
   })
 
   it('centres on the artifacts rather than the board', () => {
