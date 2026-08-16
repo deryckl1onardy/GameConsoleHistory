@@ -1,7 +1,14 @@
 import { Html } from '@react-three/drei'
 import { getConsole, releaseYear } from '@/data/consoles'
 import { useScene } from '@/store/scene'
-import type { ShelfArtifact, ShelfBay } from './shelf-layout'
+import { rotatedFootprintZ, type ShelfArtifact, type ShelfBay } from './shelf-layout'
+
+/** Clear table space between a console's own front face and its placard. */
+const LABEL_GAP = 0.1
+/** How far a placard may hang past the plinth's own front edge — a real
+ *  museum card sits right at (or a hair over) that lip, it does not float
+ *  past it into open air. */
+const MAX_OVERHANG = 0.05
 
 /**
  * A museum label, one per artifact, mounted at the shelf's own front lip
@@ -45,22 +52,27 @@ export function ArtifactLabel({ artifact, bay }: { artifact: ShelfArtifact; bay:
   // Only the station being stood at — see (3) above.
   if (hallView !== 'station' || artifact.generation !== focusGeneration) return null
 
+  /*
+    THIS console's own front face — not a bare share of the plinth's depth.
+    That used to be the bug: the plinth's front edge sits only ~7cm past the
+    deepest console on the whole station (boardDepth is sized off the single
+    deepest neighbour, plus a thin shared pad), so a shallower console right
+    next to it got no real clearance at all. Measuring from the artifact's
+    own rotated footprint gives every console the same real gap regardless of
+    what else shares its plinth.
+  */
+  const yaw = artifact.rotation[1]
+  const footprintZ = rotatedFootprintZ(artifact.size.width, artifact.size.depth, yaw)
+  const ownFrontZ = artifact.position[2] + footprintZ / 2
+  const plinthFrontZ = bay.boardCenter[2] + bay.boardDepth / 2
+  const labelZ = Math.min(ownFrontZ + LABEL_GAP, plinthFrontZ + MAX_OVERHANG)
+
   return (
     <Html
-      // The plinth's own front edge, centred under the artifact — not floating
-      // over the model, where the console's own geometry would fight it for
-      // the eye.
-      //
-      // The Z is the STATION'S front edge, not a bare half-depth. That was the
-      // same number back when every bay sat on the hall's centre line at
-      // z = 0; now that stations recede down the hall it has to be measured
-      // from the station the label belongs to, or every label in the gallery
-      // stacks up at the entrance.
-      position={[
-        artifact.position[0],
-        bay.boardY,
-        bay.boardCenter[2] + bay.boardDepth / 2,
-      ]}
+      // On the table, in the open space between the console's own front face
+      // and the plinth's front lip — not floating up over the model, where
+      // the console's own geometry would fight it for the eye.
+      position={[artifact.position[0], bay.boardY, labelZ]}
       center
       pointerEvents="none"
       occlude={false}
@@ -77,10 +89,17 @@ export function ArtifactLabel({ artifact, bay }: { artifact: ShelfArtifact; bay:
         Resting opacity is higher than it was, too. At 45% on near-black a
         label still read; the same 45% ink on white is a whisper, and a museum
         label you cannot read is not restraint.
+
+        No screen-space translate here beyond a small, fixed nudge. `center`
+        already puts the anchor at the middle of this block; stacking a full
+        `-translate-y-full` on top of that (the old code) double-shifted it
+        upward, and at close station range that shove landed the text ON the
+        console instead of clearing it — up is toward the object here, not
+        away from it, since the anchor already sits low and forward of it.
       */}
       <div
         className={[
-          'flex -translate-y-full flex-col items-center pb-2 text-center transition-opacity duration-300',
+          'flex -translate-y-1.5 flex-col items-center text-center transition-opacity duration-300',
           'motion-reduce:transition-none',
           approach === 'idle' ? (hovered ? 'opacity-100' : 'opacity-70') : 'opacity-0',
         ].join(' ')}

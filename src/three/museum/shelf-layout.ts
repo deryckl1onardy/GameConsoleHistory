@@ -134,6 +134,16 @@ export function rotatedFootprintX(widthM: number, depthM: number, yaw: number): 
 }
 
 /**
+ * The companion of `rotatedFootprintX`: how far a w x d rectangle reaches
+ * along Z once turned by its own yaw. Used to find a console's own front
+ * face — not the shared plinth edge — so a label can clear that specific
+ * object regardless of how deep its neighbours on the same station are.
+ */
+export function rotatedFootprintZ(widthM: number, depthM: number, yaw: number): number {
+  return Math.abs(widthM * Math.sin(yaw)) + Math.abs(depthM * Math.cos(yaw))
+}
+
+/**
  * Lay the built consoles out as a hall of generation stations.
  *
  * Oldest nearest the entrance, receding into the hall in release order — so
