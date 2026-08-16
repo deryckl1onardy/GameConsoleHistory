@@ -3,7 +3,7 @@ import { PerspectiveCamera, Vector3 } from 'three'
 import { CONSOLES } from '@/data/consoles'
 import { applyFrameOffset, frameOffsetFor } from '@/frame'
 import { MAX_DOLLY, shotCameraPosition, shotsFor } from '../shots'
-import { layoutMuseum } from './shelf-layout'
+import { artifactAtX, layoutMuseum } from './shelf-layout'
 import { approachShot, bayShot, hallOverviewShot, roomDelta, translate } from './museum-shots'
 
 const layout = layoutMuseum(CONSOLES)
@@ -163,6 +163,79 @@ describe('every museum shot stays inside the hall', () => {
         expect(z, `${what} past the far wall @ ${dolly}`).toBeGreaterThan(layout.hall.farZ)
       }
     })
+  }
+})
+
+/*
+  Clicking a console has to select THAT console — the one interaction the whole
+  gallery exists to offer, and the entry point to the transition.
+
+  It runs through one invisible plane per station (ShelfBay's BayHitPlane),
+  which resolves the artifact from the world X of the hit rather than
+  raycasting 180k triangles of console geometry. That indirection is fast but
+  it is also silent: if the plane drifted off its station, or stopped covering
+  the consoles' height, or `artifactAtX` disagreed with where the models
+  actually stand, clicks would land on the wrong console — or on nothing — and
+  nothing else in the suite would notice.
+
+  So this casts the real ray: from each station's own camera, through each
+  console on it, onto that station's hit plane, and asserts the hit lands
+  inside the plane AND resolves back to the console aimed at.
+*/
+describe('clicking a console picks that console', () => {
+  /** Matches BayHitPlane's own height in ShelfBay.tsx — see the marker test for why it stays a literal. */
+  const HIT_PLANE_HEADROOM = 0.22
+
+  for (const bay of layout.bays) {
+    const shot = bayShot(bay)
+    const planeZ = bay.boardCenter[2] + bay.boardDepth / 2
+    const planeHeight = bay.tallest + HIT_PLANE_HEADROOM
+
+    for (const artifact of bay.artifacts) {
+      it(`resolves ${artifact.id} from a ray through it`, () => {
+        for (const dolly of DOLLIES) {
+          const cam = shotCameraPosition(shot, dolly)
+          // Aim at the middle of the console, the way a pointer would.
+          const aim: [number, number, number] = [
+            artifact.position[0],
+            artifact.position[1] + artifact.size.height / 2,
+            artifact.position[2],
+          ]
+          const dir = [aim[0] - cam[0], aim[1] - cam[1], aim[2] - cam[2]]
+
+          // The camera must be in front of the plane, or it is looking at the
+          // back of its own station.
+          expect(cam[2], `${artifact.id} camera behind the hit plane @ ${dolly}`).toBeGreaterThan(
+            planeZ,
+          )
+
+          const t = (planeZ - cam[2]) / dir[2]
+          expect(t, `${artifact.id} ray never reaches the plane @ ${dolly}`).toBeGreaterThan(0)
+          expect(t, `${artifact.id} plane is behind the console @ ${dolly}`).toBeLessThan(1)
+
+          const hitX = cam[0] + dir[0] * t
+          const hitY = cam[1] + dir[1] * t
+
+          // Inside the plane's own rectangle.
+          expect(
+            Math.abs(hitX - bay.boardCenter[0]),
+            `${artifact.id} hit off the plane's width @ ${dolly}`,
+          ).toBeLessThanOrEqual(bay.boardLength / 2)
+          expect(hitY, `${artifact.id} hit below the plane @ ${dolly}`).toBeGreaterThanOrEqual(
+            bay.boardY,
+          )
+          expect(hitY, `${artifact.id} hit above the plane @ ${dolly}`).toBeLessThanOrEqual(
+            bay.boardY + planeHeight,
+          )
+
+          // And resolving that hit gives back the console actually aimed at.
+          expect(
+            artifactAtX(bay, hitX)?.id,
+            `${artifact.id} resolved to the wrong console @ ${dolly}`,
+          ).toBe(artifact.id)
+        }
+      })
+    }
   }
 })
 

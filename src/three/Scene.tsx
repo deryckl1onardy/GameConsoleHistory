@@ -266,7 +266,7 @@ function Background() {
  * than the old near-black hall could ever have delivered, and the whole
  * reason the room's warmth lands.
  */
-const MUSEUM_BACKDROP = '#e9e6df'
+const MUSEUM_BACKDROP = '#eeeeea'
 
 export function Scene() {
   const entry = useActiveConsole()

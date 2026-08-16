@@ -23,10 +23,31 @@ import { APPROACH_TIMING } from './approach'
  * shelves themselves were lit.
  */
 
-/** Gallery surfaces. A chosen warm-neutral plaster, never the UI-kit grey. */
-const WALL_COLOR = '#eceae4'
-const FLOOR_COLOR = '#dedbd4'
-const CEILING_COLOR = '#f4f2ee'
+/*
+  Gallery surfaces — and the values are doing structural work, not decoration.
+
+  Two failure modes were live in the first pass. The whole hall was pitched
+  warm, which walked it straight into cream-and-bone territory: the reflexive
+  "tasteful premium" background that reads as a default rather than a choice.
+  And floor, walls and plinths sat within a few percent of each other, so the
+  room had no tonal structure at all — every plane the same value is a fog,
+  however carefully it is lit.
+
+  So: a properly NEUTRAL gallery (this is a modern white room, not a warm
+  archive — the warmth is the era room's job, and the contrast between them is
+  the point of the transition), with three separated values. Floor darkest, a
+  real pale polished concrete; walls near-white plaster; plinths brighter than
+  the walls, because they are lit from directly above and should read as the
+  brightest thing in the room apart from the light slots themselves. That
+  ordering is what gives the hall a floor to stand on and a depth to read.
+
+  Deliberately not the cool blue-grey UI-kit neutral either (the #f3f4f6
+  family): these are neutral-to-faintly-green, the cast real plaster and
+  concrete actually have.
+*/
+const WALL_COLOR = '#eeeeea'
+const FLOOR_COLOR = '#c3c4c0'
+const CEILING_COLOR = '#f7f7f4'
 
 /**
  * The far wall closing the hall.

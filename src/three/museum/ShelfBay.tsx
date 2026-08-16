@@ -32,10 +32,18 @@ const REVEAL_INSET = 0.045
 /** Width of the current-console marker inlaid in the top lip — see CurrentMarker. */
 const MARKER_WIDTH = 0.044
 
-/** Gallery plinth white — a chosen warm-neutral plaster, not a UI-kit grey. */
-const PLINTH_TOP_COLOR = '#f2efe9'
-const PLINTH_BODY_COLOR = '#e8e4dc'
-const PLINTH_REVEAL_COLOR = '#b9b3a8'
+/*
+  Plinth values, keyed to the hall's own (MuseumScene). Brighter than the
+  walls, because a plinth stands directly under the ceiling slots and should
+  be the brightest surface in the room after the lights themselves — that is
+  what lifts it off the wall behind it. The reveal at the floor is much darker
+  than either, since its whole job is to read as a shadow gap.
+
+  Neutral, not cream: see the note on the hall's own palette for why.
+*/
+const PLINTH_TOP_COLOR = '#fbfbf9'
+const PLINTH_BODY_COLOR = '#f1f1ee'
+const PLINTH_REVEAL_COLOR = '#a3a4a0'
 
 /**
  * The hit surface for hover, as a sibling of the models rather than an
