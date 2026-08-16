@@ -19,6 +19,35 @@ describe('museum layout', () => {
     for (const c of CONSOLES) expect(layout.byId[c.id], c.id).toBeDefined()
   })
 
+  /*
+    Preconditions for the current-console marker (ShelfBay's CurrentMarker,
+    grand plan §13). The marker renders on whichever bay reports holding the
+    active console, so if any id were ever shelved twice the shelf would show
+    two "you are here" plates at once — and because the marker is 3D geometry
+    inside a component, this is the layer where that can actually be caught.
+  */
+  it('gives every console exactly one home bay for the current marker', () => {
+    for (const c of CONSOLES) {
+      const holding = layout.bays.filter((b) => b.artifacts.some((a) => a.id === c.id))
+      expect(holding, `${c.id} shelved in ${holding.length} bays`).toHaveLength(1)
+    }
+  })
+
+  it('leaves room on the board for a marker under every artifact', () => {
+    // MARKER_WIDTH in ShelfBay.tsx. Kept as a literal here on purpose: this
+    // asserts the LAYOUT has room for a marker of that size, so importing the
+    // constant would make the test agree with itself rather than check it.
+    const markerHalf = 0.044 / 2
+    for (const bay of layout.bays) {
+      for (const a of bay.artifacts) {
+        expect(
+          Math.abs(a.position[0]) + markerHalf,
+          `${a.id} marker overhangs its board`,
+        ).toBeLessThanOrEqual(bay.boardLength / 2)
+      }
+    }
+  })
+
   it('orders bays oldest generation first, reading downward through time', () => {
     const gens = layout.bays.map((b) => b.generation)
     expect(gens).toEqual([...gens].sort((a, b) => a - b))

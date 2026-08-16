@@ -22,6 +22,8 @@ import { SHELF_CONSTANTS, artifactAtX, type ShelfBay as Bay } from './shelf-layo
 const { BOARD_THICKNESS } = SHELF_CONSTANTS
 /** How far the lip stands proud of the board face. */
 const LIP = 0.012
+/** Width of the current-console marker inlaid in the lip — see CurrentMarker. */
+const MARKER_WIDTH = 0.044
 
 /**
  * The hit surface for hover, as a sibling of the models rather than an
@@ -101,6 +103,42 @@ function BayHitPlane({ bay }: { bay: Bay }) {
   )
 }
 
+/**
+ * The "you are here" marker — grand plan §13.
+ *
+ * The active console is not missing from its slot (HeroConsole draws it in
+ * exactly the same place), so the shelf needs something else to say which
+ * artifact you are currently looking at, and which one you just came back
+ * from after a retreat.
+ *
+ * A museum marks its current exhibit with an engraved plate set into the
+ * shelf, so that is what this is: a slim brass inlay in the board's own front
+ * lip, directly under the artifact. Deliberately NOT a glow, a ring, a pulse
+ * or a floating pip — it is a physical object lit by the room's own key light,
+ * which means it dims and brightens with the hall through the whole approach
+ * choreography for free, with no opacity handling of its own.
+ *
+ * Sized off the lip rather than a fixed number so it stays proportional to the
+ * shelf, and set a hair proud of the lip's own face so the two never z-fight.
+ */
+function CurrentMarker({ bay, x }: { bay: Bay; x: number }) {
+  const halfDepth = bay.boardDepth / 2
+  return (
+    <mesh
+      position={[
+        x,
+        bay.boardY - BOARD_THICKNESS - LIP / 2,
+        halfDepth - LIP / 2 + LIP * 0.14,
+      ]}
+    >
+      <boxGeometry args={[MARKER_WIDTH, LIP * 1.15, LIP]} />
+      {/* Aged brass: warm, slightly metallic, low roughness so the key light
+          picks out a highlight along it without it ever reading as emissive. */}
+      <meshStandardMaterial color="#b08a4a" roughness={0.34} metalness={0.62} />
+    </mesh>
+  )
+}
+
 export function ShelfBay({ bay }: { bay: Bay }) {
   const halfDepth = bay.boardDepth / 2
   // The active console is drawn by HeroConsole, not here — see its own file
@@ -109,6 +147,8 @@ export function ShelfBay({ bay }: { bay: Bay }) {
   // so the slot reads identically whether the model happens to be drawn by
   // this bay or by the hero sitting in the same spot.
   const consoleId = useScene((s) => s.consoleId)
+  // Undefined on every bay except the one holding the active console.
+  const current = bay.artifacts.find((a) => a.id === consoleId)
 
   return (
     <group>
@@ -143,6 +183,9 @@ export function ShelfBay({ bay }: { bay: Bay }) {
       {bay.artifacts.map((a) => (
         <ArtifactLabel key={a.id} artifact={a} bay={bay} />
       ))}
+
+      {/* Only the bay actually holding the active console draws one. */}
+      {current ? <CurrentMarker bay={bay} x={current.position[0]} /> : null}
     </group>
   )
 }
