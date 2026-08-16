@@ -28,18 +28,21 @@ import { COPY } from './panel-copy'
  * though it is short on height, and a vertical stack there cost exactly
  * the extra row that pushed the second stat's value out of view.
  *
- * `min-h-[64px]` on the paragraph's own scroll region is the floor that
- * stops IT being squeezed to an unreadable sliver in turn. Short of the
- * outer column itself scrolling (DetailPanel's wrapper keeps its own
- * overflow-y-auto as the last resort), the numbers and a few lines of the
- * story are both always on screen at once, with neither eating the
- * other's space.
- *
- * The attribution footer moved inside the paragraph's own scroll region,
- * as its last line, rather than staying pinned at the very bottom on its
- * own — it is a citation for the prose above it, not content that needs to
- * be visible independent of the paragraph, and unpinning it is what freed
- * the paragraph's minimum in the first place.
+ * ONE scroll surface, not two. An earlier version gave the paragraph its
+ * own `overflow-y-auto` region with a `min-h` floor, nested inside
+ * DetailPanel's column wrapper — which ALSO scrolls. Two independent
+ * scrollers stacked inside a panel this small reads as unplanned, and on
+ * touch it is worse than that: a drag that starts on the inner box can
+ * hijack the gesture instead of scrolling the column, or vice versa. The
+ * paragraph is now plain flow with no scroll of its own; DetailPanel's
+ * own `overflow-y-auto` wrapper is the ONLY scroll mechanism for this
+ * whole column, exactly as it already is for the other two. The hero
+ * stat is still guaranteed visible on load — it is `shrink-0` and first
+ * in the flow, so it sits at the top of the column at scroll position
+ * zero, which is the only guarantee that was ever actually needed. It is
+ * not pinned in place while scrolling; nothing here is sticky, on
+ * purpose — a small floating header inside an already-small box is its
+ * own kind of clutter.
  */
 
 /**
@@ -93,7 +96,7 @@ export function PanelSummary({ compact = false }: { compact?: boolean }) {
   const released = entry.released.jp ?? entry.released.na ?? entry.released.eu
 
   return (
-    <div className="flex h-full min-w-0 flex-col gap-3">
+    <div className="flex min-w-0 flex-col gap-3">
       <div className="shrink-0">
         <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-parchment/45">
           <GlobeIcon size={12} className="text-phosphor/80" />
@@ -126,7 +129,7 @@ export function PanelSummary({ compact = false }: { compact?: boolean }) {
         </div>
       </div>
 
-      <div className="min-h-[64px] flex-1 overflow-y-auto border-t border-parchment/10 pt-3">
+      <div className="border-t border-parchment/10 pt-3">
         <p className="text-[13px] leading-relaxed text-parchment/75">{entry.summary}</p>
         <p className="mt-3 text-[10px] leading-relaxed text-parchment/25">
           {released ? `Released ${new Date(released).getFullYear()}. ` : ''}

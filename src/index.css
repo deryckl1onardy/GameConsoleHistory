@@ -71,3 +71,30 @@ canvas {
   display: block;
   touch-action: none;
 }
+
+/*
+ * Every scrollable region in the room chrome is small — a column inside a
+ * floating panel — and the browser's own default scrollbar (a blocky grey
+ * system rectangle) reads as a raw, undesigned artifact sitting inside a
+ * warm museum-toned surface. Thin and self-coloured, everywhere, once,
+ * rather than styled per component: a scrollbar is chrome, not content, and
+ * belongs to the one place chrome is decided.
+ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(244, 239, 230, 0.22) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(244, 239, 230, 0.22);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(244, 239, 230, 0.38);
+}
