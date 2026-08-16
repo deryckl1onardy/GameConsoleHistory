@@ -33,7 +33,7 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred (planned, explicitly not starte
 | 6.5 | Display diagram: labels, hover states | ✅ | Top codename / bottom name-year-maker labels; hover steps the artifact forward + scales + dims neighbours (`ArtifactSlot.tsx`). |
 | 7 | Hover/focus behaviour | ✅ | Forward step + scale + label brightening, GSAP, reduced-motion aware. No neon/glow/cards. |
 | 11 | Generation navigation — continuous museum space | ✅ | Bays stack vertically; the generation rail jumps bays; **left-drag and the wheel both pan the camera up/down between shelves** (see change log, 2026-08-15). |
-| 13 | "Current console" indicator on the shelf | ⬜ | Not implemented. |
+| 13 | "Current console" indicator on the shelf | ✅ | A slim brass plate inlaid in the board's front lip under the active artifact (`ShelfBay.tsx`'s `CurrentMarker`) — a museum's engraved exhibit plate, not a glow. Lit by the hall, so it dims with the approach for free. |
 | 18 | 4–6 consoles per shelf, discovery over density | ✅ | `shelf-layout.ts` lays out a handful per bay. |
 
 ### The Console Room
@@ -51,9 +51,9 @@ Legend: ✅ done · 🟡 partial · ⏳ deferred (planned, explicitly not starte
 | Item | Status | Notes |
 |---|---|---|
 | Roster | ✅ | All 22 mainline consoles from gen 2–9 in `src/data/roster.ts`. |
-| Built dioramas | 🟡 | ~12 built (`built` derived from `CONSOLES_BY_ID`); the rest render dimmed/"soon" in the picker and shelf as a roadmap. |
-| Regional variants | ✅ | Schema + data (e.g. SNES ↔ Super Famicom swaps hardware *and* room). |
-| Annotated hardware diagrams | 🟡 | Slot + fallback rungs + one authored case (SNES); art files TBD (see `public/diagrams/README.md`). |
+| Built dioramas | ✅ | **22 of 22.** Nothing renders as a dimmed "soon" placeholder any more. The 10 added in 2026-08-16 are form-built (swept shells) rather than GLB-built; the registry resolves a dropped-in GLB first, so each upgrades with no code change. |
+| Regional variants | ✅ | Schema + data (e.g. SNES ↔ Super Famicom swaps hardware *and* room; Xbox Series S is a variant of Series X). |
+| Annotated hardware diagrams | 🟡 | Slot + fallback rungs + one authored case (SNES). Art exists in `diagrams/` but is **not wired up** — see Open threads. |
 
 ---
 
@@ -86,6 +86,56 @@ awaits a final visual eyeball.
 ---
 
 ## 3. Change log
+
+### 2026-08-16 — the roster completed, and the work committed
+
+The whole project was uncommitted before this session: ~2,100 changed lines
+and 85 untracked files sitting on a single "Initial commit". It is now five
+thematic commits (data atlas, museum shelf, console room, models/assets,
+docs) on `main`, pushed to `origin`. The local branch was renamed from
+`master` to match the remote.
+
+**The roster is complete: 22 of 22.** The ten missing consoles — Dreamcast,
+Xbox, GameCube, Xbox 360, Wii, Wii U, Xbox One, Switch, Xbox Series, Switch
+2 — are each a data entry plus a swept `ConsoleForm`, plus a `ControllerForm`
+for their pad. No GLB exists for any of them, and none is needed: the model
+registry resolves a dropped-in GLB *first*, so each console is real and
+selectable now and upgrades later with zero code changes.
+
+Three shapes a swept profile provably cannot hold, all flagged in their form
+comments for a bespoke registry override: the GameCube's moulded rear handle,
+the Xbox 360's concave waist (the pinch is on the left and right faces, and a
+profile is constant across the sweep), and the Switch/Switch 2's dock-plus-
+tablet split (their forms describe the dock, which is what the diorama
+stages). All three are dimensionally correct without it.
+
+**Grand plan §13 landed**: the current console is marked by a slim brass plate
+inlaid in the shelf's front lip — a museum's engraved exhibit plate rather
+than a glow, and 3D geometry, so the hall's own lights dim it through the
+approach with no opacity handling.
+
+Four tests were wrong and are now right, three of them caught by the new
+consoles rather than by review:
+
+- `ConsoleFromForm` renders a `power_led` mesh unconditionally for *every*
+  console, so a form declaring its own would silently resolve one name to two
+  meshes. A new kit-wide loop pins it, along with bounding boxes, animated-part
+  resolution and footprint containment for every swept form — so a console
+  added later is covered the moment its form lands.
+- The roster test required every optical console to name a tray or lid mesh.
+  A slot-loader has neither, and `IntakeKind` already documents `front-slot`
+  for exactly that group (Wii, PS3, Xbox 360 S, PS5). Widened to tray, lid or
+  slot.
+- `museum-shots` asserted the PS5's bay and the PS4's had matching board
+  lengths, true only by coincidence of how many consoles happened to be built
+  per generation. Rewritten against synthetic bays so the rule under test —
+  a bay is framed by `max(width-fit, height-fit)` — holds one variable fixed
+  by construction. Its first replacement then made the same mistake (pinning
+  the PS5's bay as the narrowest, which gen 9 growing to three consoles broke)
+  and was tightened again.
+
+192 tests pass, typecheck is clean, lint is unchanged at 3 pre-existing
+warnings.
 
 ### 2026-08-16 — centered console + contact shadow
 
@@ -233,7 +283,31 @@ beats in `approach.ts`):
 
 ## 4. Open threads
 
-- TiltShift band: visual confirmation on the lifted console (wide + compact).
-- Hardware diagram art files for the consoles that declare callouts.
-- Remaining ~10 built consoles.
+- **`public/models/CREDITS.md` is empty while 12 third-party GLBs are in use.**
+  The table still reads `_(none yet)_`. The code comments in
+  `gltf-transforms.ts` identify these as Sketchfab exports, and CREDITS.md's
+  own text says a CC-BY licence "is only honoured if the credit is actually
+  written down somewhere, and this is that somewhere". Needs the source URL,
+  author and licence for each of the 12 — only whoever downloaded them knows.
+- **The hardware diagram art does not match the architecture.** Six finished
+  PNGs sit in `diagrams/` (Atari 2600, NES, Master System, SNES, Genesis,
+  PS1) but every one has its labels, leader lines and label pills *baked into
+  the image*, which is precisely what `public/diagrams/README.md` forbids:
+  "Labels and leader lines are typography — they must match the app, so they
+  are never baked into the image." Consequences if dropped in as-is: the SNES
+  would render **double-labelled** (it declares 8 callouts, and rung 1 of
+  `HardwareDiagram` overlays the app's own leader lines on top of the art),
+  and all six are purple-on-black against the room's warm parchment palette.
+  Two ways forward: regenerate the art clean (console only, no labels, warm
+  palette) and keep the authored callouts, or keep these as illustrations and
+  strip the callouts from the data. Not wired up either way — deliberately.
+- TiltShift band: still needs a visual eyeball on the lifted console (wide +
+  compact). Not verifiable from a headless session: with the preview pane
+  hidden the page reports `document.hidden === true`, so rAF never fires, R3F
+  never renders a frame, and even the drei `<Html>` artifact labels never
+  mount. Needs the preview pane open.
+- The three bespoke shells: GameCube handle, Xbox 360 waist, Switch dock +
+  tablet (see the change log for why a swept profile cannot express them).
+- Controller and TV GLBs: `public/models/controllers/` and `tvs/` are both
+  empty, so every pad and television is form-built or a sized block.
 - Timeline navigation, Search, and the Game Artifact view (grand plan §12/§19).
