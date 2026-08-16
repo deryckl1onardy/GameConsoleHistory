@@ -15,7 +15,15 @@ import { layoutShelf, shelfExtent } from './geometry/gameBox'
  * narrower viewports.
  */
 
-export type ShotId = 'console' | 'diorama' | 'library' | 'controller' | 'tv'
+/** Shots derived from a DioramaSpec. `shotsFor` must return every one of these. */
+export type RoomShotId = 'console' | 'diorama' | 'library' | 'controller' | 'tv'
+
+/**
+ * `bay` belongs to the museum, which has no DioramaSpec to derive from — it is
+ * built by museum-shots.ts instead. It joins the union so CameraRig can hold
+ * one shot type, but stays out of `shotsFor`'s exhaustive record.
+ */
+export type ShotId = RoomShotId | 'bay'
 
 export type Shot = {
   id: ShotId
@@ -44,7 +52,7 @@ export function shotCameraPosition(shot: Shot, dolly = 1): [number, number, numb
   ]
 }
 
-export function shotsFor(entry: ConsoleEntry, spec: DioramaSpec): Record<ShotId, Shot> {
+export function shotsFor(entry: ConsoleEntry, spec: DioramaSpec): Record<RoomShotId, Shot> {
   const consoleHeight = entry.dimensions.height * MM
 
   // Height of the stacked game boxes, so the library shot centres on the

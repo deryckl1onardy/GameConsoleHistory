@@ -1,130 +1,36 @@
-import { useMemo } from 'react'
-import type { ConsoleEntry, DioramaSpec, MediaArchetypeId, PropInstance } from '@/types/console'
-import { propKit } from '@/data/kits/prop-kit'
-import { boxArgsMm, kelvinToColor, mm } from './lighting'
-import { GameShelf } from './GameShelf'
-import { ConsoleModel, ControllerModel } from './models/registry'
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import type { AmbientLight, DirectionalLight } from 'three'
+import gsap from 'gsap'
+import type { ConsoleEntry, DioramaSpec, MediaArchetypeId } from '@/types/console'
+import { useScene } from '@/store/scene'
+import { kelvinToColor, mm } from './lighting'
+import { ContactShadow } from './ContactShadow'
 
 /**
- * The room, built entirely from DioramaSpec. No console-specific code.
+ * Lighting for the room screen. That's it — no walls, furniture, TV,
+ * controller placement or game shelf.
  *
- * Props render as correctly-proportioned grey boxes until a real GLB lands in
- * the kit entry's `model` field. That is deliberate: the placeholder path IS the
- * layout, so swapping in geometry later changes nothing about composition.
+ * This used to build the full period room (RoomShell, Prop, TvPlaceholder,
+ * GameShelf, a placed ControllerModel) around whichever console HeroConsole
+ * was showing. Pulled out because too much of it was clipping — walls into
+ * the console, props into each other — and it wasn't worth chasing down
+ * piece by piece right now. `entry`/`archetypeId` stay as props (unused for
+ * now) because every removed piece read from them, and the signature
+ * shouldn't need to change again if the room comes back.
  *
- * The room is an open dollhouse cutaway — floor, back wall, left wall. The
- * missing walls are what make it read as a miniature set rather than an
- * interior render.
+ * Nothing here is deleted from the data model or the type system — DioramaSpec
+ * still carries footprint/props/tv/shelfPosition/controllerPosition, GameShelf
+ * and the prop kit still exist, `entry.controllers[0]` is still real data. This
+ * component just stops drawing any of it. Re-adding the room later is
+ * restoring the JSX that used to live here, not rebuilding the model.
  */
 
-const WALL_HEIGHT = 2.5
-const WALL_THICKNESS = 0.08
-
-function Prop({ instance }: { instance: PropInstance }) {
-  const kit = propKit(instance.kit)
-
-  if (!kit) {
-    if (import.meta.env.DEV) console.warn(`[diorama] unknown prop kit: ${instance.kit}`)
-    return null
-  }
-
-  const variant =
-    kit.variants[instance.variant ?? ''] ?? Object.values(kit.variants)[0]
-  const [w, h, d] = boxArgsMm(kit.dimensions)
-  const scale = instance.scale ?? 1
-
-  // 'floor' props are authored with their base on the ground, so lift by half
-  // their height. 'surface' and 'wall' props are positioned explicitly.
-  const yOffset = kit.anchor === 'floor' ? (h * scale) / 2 : 0
-
-  return (
-    <mesh
-      position={[
-        instance.position[0],
-        instance.position[1] + yOffset,
-        instance.position[2],
-      ]}
-      rotation={instance.rotation ?? [0, 0, 0]}
-      scale={scale}
-      castShadow
-      receiveShadow
-    >
-      <boxGeometry args={[w, h, d]} />
-      <meshStandardMaterial
-        color={variant.color}
-        roughness={variant.roughness}
-        metalness={variant.metalness ?? 0}
-      />
-    </mesh>
-  )
-}
-
-function RoomShell({ footprint }: { footprint: [number, number] }) {
-  const [fw, fd] = footprint
-
-  return (
-    <group>
-      {/* Floor */}
-      <mesh position={[0, -WALL_THICKNESS / 2, 0]} receiveShadow>
-        <boxGeometry args={[fw, WALL_THICKNESS, fd]} />
-        <meshStandardMaterial color="#8f7d68" roughness={0.95} />
-      </mesh>
-
-      {/* Back wall */}
-      <mesh
-        position={[0, WALL_HEIGHT / 2, -fd / 2 - WALL_THICKNESS / 2]}
-        receiveShadow
-        castShadow
-      >
-        <boxGeometry args={[fw + WALL_THICKNESS * 2, WALL_HEIGHT, WALL_THICKNESS]} />
-        <meshStandardMaterial color="#cdbca4" roughness={0.98} />
-      </mesh>
-
-      {/* Left wall */}
-      <mesh
-        position={[-fw / 2 - WALL_THICKNESS / 2, WALL_HEIGHT / 2, 0]}
-        receiveShadow
-        castShadow
-      >
-        <boxGeometry args={[WALL_THICKNESS, WALL_HEIGHT, fd]} />
-        <meshStandardMaterial color="#c3b199" roughness={0.98} />
-      </mesh>
-
-      {/* Baseboard, the detail that stops the walls reading as bare planes */}
-      <mesh position={[0, 0.05, -fd / 2 + WALL_THICKNESS / 2]}>
-        <boxGeometry args={[fw, 0.1, 0.02]} />
-        <meshStandardMaterial color="#e8dfd0" roughness={0.7} />
-      </mesh>
-    </group>
-  )
-}
-
-
-/** The TV cabinet at true size, with a dark screen face until phase 5. */
-function TvPlaceholder({ spec }: { spec: DioramaSpec }) {
-  const [w, h, d] = boxArgsMm(spec.tv.dimensions)
-  const screenW = w * 0.78
-  const screenH = h * 0.74
-
-  return (
-    <group position={spec.tvPosition} rotation={spec.tvRotation ?? [0, 0, 0]}>
-      <mesh position={[0, h / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[w, h, d]} />
-        <meshStandardMaterial color="#3a3733" roughness={0.6} />
-      </mesh>
-      {/* Screen face, recessed by the bezel inset */}
-      <mesh position={[0, h / 2, d / 2 - mm(spec.tv.bezelInsetMm)]}>
-        <planeGeometry args={[screenW, screenH]} />
-        <meshStandardMaterial color="#0d0f10" roughness={0.18} />
-      </mesh>
-    </group>
-  )
-}
+/** The fill's fixed intensity — never varies by console, so a plain constant. */
+const FILL_INTENSITY = 0.35
 
 export function Diorama({
   entry,
   spec,
-  archetypeId,
 }: {
   entry: ConsoleEntry
   spec: DioramaSpec
@@ -135,12 +41,80 @@ export function Diorama({
     [spec.lighting.tempK],
   )
 
+  /*
+    The contact shadow's disc radius, sized off the console's real footprint:
+    just beyond the longest side, so the dark core hides under the console
+    and the soft edge peeks out around it. A disc is rotation-invariant, so
+    the console's yaw never fights it.
+  */
+  const shadowRadius = useMemo(() => {
+    const w = mm(entry.dimensions.width)
+    const d = mm(entry.dimensions.depth)
+    return Math.max(w, d) * 0.9
+  }, [entry.dimensions.width, entry.dimensions.depth])
+
+  const approach = useScene((s) => s.approach)
+  const ambientRef = useRef<AmbientLight>(null)
+  const keyRef = useRef<DirectionalLight>(null)
+  const fillRef = useRef<DirectionalLight>(null)
+
+  /*
+    Fade up from black on arrival — but only when there WAS an arrival.
+    Diorama mounts fresh exactly when `screen` flips to 'room', which is
+    either the tail end of the approach handoff (lights should ramp in) or a
+    plain direct room load with no museum ever involved (?screen=room, or
+    before this screen existed at all — lights should just be there, full
+    brightness, no unmotivated fade). `useScene.getState()` here, read once
+    at mount, not the reactive `approach` this component also holds below:
+    we want the value as it stood the INSTANT this component appeared, not
+    whatever it becomes a moment later when the approach effect advances it
+    to 'arriving'.
+
+    LAYOUT effect, deliberately: a plain effect would paint one frame with
+    the lights at their full JSX intensities before zeroing them — a double-
+    lit flash at the handoff. Zeroing must land before first paint.
+  */
+  useLayoutEffect(() => {
+    const cameFromApproach = useScene.getState().approach !== 'idle'
+    if (!cameFromApproach) return
+    const a = ambientRef.current
+    const k = keyRef.current
+    const f = fillRef.current
+    if (!a || !k || !f) return
+    a.intensity = 0
+    k.intensity = 0
+    f.intensity = 0
+    const duration = useScene.getState().reducedMotion ? 0 : 0.9
+    gsap.to(a, { intensity: spec.lighting.ambientIntensity, duration, ease: 'power2.out' })
+    gsap.to(k, { intensity: spec.lighting.intensity, duration, ease: 'power2.out' })
+    gsap.to(f, { intensity: FILL_INTENSITY, duration, ease: 'power2.out' })
+    // Mount-only: this is "did we arrive here," not a reactive binding.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // The reverse: fade to black BEFORE unmounting, while `screen` is still
+  // 'room' (it only flips at the retreat's own handoff, ~250ms after this
+  // fires) — so the room genuinely goes dark rather than popping straight to
+  // the museum mid-brightness.
+  useEffect(() => {
+    if (approach !== 'retreating') return
+    const a = ambientRef.current
+    const k = keyRef.current
+    const f = fillRef.current
+    if (!a || !k || !f) return
+    const duration = useScene.getState().reducedMotion ? 0 : 0.25
+    gsap.to(a, { intensity: 0, duration, ease: 'power2.in' })
+    gsap.to(k, { intensity: 0, duration, ease: 'power2.in' })
+    gsap.to(f, { intensity: 0, duration, ease: 'power2.in' })
+  }, [approach])
+
   return (
     <group>
-      <ambientLight intensity={spec.lighting.ambientIntensity} color={keyColor} />
+      <ambientLight ref={ambientRef} intensity={spec.lighting.ambientIntensity} color={keyColor} />
 
       {/* Key light — position and temperature come from the era preset */}
       <directionalLight
+        ref={keyRef}
         position={spec.lighting.keyPosition}
         intensity={spec.lighting.intensity}
         color={keyColor}
@@ -153,36 +127,23 @@ export function Diorama({
       </directionalLight>
 
       {/* Cool bounce fill from the open side, so shadows are not dead black */}
-      <directionalLight position={[-2.5, 1.6, 3]} intensity={0.35} color="#9fb6d0" />
+      <directionalLight ref={fillRef} position={[-2.5, 1.6, 3]} intensity={FILL_INTENSITY} color="#9fb6d0" />
 
-      <RoomShell footprint={spec.footprint} />
+      {/*
+        The console itself is NOT rendered here. HeroConsole owns the single
+        instance of whichever console is active, mounted once outside both
+        the museum and the room, so it can be teleported by the approach's
+        rigid translation without ever being duplicated or re-parsed. See
+        HeroConsole.tsx. It lands at spec.consolePosition exactly as before —
+        only the room built around that point is gone.
+      */}
 
-      {spec.props.map((p, i) => (
-        <Prop key={`${p.kit}-${i}`} instance={p} />
-      ))}
-
-      <TvPlaceholder spec={spec} />
-
-      <ConsoleModel
-        entry={entry}
-        position={spec.consolePosition}
-        rotation={spec.consoleRotation}
-      />
-
-      {entry.controllers[0] && (
-        <ControllerModel
-          controller={entry.controllers[0]}
-          position={spec.controllerPosition}
-          rotation={spec.controllerRotation}
-        />
-      )}
-
-      <GameShelf
-        entry={entry}
-        archetypeId={archetypeId}
-        position={spec.shelfPosition}
-        rotation={spec.shelfRotation}
-      />
+      {/*
+        The one thing the room DOES place: a fake contact shadow under the
+        console. There is no floor to catch a real one, and the console would
+        otherwise float — this is what makes it read as sitting on a plinth.
+      */}
+      <ContactShadow position={spec.consolePosition} radius={shadowRadius} />
     </group>
   )
 }

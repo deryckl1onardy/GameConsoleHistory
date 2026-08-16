@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
 import { Scene } from '@/three/Scene'
-import { ConsolePicker } from '@/components/ConsolePicker'
-import { InfoPanel } from '@/components/InfoPanel'
-import { ModeBar } from '@/components/ModeBar'
-import { useActiveConsole, useScene } from '@/store/scene'
+import { RoomChrome } from '@/components/room/RoomChrome'
+import { ShelfOverlay } from '@/components/ShelfOverlay'
+import { useScene } from '@/store/scene'
 
 /**
  * Full-bleed 3D with floating panels.
@@ -15,12 +14,16 @@ import { useActiveConsole, useScene } from '@/store/scene'
  *
  * The overlay layer is pointer-events-none; each panel opts back in. Otherwise
  * an invisible full-screen div would swallow every orbit drag.
+ *
+ * Double-click anywhere over the scene resets the camera (bumpReframe) — the
+ * pan escape hatch, since pan is unbounded in the room and the legend's reset
+ * button is the other way home.
  */
 export default function App() {
-  const entry = useActiveConsole()
+  const screen = useScene((s) => s.screen)
   const setReducedMotion = useScene((s) => s.setReducedMotion)
-  const setPickerOpen = useScene((s) => s.setPickerOpen)
-  const setPanelOpen = useScene((s) => s.setPanelOpen)
+  const setLayout = useScene((s) => s.setLayout)
+  const bumpReframe = useScene((s) => s.bumpReframe)
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -31,42 +34,46 @@ export default function App() {
   }, [setReducedMotion])
 
   /*
-    Both panels flanking the scene needs room; below ~1100px they would cover
-    the diorama entirely. Crossing the breakpoint sets both to the layout that
-    fits — closing on the way down and reopening on the way up. An earlier
-    version only ever closed them, so a window that was briefly narrow left the
-    panels stuck shut with no way back except the edge tabs.
+    The room chrome has two layouts — wide (side title column, split panel)
+    and compact (title inline, single-column panel). Crossing the 1100px
+    breakpoint swaps the layout, and because the chrome and the camera both
+    read the SAME fractions from frame.ts, the camera reframes with it for
+    free. An earlier version toggled two side rails open/closed and crossing
+    the breakpoint could leave them stuck shut; the layout is a plain value,
+    so there is no state machine to get stuck.
   */
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1100px)')
-    const apply = () => {
-      setPickerOpen(mq.matches)
-      setPanelOpen(mq.matches)
-    }
+    const apply = () => setLayout(mq.matches ? 'wide' : 'compact')
     apply()
     mq.addEventListener('change', apply)
     return () => mq.removeEventListener('change', apply)
-  }, [setPickerOpen, setPanelOpen])
+  }, [setLayout])
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div
+      className="relative h-full w-full overflow-hidden"
+      onDoubleClick={(e) => {
+        // Only the canvas itself — the overlay layers are pointer-events-none
+        // so a click on empty space lands here, while a double-click inside a
+        // panel (e.target inside it) must NOT yank the camera.
+        if ((e.target as HTMLElement).tagName === 'CANVAS' && useScene.getState().screen === 'room') {
+          bumpReframe()
+        }
+      }}
+    >
       <Scene />
 
-      <div className="pointer-events-none absolute inset-0">
-        <header className="absolute left-8 top-8 max-w-sm">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-parchment/50">
-            Generation {entry.generation} · {entry.manufacturer}
-          </p>
-          <h1 className="mt-2 font-display text-5xl leading-none text-parchment">
-            {entry.shortName}
-          </h1>
-          <p className="mt-3 text-sm italic text-parchment/70">{entry.tagline}</p>
-        </header>
-
-        <ConsolePicker />
-        <InfoPanel />
-        <ModeBar />
-      </div>
+      {/* Screen-conditional rather than two permanently-mounted layers. */}
+      {screen === 'shelf' ? (
+        <div className="pointer-events-none absolute inset-0">
+          <ShelfOverlay />
+        </div>
+      ) : (
+        <div className="pointer-events-none absolute inset-0">
+          <RoomChrome />
+        </div>
+      )}
     </div>
   )
 }

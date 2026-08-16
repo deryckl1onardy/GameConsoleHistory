@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_DOLLY, aspectDolly, shotCameraPosition, shotsFor, type ShotId } from './shots'
+import { MAX_DOLLY, aspectDolly, shotCameraPosition, shotsFor, type RoomShotId } from './shots'
 import { snes } from '@/data/consoles/snes'
 import type { DioramaSpec } from '@/types/console'
 
@@ -10,7 +10,8 @@ import type { DioramaSpec } from '@/types/console'
  * follows" cases below break.
  */
 
-const ALL: ShotId[] = ['console', 'diorama', 'library', 'controller', 'tv']
+// Room shots only — `bay` belongs to the museum and is built by museum-shots.ts.
+const ALL: RoomShotId[] = ['console', 'diorama', 'library', 'controller', 'tv']
 
 function shots(spec: DioramaSpec = snes.diorama) {
   return shotsFor(snes, spec)

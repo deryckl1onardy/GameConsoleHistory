@@ -1,5 +1,35 @@
 @import 'tailwindcss';
 
+/*
+ * Sentient (Fontshare, free for commercial use, self-hosted below) — a warm,
+ * slightly-idiosyncratic serif with real character in its italic, standing in
+ * for the Cormorant Garamond this app declared but never loaded. Cormorant is
+ * the reflexive "elegant/editorial" choice on every fashion, real-estate and
+ * fine-dining site going; a museum label deserves a face someone actually
+ * chose. Licence and source noted in public/fonts/CREDITS.md.
+ */
+@font-face {
+  font-family: 'Sentient';
+  src: url('/fonts/sentient-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient';
+  src: url('/fonts/sentient-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Sentient';
+  src: url('/fonts/sentient-medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   /* Warm museum-meets-CRT palette. Neutral base so the diorama carries the colour. */
   --color-ink: #12100e;
@@ -9,8 +39,17 @@
   --color-phosphor: #6ee7a8;
   --color-amber: #d98c34;
 
-  --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Sentient', ui-serif, Georgia, serif;
+  /*
+   * No brand-name sans is declared here on purpose. 'Inter' was named before
+   * but never loaded — it silently fell back to system-ui the whole time,
+   * which is the genuinely neutral, unchosen choice a body/label face should
+   * be. Naming it without shipping it was the actual problem, not the
+   * fallback stack itself, so the fix is dropping the false name rather than
+   * adding the weight of a self-hosted Inter that exists only to carry
+   * nothing.
+   */
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
 }
 
 html,
