@@ -119,6 +119,83 @@ function FarWall({
   )
 }
 
+/**
+ * The inlaid line and its ticks — a shade off the floor, never a drawn stroke.
+ *
+ * Close to the concrete on purpose. A strong value against the floor reads as
+ * a stripe PAINTED on it; an inlay is a change of material, which is a small
+ * shift in tone and a larger one in how it takes the light — hence low
+ * contrast but a little metalness.
+ */
+const INLAY_COLOR = '#b3b4b0'
+
+/**
+ * The year-line: a metal strip inlaid down the centre of the gallery floor,
+ * with a tick reaching out to each station.
+ *
+ * This is the hall's signature, and the reason it is a *timeline* rather than
+ * a corridor. Walking the hall is already moving through history; the line
+ * makes that legible instead of implied — it gives the large empty floor a
+ * job, it physically connects each generation to the run of years, and the
+ * ticks reaching alternately left and right are what tie the zigzag of
+ * plinths back into one continuous thing.
+ *
+ * It is architecture, not ornament: a real inlay set into a real floor, a
+ * shade darker than the concrete so it reads as a change of material and not
+ * as a line drawn on top. That is also why the ticks stop at the plinth
+ * rather than running under it — an inlay meets the object it points at.
+ */
+function YearLine({
+  bays,
+  hall,
+}: {
+  bays: typeof MUSEUM_LAYOUT.bays
+  hall: typeof MUSEUM_LAYOUT.hall
+}) {
+  /*
+    Starts just in front of where the camera stands at the overview, not at
+    z = 0. The camera sits within half a metre of the entrance, and a 5cm
+    strip that close to the lens fills a huge angle — running it all the way
+    to the door put a wide grey wedge across the bottom of the opening frame,
+    which read as a painted band rather than an inlay.
+  */
+  const startZ = hall.entranceZ - 1.4
+  const runLength = Math.abs(hall.farZ - startZ)
+  const centerZ = (startZ + hall.farZ) / 2
+
+  return (
+    <group>
+      {/* The line itself, running the length of the hall. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, hall.floorY + 0.001, centerZ]}>
+        <planeGeometry args={[0.042, runLength]} />
+        <meshStandardMaterial color={INLAY_COLOR} roughness={0.42} metalness={0.3} />
+      </mesh>
+
+      {bays.map((bay) => {
+        const toward = bay.side === 'left' ? -1 : 1
+        // Reach from the centre line out to the near edge of the plinth, and
+        // stop there.
+        const plinthInnerX = Math.abs(bay.boardCenter[0]) - bay.boardLength / 2
+        const length = Math.max(0.1, plinthInnerX)
+        return (
+          <mesh
+            key={bay.generation}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[
+              (toward * length) / 2,
+              hall.floorY + 0.001,
+              bay.boardCenter[2],
+            ]}
+          >
+            <planeGeometry args={[length, 0.032]} />
+            <meshStandardMaterial color={INLAY_COLOR} roughness={0.42} metalness={0.3} />
+          </mesh>
+        )
+      })}
+    </group>
+  )
+}
+
 export function MuseumScene() {
   const { bays, hall } = MUSEUM_LAYOUT
   const hovered = useScene((s) => s.hoveredId !== null)
@@ -198,6 +275,8 @@ export function MuseumScene() {
           <meshBasicMaterial color="#fffdf7" toneMapped={false} />
         </mesh>
       ))}
+
+      <YearLine bays={bays} hall={hall} />
 
       {bays.map((bay) => (
         <ShelfBay key={bay.generation} bay={bay} />
