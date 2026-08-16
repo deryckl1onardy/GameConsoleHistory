@@ -70,47 +70,58 @@ export const snes: ConsoleEntry = {
   mediaKind: 'cartridge',
   mediaArchetype: 'cart-snes-na',
   model: '/models/consoles/snes.glb',
-  // The proving case for the diagram slot. Art is AI-generated and dropped in
-  // at public/diagrams/consoles/snes.svg when it exists; callout coordinates
-  // are fractions of that image box, coupled to its crop — see
-  // public/diagrams/README.md.
-  // Anchors are NOT eyeballed against a picture — they are computed straight
-  // from the same measured reference data that drives the SNES's own
-  // fallback shell (console-forms.ts's `snes` form: profile, control and
-  // intake positions, all sourced from real reference photographs). Each
-  // point is [x, y, z] in the console's own local metres, origin at the
-  // shell's floor-centre — the exact convention `Fact.anchor` already uses.
-  // Power and reset used to share one combined callout, which was a habit
-  // left over from the flat-image system (one text box could gesture at two
-  // nearby leader lines in a picture); anchored precisely in 3D, each gets
-  // its own point instead, since a single anchor can only ever point at one
-  // exact spot on the model.
+  // The proving case for the annotation slot (HardwareAnnotations.tsx).
+  //
+  // The first version of these anchors was computed on paper — converted
+  // from console-forms.ts's `snes` form (its profile, control and intake
+  // positions, sourced from real reference photographs) using the exact
+  // math ConsoleFromForm.tsx uses to place those same features. It looked
+  // right on paper and was wrong in the room: this console renders from its
+  // dropped-in GLB, not that fallback form, and gltf-transforms.ts already
+  // documented why that specific file can't be trusted this way — its
+  // WIDTH was measured against the real 203.2mm spec, but its height and
+  // depth are contaminated by a controller and cord fused into the same
+  // mesh, so they read as 88mm and 163mm rather than the real 68mm and
+  // 254mm. Coordinates derived from the real-world spec landed on the
+  // wrong points of THIS mesh's actual, distorted proportions — the power
+  // and reset labels pointed at the dangling cord, nowhere near the deck.
+  //
+  // These anchors are the actual fix: raycast against the real rendered
+  // geometry (nearest surface vertex to a chosen screen pixel, picking the
+  // camera-facing one where several vertices project to the same pixel),
+  // at the app's own default camera pose, cross-checked by placing visible
+  // test markers back into the live scene and screenshotting until they
+  // sat on the right part of the shell. Still not laser-precise — this
+  // model has no separately modelled button geometry to snap to, so "the
+  // power switch" is a judged point on a continuous surface, not a solved
+  // one — but it points at the actual control deck, left-to-right in the
+  // real power/eject/reset order, rather than at empty air.
   hardwareDiagram: {
     callouts: [
       {
         label: 'Power switch — flat on the top deck, not the front face',
-        anchor: [-0.05, 0.0412, 0.113],
-        labelOffset: [-0.03, 0.05, 0.015],
+        anchor: [-0.0423, 0.047, 0.0514],
+        labelOffset: [-0.025, 0.05, 0.01],
       },
       {
         label: 'Reset button — flat on the top deck, not the front face',
-        anchor: [0.05, 0.0412, 0.113],
-        labelOffset: [0.03, 0.05, 0.015],
+        anchor: [0.0231, 0.0467, -0.0173],
+        labelOffset: [0.025, 0.05, 0.01],
       },
       {
         label: 'Eject lever — the narrower column between the two blocks',
-        anchor: [0, 0.02, 0.1282],
-        labelOffset: [0, 0.035, 0.05],
+        anchor: [0.0002, 0.0538, 0.0357],
+        labelOffset: [0, 0.065, 0.02],
       },
       {
         label: 'Controller ports (×2) — 7-pin, same as the NES',
-        anchor: [-0.058, 0.017, 0.1307],
-        labelOffset: [-0.02, 0.04, 0.035],
+        anchor: [-0.035, 0.0097, 0.0474],
+        labelOffset: [-0.015, 0.045, 0.02],
       },
       {
         label: 'Cartridge slot — the Game Pak slides in from the top',
-        anchor: [0, 0.0692, -0.063],
-        labelOffset: [0, 0.045, 0],
+        anchor: [-0.0203, 0.0881, 0.0152],
+        labelOffset: [0, 0.035, 0.01],
       },
     ],
   },
