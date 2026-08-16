@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { CONSOLES } from '@/data/consoles'
-import { SHELF_CONSTANTS, artifactAtX, layoutMuseum, rotatedFootprintX } from './shelf-layout'
+import {
+  SHELF_CONSTANTS,
+  artifactAtX,
+  generationNearestY,
+  layoutMuseum,
+  rotatedFootprintX,
+} from './shelf-layout'
 import { mm } from '../lighting'
 
 /**
@@ -46,6 +52,37 @@ describe('museum layout', () => {
         ).toBeLessThanOrEqual(bay.boardLength / 2)
       }
     }
+  })
+
+  /*
+    `generationNearestY` is what finally lets a pan tell the rest of the app
+    where it ended up — the fix for a rail and an accent light that both kept
+    pointing at the bay you had already left. It has to agree with the camera:
+    it measures to the same point `bayShot` targets, so "nearest" means one
+    thing to both.
+  */
+  describe('generationNearestY', () => {
+    it('returns each bay when asked at that bay’s own focus height', () => {
+      for (const bay of layout.bays) {
+        const focusY = bay.boardY + bay.tallest / 2
+        expect(generationNearestY(layout, focusY), `gen ${bay.generation}`).toBe(bay.generation)
+      }
+    })
+
+    it('clamps to the end bays beyond the ends of the collection', () => {
+      const first = layout.bays[0]
+      const last = layout.bays[layout.bays.length - 1]
+      // Bays read oldest-first downward, so the FIRST bay is the highest.
+      expect(generationNearestY(layout, first.boardY + 100)).toBe(first.generation)
+      expect(generationNearestY(layout, last.boardY - 100)).toBe(last.generation)
+    })
+
+    it('never answers with a generation that has no bay', () => {
+      const known = new Set(layout.bays.map((b) => b.generation))
+      for (let y = -2; y <= 6; y += 0.05) {
+        expect(known.has(generationNearestY(layout, y)), `y=${y.toFixed(2)}`).toBe(true)
+      }
+    })
   })
 
   it('orders bays oldest generation first, reading downward through time', () => {

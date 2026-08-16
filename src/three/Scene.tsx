@@ -66,8 +66,25 @@ const fxParam =
     ? new URLSearchParams(window.location.search).get('fx')
     : null
 
+/**
+ * Post-processing, and it is NOT the same for both screens.
+ *
+ * The tilt-shift band is a MINIATURE effect: it blurs by screen position so a
+ * real-sized room reads as a model on a table. That is exactly right for the
+ * room and exactly wrong for the shelf, where the subject is a whole
+ * collection and the neighbouring generations are the content — blurring them
+ * dissolved every bay but one into an unreadable smear and fought the one
+ * thing the shelf exists to do. It used to apply to both screens because this
+ * component never knew which screen it was on.
+ *
+ * The shelf keeps the effects that describe SOLID OBJECTS IN A SPACE —
+ * ambient occlusion and antialiasing — and drops the ones that fake a lens:
+ * the band, the bloom, and the heavy vignette (which on a bright gallery
+ * would read as dirt in the corners rather than as focus).
+ */
 function Effects() {
   const quality = useScene((s) => s.quality)
+  const screen = useScene((s) => s.screen)
   // The room's frame offset lifts the subject up on screen (frame.ts), so the
   // focus band has to rise with it or the console renders permanently blurred
   // while the chrome says it's sharp. CameraRig mirrors the applied offset
@@ -80,13 +97,28 @@ function Effects() {
 
   if (fxParam === 'none') return null
 
+  const onShelf = screen === 'shelf'
+
   if (quality === 'low') {
-    // Keep the band and the vignette — together they still read as miniature,
-    // and they are the cheapest two effects in the stack.
+    // Low quality drops to the two cheapest effects. On the shelf that leaves
+    // nothing worth composing for, so it renders untouched rather than paying
+    // for a pass that only darkens the corners.
+    if (onShelf) return null
     return (
       <EffectComposer multisampling={0}>
         <TiltShift2 blur={0.35} taper={0.5} samples={6} start={[0, bandStart]} end={[1, bandEnd]} />
         <Vignette offset={0.28} darkness={0.72} />
+      </EffectComposer>
+    )
+  }
+
+  if (onShelf) {
+    return (
+      <EffectComposer multisampling={0}>
+        {fxParam !== 'noao' && (
+          <N8AO aoRadius={0.45} intensity={2.2} distanceFalloff={0.8} quality="medium" />
+        )}
+        <SMAA />
       </EffectComposer>
     )
   }

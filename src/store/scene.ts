@@ -117,6 +117,18 @@ type SceneState = {
   approach: Approach
   /** Which generation's bay the museum camera rests on. */
   focusGeneration: Generation
+  /**
+   * Bumped only when the user asks to GO to a generation (the rail), never
+   * when the camera merely notices it has arrived near one by panning.
+   *
+   * Both are the same fact — "which generation is current" — so they share
+   * one field rather than drifting as two. But only one of them should move
+   * the camera: keying CameraRig's destination effect on `focusGeneration`
+   * itself meant a passive sync would yank the camera to that bay's shot
+   * mid-drag, which is exactly why the sync could never be added before and
+   * why the rail and the accent light have been lying about where you are.
+   */
+  focusNavNonce: number
   /** Artifact under the pointer on the shelf, or null. */
   hoveredId: string | null
   /** Whether the museum's opening move has played this session. */
@@ -155,7 +167,13 @@ type SceneState = {
   /** Returns false and does nothing if the transition is not legal. */
   advanceApproach: (next: Approach) => boolean
   setScreen: (s: Screen) => void
+  /** Navigate TO a generation — moves the camera. */
   setFocusGeneration: (g: Generation) => void
+  /**
+   * Record which generation the camera is already nearest, without moving it.
+   * What the accent light and the rail highlight should follow while panning.
+   */
+  syncFocusGeneration: (g: Generation) => void
   setHovered: (id: string | null) => void
   setMuseumIntroDone: (v: boolean) => void
 }
@@ -195,6 +213,7 @@ export const useScene = create<SceneState>((set, get) => ({
     (oldest, c) => (c.generation < oldest ? c.generation : oldest),
     CONSOLES[0].generation,
   ),
+  focusNavNonce: 0,
   hoveredId: null,
   museumIntroDone: false,
   approachNonce: 0,
@@ -320,7 +339,10 @@ export const useScene = create<SceneState>((set, get) => ({
   },
 
   setScreen: (screen) => set({ screen }),
-  setFocusGeneration: (focusGeneration) => set({ focusGeneration }),
+  setFocusGeneration: (focusGeneration) =>
+    set((s) => ({ focusGeneration, focusNavNonce: s.focusNavNonce + 1 })),
+  syncFocusGeneration: (focusGeneration) =>
+    set((s) => (s.focusGeneration === focusGeneration ? {} : { focusGeneration })),
   setHovered: (hoveredId) => set({ hoveredId }),
   setMuseumIntroDone: (museumIntroDone) => set({ museumIntroDone }),
 }))

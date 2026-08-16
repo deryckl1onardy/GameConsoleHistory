@@ -7,6 +7,7 @@ import { INTRO, aspectDolly, shotCameraPosition, shotsFor, type Shot } from './s
 import { approachShot as computeApproachShot, bayShots, roomDelta } from './museum/museum-shots'
 import { NO_OFFSET, applyFrameOffset, frameOffsetFor } from '@/frame'
 import { MUSEUM_LAYOUT } from './museum/layout'
+import { generationNearestY } from './museum/shelf-layout'
 import { APPROACH_TIMING } from './museum/approach'
 import { heroGroupRef } from './HeroConsole'
 import { useActiveConsole, useActiveDiorama, useScene } from '@/store/scene'
@@ -70,6 +71,7 @@ export function CameraRig() {
   const advanceApproach = useScene((s) => s.advanceApproach)
   const setScreen = useScene((s) => s.setScreen)
   const setFocusGeneration = useScene((s) => s.setFocusGeneration)
+  const focusNavNonce = useScene((s) => s.focusNavNonce)
 
   const shots = useMemo(() => shotsFor(entry, spec), [entry, spec])
   const museumShots = useMemo(() => bayShots(MUSEUM_LAYOUT), [])
@@ -235,6 +237,19 @@ export function CameraRig() {
     setMuseumIntroDone(true)
   }, [onShelf, museumIntroDone, restingShot, applyShot, setMuseumIntroDone])
 
+  /*
+    What counts as "the user asked to go somewhere new".
+
+    In the room that is a mode change. On the shelf it is a RAIL CLICK
+    specifically — `focusNavNonce` — and deliberately NOT `focusGeneration`
+    itself, because that field now also changes passively as a pan discovers
+    it has arrived near a different bay (`syncFocusGeneration`). Keying the
+    effect below on the generation would make every such sync re-apply that
+    bay's shot and yank the camera out of the drag the user is still in the
+    middle of. Navigation moves the camera; noticing where you are does not.
+  */
+  const destinationKey = onShelf ? `bay:${focusNavNonce}` : `mode:${mode}`
+
   // Any change of destination drives the camera — a mode change in the room, a
   // bay change in the museum. One effect for both, so they cannot disagree.
   //
@@ -252,8 +267,10 @@ export function CameraRig() {
     if (onShelf ? !museumIntroDone : !introDone) return
     if (approach !== 'idle') return
     applyShot(restingShot, { animate: !reducedMotion })
+    // `restingShot` is read, not listed — see `destinationKey` above for why
+    // the shelf must react to navigation intent rather than to the generation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restingShot, onShelf, introDone, museumIntroDone, reducedMotion, applyShot])
+  }, [destinationKey, onShelf, introDone, museumIntroDone, reducedMotion, applyShot])
 
   // Reframe on resize without animating — a resize is not a camera move.
   useEffect(() => {
@@ -355,6 +372,19 @@ export function CameraRig() {
       camera.position.y += delta
       c.target.y += delta
       c.update()
+
+      /*
+        Tell the rest of the app which bay we are now in front of. Without
+        this the pan was silent: the generation rail kept highlighting the bay
+        you started from, and the accent spotlight — the one light
+        MuseumLights calls "what says you are here" — stayed parked over it,
+        leaving the bay actually on screen lit by ambient and key alone, which
+        is why panning read as dim and directionless.
+
+        A passive sync, never `setFocusGeneration`: this must not feed back
+        into the destination effect and re-aim the camera mid-drag.
+      */
+      useScene.getState().syncFocusGeneration(generationNearestY(MUSEUM_LAYOUT, c.target.y))
     }
 
     const onDown = (e: PointerEvent) => {

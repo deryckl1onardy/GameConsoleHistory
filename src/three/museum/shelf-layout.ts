@@ -187,6 +187,31 @@ export function layoutMuseum(consoles: ConsoleEntry[]): MuseumLayout {
 }
 
 /**
+ * Which generation the camera is currently nearest, given the height it is
+ * looking at.
+ *
+ * Measured against each bay's own FOCUS height — the middle of its artifacts,
+ * the same point `bayShot` targets — rather than its board, so "nearest" means
+ * the same thing to this function as it does to the camera that framed it.
+ *
+ * Exists because panning used to move the camera without telling anything
+ * about it: the generation rail and the accent light both kept pointing at
+ * the bay you had left. See `syncFocusGeneration` in the scene store.
+ */
+export function generationNearestY(layout: MuseumLayout, y: number): Generation {
+  let best = layout.bays[0]
+  let bestDistance = Infinity
+  for (const bay of layout.bays) {
+    const distance = Math.abs(bay.boardY + bay.tallest / 2 - y)
+    if (distance < bestDistance) {
+      bestDistance = distance
+      best = bay
+    }
+  }
+  return best.generation
+}
+
+/**
  * Which artifact sits under a given X on a bay's board, or null for a gap.
  * The shelf hit-tests with one plane per bay and resolves the artifact here,
  * rather than raycasting 180k triangles of console geometry.
