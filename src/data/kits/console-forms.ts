@@ -492,6 +492,86 @@ export const CONSOLE_FORMS: Record<string, ConsoleForm> = {
     ],
     vents: [],
   },
+
+  'xbox-series': {
+    shell: {
+      kind: 'swept',
+      // Authored STANDING, the orientation Microsoft sells it in: a 151mm
+      // square footprint carried 301mm straight up. It is the most literally
+      // rectangular console in the atlas — almost no chamfer anywhere, which
+      // is exactly why it drew the refrigerator comparisons.
+      profile: [
+        [0, 0], // front-bottom
+        [0, 292], // front face, straight up
+        [8, 301], // small top chamfer
+        [143, 301], // flat top — the vent grille sits on this
+        [151, 292], // rear chamfer
+        [151, 0], // back face straight down
+      ],
+      cornerRadiusMm: 6,
+      bevelMm: 1.2,
+    },
+    finish: 'matte',
+    // Matte black with the green intake grille on the top face — the only
+    // colour anywhere on the machine.
+    palette: { shell: '#131315', accent: '#107c10', dark: '#08080a' },
+    intake: {
+      // Standing, the disc slot is a horizontal letterbox low on the front.
+      kind: 'front-slot',
+      position: [-14, 42],
+      widthMm: 110,
+      heightMm: 13,
+    },
+    controls: [
+      { mesh: 'power_button', kind: 'touch', position: [-52, 74], sizeMm: 20, color: 'dark' },
+      { mesh: 'power_logo', kind: 'jewel', position: [-52, 74], sizeMm: 14, color: 'accent' },
+      { mesh: 'eject_button', kind: 'round-button', position: [52, 42], sizeMm: 10, color: 'dark' },
+    ],
+    ports: [{ mesh: 'usb_port_1', position: [52, 74], widthMm: 16, heightMm: 8 }],
+    // The top face is one large circular intake grille. The vent kit cuts rows
+    // on the front face, so it is left empty rather than cutting a row of
+    // slots the hardware does not have.
+    vents: [],
+  },
+
+  'switch-2': {
+    shell: {
+      kind: 'swept',
+      // The DOCK again, for the same reason as its predecessor: it is the part
+      // that lives under the television. Slightly larger than the original's
+      // and more rounded, with the same tablet slot along the top that a swept
+      // profile cannot express — flagged for a bespoke override.
+      profile: [
+        [0, 0], // front-bottom
+        [0, 106], // front face
+        [7, 116], // top front chamfer
+        [44, 116], // flat top — the tablet slot runs along this
+        [51, 106], // top rear chamfer
+        [51, 0], // back face straight down
+      ],
+      cornerRadiusMm: 8,
+      bevelMm: 1.2,
+    },
+    finish: 'matte',
+    // Matte near-black like the original, with the Joy-Con 2 neon accents.
+    palette: { shell: '#1a1a1d', accent: '#ff3c28', dark: '#0c0c0e' },
+    intake: {
+      kind: 'dock',
+      position: [0, 24],
+      widthMm: 136,
+      heightMm: 12,
+    },
+    controls: [
+      { mesh: 'power_button', kind: 'round-button', position: [-68, 66], sizeMm: 10, color: 'dark' },
+      { mesh: 'card_slot', kind: 'rect-button', position: [0, 86], sizeMm: 28, aspect: 0.3, color: 'dark' },
+      { mesh: 'dock_led', kind: 'jewel', position: [-68, 48], sizeMm: 6, color: 'accent' },
+    ],
+    ports: [
+      { mesh: 'usb_port_1', position: [-60, 22], widthMm: 16, heightMm: 8 },
+      { mesh: 'usb_port_2', position: [-38, 22], widthMm: 16, heightMm: 8 },
+    ],
+    vents: [],
+  },
 }
 
 export function consoleForm(id: string): ConsoleForm | undefined {

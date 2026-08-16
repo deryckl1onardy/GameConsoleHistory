@@ -180,14 +180,17 @@ describe('bay shots', () => {
     expect(bayShot(wide).distance).toBeGreaterThan(bayShot(flat).distance)
   })
 
-  it('pulls back for a standing console despite its narrow bay', () => {
-    // The roster-level consequence of the rule above: the PS5 stands upright,
-    // so its bay is framed by height even though it is among the narrowest.
+  it('frames a real bay of standing consoles by its height', () => {
+    // The roster-level consequence of the rule above, on the one bay that
+    // holds consoles which stand upright rather than lie flat.
+    //
+    // Deliberately states NOTHING about how this bay's width compares to any
+    // other's: an earlier version of this assertion pinned it as the narrowest
+    // bay, which was true only until gen 9 gained a second and third console —
+    // the same roster-coupling that broke the test this replaced.
     const ps5Bay = layout.bays.find((b) => b.artifacts.some((a) => a.id === 'ps5'))!
-    const narrowest = [...layout.bays].sort((a, b) => a.boardLength - b.boardLength)[0]
-    expect(ps5Bay.boardLength).toBeLessThanOrEqual(narrowest.boardLength + 1e-9)
-    // A flat bay of the same width would be framed by width alone; this one
-    // is not, so its distance must exceed that width-only framing.
+    // Flatten the same bay and it would be framed by width alone. That the
+    // real one sits further back is exactly what "height binds here" means.
     expect(bayShot(ps5Bay).distance).toBeGreaterThan(
       bayShot({ ...ps5Bay, tallest: 0.05 }).distance,
     )

@@ -16,6 +16,8 @@ import { wii } from './wii'
 import { wiiU } from './wii-u'
 import { xboxOne } from './xbox-one'
 import { nintendoSwitch } from './switch'
+import { xboxSeries } from './xbox-series'
+import { switch2 } from './switch-2'
 import { ps3 } from './ps3'
 import { ps4 } from './ps4'
 import { ps5 } from './ps5'
@@ -24,7 +26,7 @@ import { ps5 } from './ps5'
  * The roster. Adding a console means adding a data file and one line here —
  * that is the whole scaling contract.
  *
- * Target roster (~22 mainline home consoles), in release order:
+ * Target roster (22 mainline home consoles), in release order — all built:
  *   gen 2  Atari 2600 ✅
  *   gen 3  NES ✅, Master System ✅
  *   gen 4  Genesis ✅, SNES ✅
@@ -32,7 +34,7 @@ import { ps5 } from './ps5'
  *   gen 6  Dreamcast ✅, PlayStation 2 ✅, Xbox ✅, GameCube ✅
  *   gen 7  Xbox 360 ✅, PlayStation 3 ✅, Wii ✅
  *   gen 8  Wii U ✅, PlayStation 4 ✅, Xbox One ✅, Switch ✅
- *   gen 9  PlayStation 5 ✅, Xbox Series X|S, Switch 2
+ *   gen 9  PlayStation 5 ✅, Xbox Series X|S ✅, Switch 2 ✅
  */
 export const CONSOLES: ConsoleEntry[] = [
   atari2600,
@@ -55,6 +57,8 @@ export const CONSOLES: ConsoleEntry[] = [
   xboxOne,
   nintendoSwitch,
   ps5,
+  xboxSeries,
+  switch2,
 ]
 
 export const CONSOLES_BY_ID = new Map(CONSOLES.map((c) => [c.id, c]))
@@ -100,4 +104,6 @@ export {
   xboxOne,
   nintendoSwitch,
   ps5,
+  xboxSeries,
+  switch2,
 }

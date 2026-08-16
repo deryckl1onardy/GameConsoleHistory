@@ -651,6 +651,71 @@ export const CONTROLLER_FORMS: Record<string, ControllerForm> = {
     // rather than one — the two halves genuinely are different colours.
     palette: { shell: '#3a3a3f', accent: '#ff3c28', accent2: '#0ab9e6', dark: '#1a1a1d' },
   },
+
+  'xbox-series-pad': {
+    // Essentially the Xbox One outline with the grips very slightly slimmed
+    // and the shoulders squared — the pad barely changed between generations,
+    // which was the point. Anchored to the ~151 x 103mm footprint.
+    plan: [
+      [-48, -51.5],
+      [48, -51.5],
+      [60, -47],
+      [69, -37],
+      [75.5, -21],
+      [75.5, -4],
+      [68, 14],
+      [55, 30],
+      [38, 43],
+      [21, 51],
+      [8, 54],
+      [-8, 54],
+      [-21, 51],
+      [-38, 43],
+      [-55, 30],
+      [-68, 14],
+      [-75.5, -4],
+      [-75.5, -21],
+      [-69, -37],
+      [-60, -47],
+    ],
+    thicknessMm: 60,
+    domeMm: 6,
+    bevelMm: 2,
+    palette: { shell: '#131315', accent: '#e8e8ea', dark: '#08080a' },
+  },
+
+  'joy-con-2-pair': {
+    // The Joy-Con 2 pair in its grip: marginally larger than the original's
+    // and a little rounder at the shoulders, but the same three-part
+    // construction, so the near edge stays similarly straight. Anchored to the
+    // ~158 x 108mm footprint.
+    plan: [
+      [-54, -54],
+      [54, -54],
+      [66, -49],
+      [75, -39],
+      [79, -24],
+      [79, 22],
+      [72, 39],
+      [60, 49],
+      [45, 54],
+      [33, 51],
+      [27, 41],
+      [-27, 41],
+      [-33, 51],
+      [-45, 54],
+      [-60, 49],
+      [-72, 39],
+      [-79, 22],
+      [-79, -24],
+      [-75, -39],
+      [-66, -49],
+    ],
+    thicknessMm: 62,
+    domeMm: 4,
+    bevelMm: 2,
+    palette: { shell: '#3a3a3f', accent: '#ff3c28', accent2: '#0ab9e6', dark: '#1a1a1d' },
+  },
 }
 
 export function controllerForm(id: string): ControllerForm | undefined {
