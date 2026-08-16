@@ -16,15 +16,21 @@ import { HistoryTab } from './tabs/HistoryTab'
  * height, which recomputes the camera's frame offset, which is exactly the
  * coupling this file exists to keep honest.
  *
- * Wide: three columns — the lead summary, the tabbed column, and the fun
- * fact as a genuine third region, each divided by the same self-coloured
- * hairline. The fact used to float above the panel as its own bordered
- * card; folding it in here is what actually makes the bottom of the screen
- * read as one composed object instead of two overlapping panels. It drops
- * out entirely when the active console has no facts to show, so the grid
- * never holds a bordered column with nothing in it. Compact: the lead and
- * tabbed columns stack into one column at 45vh; the fact has nowhere to go
- * at that width and is left out, same as before.
+ * The two layouts are structurally different, not just resized, because a
+ * user pass found stacking two independently-scrolling boxes on top of each
+ * other reads as broken on a phone in a way two side-by-side scrolling
+ * COLUMNS on a desktop does not — side by side, each is legibly its own
+ * pane; stacked, it looks like the page failed to load the rest of itself.
+ *
+ *   Wide: three columns — the lead summary, the tabbed column, and the fun
+ *   fact as a genuine third region — each with its OWN scroll, since they
+ *   sit beside each other and scrolling one has no bearing on the others.
+ *
+ *   Compact: ONE scroll for the whole body. The summary, the tab nav (kept
+ *   sticky so switching tabs never needs a scroll back to the top) and the
+ *   active tab's content all flow down a single column, in a single
+ *   overflow-y-auto — never two. The fun fact has nowhere to go at this
+ *   width and is left out, same as before.
  *
  * The chevron at the bottom-centre collapses the panel to its slim bar.
  * `panelOpen` is expanded-vs-collapsed (the old side-rail open/close is gone
@@ -63,73 +69,86 @@ export function DetailPanel() {
     )
   }
 
+  const tabNav = (
+    <nav className="flex gap-0.5 border-b border-parchment/10 px-5 pt-3" role="tablist">
+      {ROOM_TABS.map((t) => (
+        <button
+          key={t.id}
+          role="tab"
+          aria-selected={tab === t.id}
+          onClick={() => setTab(t.id)}
+          className={[
+            'rounded-t-md px-2.5 pb-2.5 pt-1 text-[11px] transition',
+            tab === t.id
+              ? 'border-b-2 border-amber text-parchment'
+              : 'border-b-2 border-transparent text-parchment/45 hover:text-parchment/80',
+          ].join(' ')}
+        >
+          {t.label}
+        </button>
+      ))}
+    </nav>
+  )
+
+  const tabBody = (
+    <>
+      {tab === 'overview' && <OverviewTab />}
+      {tab === 'games' && <GamesTab />}
+      {tab === 'hardware' && <HardwareTab />}
+      {tab === 'history' && <HistoryTab />}
+    </>
+  )
+
   return (
     <aside
       className="pointer-events-auto absolute bottom-0 left-1/2 flex -translate-x-1/2 flex-col overflow-hidden rounded-t-2xl border border-b-0 border-parchment/12 bg-ink/85 backdrop-blur-xl"
       style={{ width, height: `${heightVh}vh` }}
       aria-label={`${entry.shortName} details`}
     >
-      <div
-        className="min-h-0 flex-1"
-        style={{
-          display: 'grid',
-          gridTemplateColumns:
-            layout === 'wide'
-              ? showAside
-                ? 'minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr)'
-                : 'minmax(0, 2fr) minmax(0, 3fr)'
-              : '1fr',
-          gridTemplateRows: layout === 'wide' ? '1fr' : 'minmax(0, 2fr) minmax(0, 3fr)',
-        }}
-      >
-        <div
-          className={
-            layout === 'wide'
-              ? 'min-h-0 overflow-y-auto border-r border-parchment/10 px-7 py-5'
-              : 'min-h-0 overflow-y-auto border-b border-parchment/10 px-5 py-4'
-          }
-        >
-          <PanelSummary compact={layout === 'compact'} />
-        </div>
-
-        <div
-          className={[
-            'flex min-h-0 flex-col',
-            showAside ? 'border-r border-parchment/10' : '',
-          ].join(' ')}
-        >
-          <nav className="flex gap-0.5 border-b border-parchment/10 px-5 pt-3" role="tablist">
-            {ROOM_TABS.map((t) => (
-              <button
-                key={t.id}
-                role="tab"
-                aria-selected={tab === t.id}
-                onClick={() => setTab(t.id)}
-                className={[
-                  'rounded-t-md px-2.5 pb-2.5 pt-1 text-[11px] transition',
-                  tab === t.id
-                    ? 'border-b-2 border-amber text-parchment'
-                    : 'border-b-2 border-transparent text-parchment/45 hover:text-parchment/80',
-                ].join(' ')}
-              >
-                {t.label}
-              </button>
-            ))}
-          </nav>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-            {tab === 'overview' && <OverviewTab />}
-            {tab === 'games' && <GamesTab />}
-            {tab === 'hardware' && <HardwareTab />}
-            {tab === 'history' && <HistoryTab />}
+      {layout === 'compact' ? (
+        // ONE scroll for the whole body — see the file header for why this
+        // isn't just the wide layout's grid resized down.
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="px-5 pt-4">
+            <PanelSummary compact />
           </div>
+          {/* Sticky so a scroll deep into a tab's content never strands the
+              nav above the fold — switching tabs stays a zero-scroll action. */}
+          <div className="sticky top-0 z-10 bg-ink/95 backdrop-blur-xl">{tabNav}</div>
+          <div className="px-5 py-4">{tabBody}</div>
         </div>
-
-        {showAside && (
-          <div className="min-h-0 overflow-y-auto px-6 py-5">
-            <FunFactCard />
+      ) : (
+        <div
+          className="min-h-0 flex-1"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: showAside
+              ? 'minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr)'
+              : 'minmax(0, 2fr) minmax(0, 3fr)',
+            gridTemplateRows: '1fr',
+          }}
+        >
+          <div className="min-h-0 overflow-y-auto border-r border-parchment/10 px-7 py-5">
+            <PanelSummary />
           </div>
-        )}
-      </div>
+
+          <div
+            className={[
+              'flex min-h-0 flex-col',
+              showAside ? 'border-r border-parchment/10' : '',
+            ].join(' ')}
+          >
+            {tabNav}
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{tabBody}</div>
+          </div>
+
+          {showAside && (
+            <div className="min-h-0 overflow-y-auto px-6 py-5">
+              <FunFactCard />
+            </div>
+          )}
+        </div>
+      )}
 
       <footer className="flex h-8 shrink-0 items-center justify-center border-t border-parchment/10">
         <button
