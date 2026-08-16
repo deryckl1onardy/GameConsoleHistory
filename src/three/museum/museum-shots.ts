@@ -153,6 +153,12 @@ export function hallOverviewShot(layout: MuseumLayout): Shot {
     // Straight down the hall, barely lifted — see above.
     direction: normalise([0.03, 0.05, 1]),
     distance,
+    // The overview camera stands INSIDE a box, so a narrow viewport must not
+    // dolly it back — that is exactly what pushed it through the far wall at
+    // portrait aspect (z = +21.9, 18m outside the shell). Pulling back is
+    // right for an object in open space and wrong here: a narrow frame should
+    // crop the hall's width, which carries no content.
+    dolly: 'none',
     minDistance: distance * 0.45,
     maxDistance: distance * 1.6,
   }

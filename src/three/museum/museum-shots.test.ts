@@ -231,6 +231,14 @@ describe('every museum shot stays inside the hall', () => {
           layout.hall.width / 2,
         )
         expect(z, `${what} past the far wall @ ${dolly}`).toBeGreaterThan(layout.hall.farZ)
+        // The other end of the hall: the camera must not back out of the
+        // entrance either. Live at MAX_DOLLY before the dolly fix: the
+        // overview camera landed at z = +21.9, ~18m outside the shell,
+        // framing the gallery through a wall that is not there — and the old
+        // suite never noticed because it only asserted `z > farZ`.
+        expect(z, `${what} out of the entrance @ ${dolly}`).toBeLessThan(
+          layout.hall.entranceZ + 4,
+        )
       }
     })
   }

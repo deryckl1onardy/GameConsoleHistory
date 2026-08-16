@@ -36,6 +36,15 @@ export type Shot = {
   /** Unit direction from the target toward the camera. */
   direction: [number, number, number]
   distance: number
+  /**
+   * How `aspectDolly` applies. 'distance' (default) pulls the camera back on
+   * a narrow viewport — right for an object in open space, where cropping
+   * loses the subject. 'none' keeps the shot exactly as authored: right for
+   * the hall overview, a camera inside a BOX, where pulling back pushes it
+   * through a wall — a narrow viewport should crop the hall's width (which
+   * carries no content), never dolly the camera out of the room.
+   */
+  dolly?: 'distance' | 'none'
   /** Orbit clamps differ wildly: 0.3m for a cartridge, 6m for a room. */
   minDistance: number
   maxDistance: number
@@ -48,7 +57,7 @@ function normalise([x, y, z]: [number, number, number]): [number, number, number
 
 /** Where the camera ends up for a shot, in world space. */
 export function shotCameraPosition(shot: Shot, dolly = 1): [number, number, number] {
-  const d = shot.distance * dolly
+  const d = shot.dolly === 'none' ? shot.distance : shot.distance * dolly
   return [
     shot.target[0] + shot.direction[0] * d,
     shot.target[1] + shot.direction[1] * d,
