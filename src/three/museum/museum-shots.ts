@@ -1,5 +1,6 @@
 import type { ConsoleEntry, DioramaSpec } from '@/types/console'
 import { type Shot, shotsFor } from '../shots'
+import { hallOffsetFor } from './hall-glide'
 import type { MuseumLayout, ShelfBay } from './shelf-layout'
 
 /**
@@ -29,12 +30,18 @@ type Vec3 = [number, number, number]
 const add = (a: Vec3, b: Vec3): Vec3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
 const sub = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
 
-/** Room pose minus shelf pose. Pure translation — see the file comment. */
+/**
+ * Room pose minus shelf pose. Pure translation — see the file comment.
+ *
+ * The "not on any shelf" guard lives in hall-glide's `hallOffsetFor`, shared
+ * with the glide and the hero pose; routing through it here means the three
+ * places that must agree about where a console lives throw from the same
+ * code rather than drifting apart.
+ */
 export function roomDelta(layout: MuseumLayout, entry: ConsoleEntry, spec: DioramaSpec): Vec3 {
+  // Throws for a console that is not on any shelf.
+  hallOffsetFor(layout, entry.id)
   const artifact = layout.byId[entry.id]
-  if (!artifact) {
-    throw new Error(`museum-shots: ${entry.id} is not on any shelf`)
-  }
   return sub(spec.consolePosition as Vec3, artifact.position)
 }
 

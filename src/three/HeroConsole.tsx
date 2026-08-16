@@ -3,6 +3,7 @@ import type { Group } from 'three'
 import { useActiveConsole, useActiveDiorama, useScene } from '@/store/scene'
 import { ConsoleModel } from './models/registry'
 import { MUSEUM_LAYOUT } from './museum/layout'
+import { shelfWorldPose } from './museum/hall-glide'
 import { HardwareAnnotations } from './HardwareAnnotations'
 
 /**
@@ -65,8 +66,14 @@ export function HeroConsole() {
     if (!artifact) return
     const g = groupRef.current
     if (!g) return
-    g.position.set(...artifact.position)
-    g.rotation.set(...artifact.rotation)
+    // shelfWorldPose, not raw artifact.position: the hero lives OUTSIDE the
+    // glided hall group, so its shelf pose must include whatever glide offset
+    // the hall is carrying (zero until Phase 4 — but the hero must already
+    // route through here, or the moment the hall glides it would sit at the
+    // un-glided spot).
+    const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id)
+    g.position.set(...pose.position)
+    g.rotation.set(...pose.rotation)
   }, [entry.id, screen])
 
   useEffect(() => {
@@ -82,8 +89,9 @@ export function HeroConsole() {
         }
         return
       }
-      g.position.set(...artifact.position)
-      g.rotation.set(...artifact.rotation)
+      const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id)
+      g.position.set(...pose.position)
+      g.rotation.set(...pose.rotation)
     } else {
       g.position.set(...spec.consolePosition)
       g.rotation.set(...(spec.consoleRotation ?? [0, 0, 0]))

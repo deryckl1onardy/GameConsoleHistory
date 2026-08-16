@@ -5,6 +5,14 @@ import { applyFrameOffset, frameOffsetFor } from '@/frame'
 import { MAX_DOLLY, shotCameraPosition, shotsFor } from '../shots'
 import { artifactAtX, layoutMuseum } from './shelf-layout'
 import { approachShot, bayShot, hallOverviewShot, roomDelta, translate } from './museum-shots'
+import {
+  getHallOffset,
+  hallOffsetFor,
+  presentOffset,
+  setHallOffset,
+  shelfWorldPose,
+  stageWorldPos,
+} from './hall-glide'
 
 const layout = layoutMuseum(CONSOLES)
 
@@ -130,6 +138,68 @@ describe('the handoff invariant', () => {
         expect(after.y, `${entry.id} NDC.y @ dolly ${dolly}`).toBeCloseTo(before.y, 6)
       }
     }
+  })
+})
+
+describe('the glide invariant', () => {
+  /**
+   * THE test this redesign exists to write. The two tests above pin that
+   * `approachShot` is DERIVED from the room's console shot, but neither
+   * numerically checks the value of T = room − shelf — and the hall glide
+   * is exactly what puts T's value at risk. This one binds it directly:
+   * `stageWorldPos(id)` must be exactly `artifact.position + hallOffsetFor +
+   * presentOffset` for every console, so when the hall is glided to its
+   * target the console sits precisely on the stage, and roomDelta's
+   * translation stays pure no matter which console is focused.
+   */
+  it('glides every artifact exactly onto its stage pose', () => {
+    for (const entry of CONSOLES) {
+      const artifact = layout.byId[entry.id]
+      const expected = stageWorldPos(entry.id)
+      const actual = translate(
+        translate(artifact.position, hallOffsetFor(layout, entry.id)),
+        presentOffset(entry.id),
+      )
+      actual.forEach((v, i) => {
+        expect(v, `${entry.id} stage[${i}]`).toBeCloseTo(expected[i], 9)
+      })
+    }
+  })
+
+  /**
+   * And the live path that Phase 4 actually animates: when the hall group
+   * carries its target offset, `shelfWorldPose` (what the hero console and
+   * the approach both read) must land on the stage.
+   */
+  it('sits on the stage when the hall is glided to its target', () => {
+    for (const entry of CONSOLES) {
+      setHallOffset(hallOffsetFor(layout, entry.id))
+      const pose = shelfWorldPose(layout, entry.id)
+      const stage = stageWorldPos(entry.id)
+      pose.position.forEach((v, i) => {
+        expect(v, `${entry.id} live stage[${i}]`).toBeCloseTo(stage[i], 9)
+      })
+    }
+    setHallOffset([0, 0, 0])
+    expect(getHallOffset()).toEqual([0, 0, 0])
+  })
+
+  /**
+   * The rotation guard. The existing yaw test reads DATA (`artifact.rotation`
+   * vs `consoleRotation`); this one reads the POSE the world actually uses —
+   * it would fire the moment anyone added "and it turns to face you" to the
+   * present step.
+   */
+  it('never changes a console’s rotation on its way to the stage', () => {
+    for (const entry of CONSOLES) {
+      const pose = shelfWorldPose(layout, entry.id)
+      expect(pose.rotation, entry.id).toEqual(layout.byId[entry.id].rotation)
+    }
+  })
+
+  it('throws rather than guessing for a console that is not shelved', () => {
+    expect(() => hallOffsetFor(layout, 'not-on-any-shelf')).toThrow(/not on any shelf/)
+    expect(() => shelfWorldPose(layout, 'not-on-any-shelf')).toThrow(/not on any shelf/)
   })
 })
 

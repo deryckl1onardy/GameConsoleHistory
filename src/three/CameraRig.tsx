@@ -12,7 +12,9 @@ import {
 } from './museum/museum-shots'
 import { NO_OFFSET, applyFrameOffset, frameOffsetFor } from '@/frame'
 import { MUSEUM_LAYOUT } from './museum/layout'
+import { MUSEUM_SHELL_LAYER } from './museum/layers'
 import { generationNearestZ } from './museum/shelf-layout'
+import { shelfWorldPose } from './museum/hall-glide'
 import { APPROACH_TIMING } from './museum/approach'
 import { heroGroupRef } from './HeroConsole'
 import { useActiveConsole, useActiveDiorama, useScene } from '@/store/scene'
@@ -63,6 +65,15 @@ export function CameraRig() {
   const gl = useThree((s) => s.gl)
   const width = useThree((s) => s.size.width)
   const height = useThree((s) => s.size.height)
+
+  // The hall's own shell (floor/walls/ceiling — see MUSEUM_SHELL_LAYER in
+  // MuseumScene.tsx) renders on a layer the main camera does not see by
+  // default. Enabled once, here, rather than toggled per screen: the shell
+  // only ever exists while the museum is mounted, so there is nothing on
+  // that layer to leak into the room in the first place.
+  useEffect(() => {
+    camera.layers.enable(MUSEUM_SHELL_LAYER)
+  }, [camera])
 
   const entry = useActiveConsole()
   const spec = useActiveDiorama()
@@ -639,8 +650,12 @@ export function CameraRig() {
         const artifact = MUSEUM_LAYOUT.byId[entry.id]
         const hero = heroGroupRef.current
         if (hero && artifact) {
-          hero.position.set(...artifact.position)
-          hero.rotation.set(...artifact.rotation)
+          // shelfWorldPose, not raw artifact.position: the hall may be
+          // carrying a glide offset (zero today, live from Phase 4), and the
+          // retreat must land the hero exactly where the hall actually is.
+          const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id)
+          hero.position.set(...pose.position)
+          hero.rotation.set(...pose.rotation)
         } else if (import.meta.env.DEV) {
           console.warn('[CameraRig] retreat handoff missing the hero console or its shelf slot.')
         }
