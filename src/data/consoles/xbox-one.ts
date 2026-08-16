@@ -187,7 +187,7 @@ export const xboxOne: ConsoleEntry = {
       intensity: 2.4,
       keyPosition: [3.5, 2.2, 1.1],
       ambientIntensity: 0.28,
-      backdrop: '#15171c',
+      backdrop: '#eeeeea',
     },
     tvPosition: [-0.3, 0.62, -1.2],
     tvRotation: [0, 0.1, 0],

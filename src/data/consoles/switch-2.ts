@@ -187,7 +187,7 @@ export const switch2: ConsoleEntry = {
       intensity: 3.0,
       keyPosition: [3.2, 2.4, 1.0],
       ambientIntensity: 0.4,
-      backdrop: '#262a35',
+      backdrop: '#eeeeea',
     },
     tvPosition: [-0.3, 0.66, -1.2],
     tvRotation: [0, 0.1, 0],

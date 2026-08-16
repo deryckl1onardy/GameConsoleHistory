@@ -189,7 +189,7 @@ export const wiiU: ConsoleEntry = {
       intensity: 2.6,
       keyPosition: [3.4, 2.2, 1.1],
       ambientIntensity: 0.34,
-      backdrop: '#1b1d24',
+      backdrop: '#eeeeea',
     },
     tvPosition: [-0.3, 0.62, -1.2],
     tvRotation: [0, 0.1, 0],

@@ -189,7 +189,7 @@ export const gamecube: ConsoleEntry = {
       intensity: 3.0,
       keyPosition: [3.2, 2.3, 1.0],
       ambientIntensity: 0.38,
-      backdrop: '#232630',
+      backdrop: '#eeeeea',
     },
     tvPosition: [-0.28, 0.5, -1.15],
     tvRotation: [0, 0.12, 0],

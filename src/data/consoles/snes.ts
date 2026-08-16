@@ -151,7 +151,7 @@ export const snes: ConsoleEntry = {
           intensity: 2.4,
           keyPosition: [0, 2.4, 0],
           ambientIntensity: 0.5,
-          backdrop: '#2a2f35',
+          backdrop: '#eeeeea',
         },
       },
       note: 'The Japanese cartridge is a different physical shape — rounder, slightly smaller, with different notches. That was deliberate: the shells were designed so imported games would not fit, region-locking the hardware by geometry alone. It is the reason this atlas needs two cartridge archetypes for one console.',
@@ -274,7 +274,7 @@ export const snes: ConsoleEntry = {
       // Deliberately not the room's own palette. A warm-lit set against a dark
       // neutral sweep reads as a photographed model; against a matching tan it
       // reads as a flat illustration.
-      backdrop: '#2b2621',
+      backdrop: '#eeeeea',
     },
     // Cabinet top is 500mm; the TV group is anchored at that height.
     tvPosition: [-0.28, 0.5, -1.15],

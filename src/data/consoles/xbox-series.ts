@@ -197,7 +197,7 @@ export const xboxSeries: ConsoleEntry = {
       intensity: 2.3,
       keyPosition: [3.5, 2.2, 1.1],
       ambientIntensity: 0.26,
-      backdrop: '#131519',
+      backdrop: '#eeeeea',
     },
     tvPosition: [-0.3, 0.66, -1.2],
     tvRotation: [0, 0.1, 0],

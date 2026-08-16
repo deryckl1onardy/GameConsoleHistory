@@ -186,7 +186,7 @@ export const wii: ConsoleEntry = {
       intensity: 3.2,
       keyPosition: [3.2, 2.4, 1.0],
       ambientIntensity: 0.44,
-      backdrop: '#252831',
+      backdrop: '#eeeeea',
     },
     tvPosition: [-0.3, 0.62, -1.2],
     tvRotation: [0, 0.1, 0],

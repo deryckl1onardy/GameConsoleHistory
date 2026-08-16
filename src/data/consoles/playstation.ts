@@ -183,7 +183,7 @@ export const playstation: ConsoleEntry = {
       intensity: 2.8,
       keyPosition: [3.4, 2.1, 1.2],
       ambientIntensity: 0.32,
-      backdrop: '#20222a',
+      backdrop: '#eeeeea',
     },
     tvPosition: [-0.28, 0.5, -1.15],
     tvRotation: [0, 0.12, 0],

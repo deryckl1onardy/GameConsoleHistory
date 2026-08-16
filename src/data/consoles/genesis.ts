@@ -180,7 +180,7 @@ export const genesis: ConsoleEntry = {
       intensity: 2.9,
       keyPosition: [3.4, 2.1, 1.2],
       ambientIntensity: 0.33,
-      backdrop: '#241f2b',
+      backdrop: '#eeeeea',
     },
     tvPosition: [-0.28, 0.5, -1.15],
     tvRotation: [0, 0.12, 0],

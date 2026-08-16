@@ -107,7 +107,7 @@ function Effects() {
     return (
       <EffectComposer multisampling={0}>
         <TiltShift2 blur={0.35} taper={0.5} samples={6} start={[0, bandStart]} end={[1, bandEnd]} />
-        <Vignette offset={0.28} darkness={0.72} />
+        <Vignette offset={0.4} darkness={0.22} />
       </EffectComposer>
     )
   }
@@ -138,7 +138,15 @@ function Effects() {
       <TiltShift2 blur={1.15} taper={0.9} samples={14} start={[0, bandStart]} end={[1, bandEnd]} />
       <Bloom intensity={0.4} luminanceThreshold={0.75} luminanceSmoothing={0.3} mipmapBlur />
       <HueSaturation saturation={0.16} />
-      <Vignette offset={0.24} darkness={0.68} />
+      {/*
+        A near-black backdrop could carry a heavy vignette; a white gallery
+        one cannot — the same darkening that used to read as cinematic focus
+        reads as dirt smeared into the corners of a bright room (the exact
+        reason the shelf itself dropped this effect entirely, see Effects()
+        above). Kept faint rather than removed: the room still wants a soft
+        lens falloff, just not one heavy enough to fight its own backdrop.
+      */}
+      <Vignette offset={0.4} darkness={0.22} />
       <SMAA />
     </EffectComposer>
   )

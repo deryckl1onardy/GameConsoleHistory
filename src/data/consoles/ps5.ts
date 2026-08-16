@@ -194,7 +194,7 @@ export const ps5: ConsoleEntry = {
       intensity: 2.6,
       keyPosition: [3.4, 2.1, 1.2],
       ambientIntensity: 0.36,
-      backdrop: '#191b22',
+      backdrop: '#eeeeea',
     },
     tvPosition: [-0.28, 0.62, -1.15],
     tvRotation: [0, 0.12, 0],
