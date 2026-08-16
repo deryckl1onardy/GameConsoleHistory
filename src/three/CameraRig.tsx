@@ -10,7 +10,7 @@ import {
   hallOverviewShot,
   roomDelta,
 } from './museum/museum-shots'
-import { NO_OFFSET, applyFrameOffset, frameOffsetFor } from '@/frame'
+import { applyFrameOffset, frameOffsetFor, shelfFrameOffsetFor } from '@/frame'
 import { MUSEUM_LAYOUT } from './museum/layout'
 import { MUSEUM_SHELL_LAYER } from './museum/layers'
 import { generationNearestZ } from './museum/shelf-layout'
@@ -313,16 +313,20 @@ export function CameraRig() {
   }, [width, height])
 
   /**
-   * Keep the frame offset in sync with the chrome at rest. The offset is the
-   * room's projection contract (frame.ts): applied whenever the room is up
-   * and idle — on layout/panel/viewport changes, and once `arriving` hands
-   * over to `idle`. While `arriving`/`retreating` is in flight, the tween in
-   * the choreography effect owns the offset and this effect stays out.
+   * Keep the frame offset in sync with the chrome at rest. The offset is a
+   * projection contract (frame.ts): the shelf clears its timeline strip, the
+   * room clears its detail panel, each applied whenever that screen is up and
+   * idle — on layout/panel/viewport changes, and once `arriving`/`retreating`
+   * hands over to `idle`. While a transition is in flight, the tween in the
+   * choreography effect owns the offset and this effect stays out.
    */
   useEffect(() => {
     const s = useScene.getState()
-    if (s.screen !== 'room' || s.approach !== 'idle') return
-    const offset = frameOffsetFor(width, height, s.layout, !s.panelOpen)
+    if (s.approach !== 'idle') return
+    const offset =
+      s.screen === 'room'
+        ? frameOffsetFor(width, height, s.layout, !s.panelOpen)
+        : shelfFrameOffsetFor(width, height)
     applyFrameOffset(camera, offset)
     s.setFrameOffset(offset)
     // `approach` listed so a mid-flight viewport change is corrected the
@@ -666,8 +670,10 @@ export function CameraRig() {
         setScreen('shelf')
 
         // Offset out during the pull-back, so the view settles as the camera
-        // returns to the bay instead of stepping before it moves.
-        tweenOffsetTo(NO_OFFSET, flightMs, 'power2.inOut')
+        // returns to the bay instead of stepping before it moves. Lands on the
+        // SHELF's own offset (its timeline strip), not NO_OFFSET — the shelf
+        // camera is framed clear of its chrome just like the room's is.
+        tweenOffsetTo(shelfFrameOffsetFor(width, height), flightMs, 'power2.inOut')
 
         // `finish()` inside `applyShot` reads `screen` fresh (see its own
         // comment) rather than a value captured when this closure was

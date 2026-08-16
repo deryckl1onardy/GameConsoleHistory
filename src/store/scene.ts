@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import type { ConsoleEntry, DioramaSpec, Game, Generation, RegionVariant } from '@/types/console'
 import { CONSOLES, getConsole } from '@/data/consoles'
 import type { FrameOffset, Layout } from '@/frame'
+import { firstOfGeneration } from '@/three/museum/hall-glide'
+import { MUSEUM_LAYOUT } from '@/three/museum/layout'
 
 /**
  * One store, shared by the 2D shell and the 3D scene. The playback field is a
@@ -130,7 +132,25 @@ type SceneState = {
    * unbounded pan gave you no sense of ever having got anywhere.
    */
   hallView: HallView
-  /** Which generation's station the museum camera rests on. */
+  /**
+   * The console currently focused on the shelf — the one the chrome (timeline
+   * strip, search, keyboard) points at, and from Phase 4 the one the hall
+   * glides onto the stage. The museum's camera generation follows it.
+   */
+  focusedId: string
+  /**
+   * Whether the hall group is mid-glide toward a newly focused console.
+   * `selectArtifact` refuses to fire while gliding, so the approach can never
+   * read a half-moved hall (see the three guards in the navigation plan).
+   * Phase 3 adds the field; Phase 4 animates it.
+   */
+  hallMotion: 'settled' | 'gliding'
+  /**
+   * Which generation's station the museum camera rests on. Derived from
+   * `focusedId` by every setter that moves focus, so the two can never
+   * disagree; the one independent writer left — the passive pan sync from
+   * `syncFocusGeneration` — is deleted along with the pan in Phase 4.
+   */
   focusGeneration: Generation
   /**
    * Bumped only when the user asks to GO to a generation (the rail), never
@@ -182,7 +202,9 @@ type SceneState = {
   /** Returns false and does nothing if the transition is not legal. */
   advanceApproach: (next: Approach) => boolean
   setScreen: (s: Screen) => void
-  /** Navigate TO a generation's station — moves the camera, and closes in. */
+  /** Focus a console — moves the camera to its station, and closes in. */
+  setFocusedConsole: (id: string) => void
+  /** Navigate TO a generation's station — focuses its first console. */
   setFocusGeneration: (g: Generation) => void
   /**
    * Record which generation the camera is already nearest, without moving it.
@@ -225,7 +247,12 @@ export const useScene = create<SceneState>((set, get) => ({
   // flashes the room first. Same category of dev switch as Scene.tsx's ?fx.
   screen: initialScreen(),
   approach: 'idle',
-  // The oldest bay: the museum reads downward through time from here.
+  // The oldest bay: the museum reads downward through time from here. The
+  // first console is focused by default, so the chrome has something to point
+  // at before the user ever touches it.
+  focusedId: CONSOLES[0].id,
+  hallMotion: 'settled',
+  // Derived from focusedId above (see the field comment): the oldest bay.
   focusGeneration: CONSOLES.reduce<Generation>(
     (oldest, c) => (c.generation < oldest ? c.generation : oldest),
     CONSOLES[0].generation,
@@ -359,15 +386,27 @@ export const useScene = create<SceneState>((set, get) => ({
   },
 
   setScreen: (screen) => set({ screen }),
-  // Asking for a generation is asking to go and stand in front of it, so this
-  // closes in from the overview as well as aiming. Both changes bump the same
-  // nonce, which is the one signal CameraRig treats as "move".
-  setFocusGeneration: (focusGeneration) =>
-    set((s) => ({
-      focusGeneration,
-      hallView: 'station' as HallView,
-      focusNavNonce: s.focusNavNonce + 1,
-    })),
+  // Focusing a console is asking to go and stand in front of its generation's
+  // station, so this closes in from the overview as well as aiming. Both
+  // changes bump the same nonce, which is the one signal CameraRig treats as
+  // "move". The generation is derived from the id, never accepted separately.
+  setFocusedConsole: (focusedId) =>
+    set((s) => {
+      const artifact = MUSEUM_LAYOUT.byId[focusedId]
+      if (!artifact) return {}
+      return {
+        focusedId,
+        focusGeneration: artifact.generation,
+        hallView: 'station' as HallView,
+        focusNavNonce: s.focusNavNonce + 1,
+      }
+    }),
+  // A generation jump is shorthand for focusing its first console.
+  setFocusGeneration: (focusGeneration) => {
+    const id = firstOfGeneration(MUSEUM_LAYOUT, focusGeneration)
+    if (!id) return
+    useScene.getState().setFocusedConsole(id)
+  },
   syncFocusGeneration: (focusGeneration) =>
     set((s) => (s.focusGeneration === focusGeneration ? {} : { focusGeneration })),
   showHallOverview: () =>

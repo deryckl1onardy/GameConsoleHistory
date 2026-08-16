@@ -7,6 +7,16 @@ import {
   layoutMuseum,
   rotatedFootprintX,
 } from './shelf-layout'
+import {
+  consoleAtYear,
+  consoleOrder,
+  firstOfGeneration,
+  nextConsole,
+  nextGeneration,
+  prevConsole,
+  prevGeneration,
+  yearOf,
+} from './hall-glide'
 import { mm } from '../lighting'
 
 /**
@@ -163,6 +173,71 @@ describe('museum layout', () => {
     for (const bay of layout.bays) {
       expect(bay.boardY, `gen ${bay.generation}`).toBe(SHELF_CONSTANTS.PLINTH_TOP)
     }
+  })
+
+  /*
+    The order helpers are the replacement for `generationNearestZ`'s job —
+    "where should navigation go next" — once the camera stops travelling and
+    the collection presents itself instead. The timeline strip, the keyboard
+    map and every focus transition read this one ordering, so it has to be
+    the same walk the hall physically offers.
+  */
+  describe('console order helpers', () => {
+    it('walks every console exactly once, station by station', () => {
+      const order = consoleOrder(layout)
+      expect(order.map((a) => a.id)).toHaveLength(CONSOLES.length)
+      expect(new Set(order.map((a) => a.id)).size).toBe(CONSOLES.length)
+      // Stations first, oldest first; within a station, left to right.
+      for (let i = 1; i < order.length; i += 1) {
+        const prev = layout.byId[order[i - 1].id]
+        const curr = layout.byId[order[i].id]
+        expect(curr.generation, `step ${i}`).toBeGreaterThanOrEqual(prev.generation)
+      }
+    })
+
+    it('wraps next/prev around the ends of the hall', () => {
+      const order = consoleOrder(layout)
+      const first = order[0].id
+      const last = order[order.length - 1].id
+      expect(prevConsole(layout, first)).toBe(last)
+      expect(nextConsole(layout, last)).toBe(first)
+      expect(nextConsole(layout, first)).toBe(order[1].id)
+      expect(prevConsole(layout, last)).toBe(order[order.length - 2].id)
+    })
+
+    it('steps generations one station at a time, clamped at both ends', () => {
+      const gens = layout.bays.map((b) => b.generation)
+      expect(prevGeneration(layout, gens[0])).toBe(gens[0])
+      expect(nextGeneration(layout, gens[gens.length - 1])).toBe(gens[gens.length - 1])
+      expect(nextGeneration(layout, gens[0])).toBe(gens[1])
+      expect(prevGeneration(layout, gens[gens.length - 1])).toBe(gens[gens.length - 2])
+    })
+
+    it('firstOfGeneration returns the walk-first console of each station', () => {
+      for (const bay of layout.bays) {
+        expect(firstOfGeneration(layout, bay.generation)).toBe(bay.artifacts[0].id)
+      }
+    })
+
+    it('consoleAtYear finds a console released in that year', () => {
+      for (const artifact of consoleOrder(layout)) {
+        const entry = CONSOLES.find((c) => c.id === artifact.id)!
+        const found = consoleAtYear(layout, yearOf(entry))
+        expect(found, `${artifact.id} (${yearOf(entry)})`).not.toBeNull()
+        const foundEntry = CONSOLES.find((c) => c.id === found)!
+        expect(yearOf(foundEntry)).toBe(yearOf(entry))
+      }
+    })
+
+    it('returns null for a year no console shipped in', () => {
+      expect(consoleAtYear(layout, 1900)).toBeNull()
+    })
+
+    it('yearOf returns 0 for a console with no release dates, never NaN', () => {
+      const bare = { ...CONSOLES[0], released: {} }
+      expect(yearOf(bare)).toBe(0)
+      expect(Number.isFinite(yearOf(bare))).toBe(true)
+    })
   })
 
   it('never overlaps two artifacts on the same board', () => {

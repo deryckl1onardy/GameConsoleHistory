@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { PerspectiveCamera, Vector3 } from 'three'
-import { NO_OFFSET, applyFrameOffset, frameOffsetFor } from './frame'
+import { NO_OFFSET, applyFrameOffset, frameOffsetFor, shelfFrameOffsetFor } from './frame'
 
 describe('frameOffsetFor', () => {
   it('lifts the subject up (positive dy) and keeps it horizontally centred (dx 0) on a wide layout', () => {
@@ -52,6 +52,26 @@ describe('frameOffsetFor', () => {
 
   it('is deterministic', () => {
     expect(frameOffsetFor(1440, 900, 'wide')).toEqual(frameOffsetFor(1440, 900, 'wide'))
+  })
+})
+
+describe('shelfFrameOffsetFor', () => {
+  it('lifts the subject clear of the timeline strip, horizontally centred', () => {
+    const { dx, dy } = shelfFrameOffsetFor(1440, 900)
+    expect(dy).toBeGreaterThan(0)
+    expect(dx).toBe(0)
+  })
+
+  it('lifts less than the room does — a strip is not a panel', () => {
+    const shelf = shelfFrameOffsetFor(1440, 900)
+    const room = frameOffsetFor(1440, 900, 'wide')
+    expect(shelf.dy).toBeLessThan(room.dy)
+  })
+
+  it('returns NO_OFFSET for a degenerate viewport', () => {
+    expect(shelfFrameOffsetFor(0, 900)).toEqual(NO_OFFSET)
+    expect(shelfFrameOffsetFor(NaN, 900)).toEqual(NO_OFFSET)
+    expect(shelfFrameOffsetFor(1440, Infinity)).toEqual(NO_OFFSET)
   })
 })
 

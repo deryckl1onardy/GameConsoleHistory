@@ -1,4 +1,6 @@
-import { SHELF_CONSTANTS, type MuseumLayout } from './shelf-layout'
+import type { ConsoleEntry, Generation } from '@/types/console'
+import { getConsole } from '@/data/consoles'
+import { SHELF_CONSTANTS, type MuseumLayout, type ShelfArtifact } from './shelf-layout'
 
 /**
  * The maths of the hall GLIDE — the shelf navigation redesign's replacement
@@ -126,4 +128,81 @@ export function shelfWorldPose(
     position: add(add(artifact.position, getHallOffset()), presentOffset(id)),
     rotation: artifact.rotation,
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Console order — the collection as a walk.                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The earliest release year of a console, `0` when it has no release dates
+ * at all. The timeline guard: every mark is positioned by year, so a
+ * dateless console must fall out to a harmless 0 (never NaN/Infinity from
+ * `Math.min()` on an empty list) rather than break the strip.
+ */
+export function yearOf(entry: ConsoleEntry): number {
+  const dates = Object.values(entry.released).filter(Boolean) as string[]
+  if (dates.length === 0) return 0
+  return Math.min(...dates.map((d) => new Date(d).getFullYear()))
+}
+
+/**
+ * Every artifact, in the one order guaranteed to match what the camera walks
+ * past: station by station down the hall (oldest generation first), oldest
+ * console first within each station. This is the ordering the timeline strip,
+ * the keyboard map and every focus transition use, so focus always moves the
+ * same way the collection physically does.
+ */
+export function consoleOrder(layout: MuseumLayout): ShelfArtifact[] {
+  return layout.bays.flatMap((b) => b.artifacts)
+}
+
+function requireIndex(layout: MuseumLayout, id: string): number {
+  const i = consoleOrder(layout).findIndex((a) => a.id === id)
+  if (i === -1) {
+    throw new Error(`hall-glide: ${id} is not on any shelf`)
+  }
+  return i
+}
+
+/** The console one step further into history (deeper down the hall). Wraps. */
+export function nextConsole(layout: MuseumLayout, id: string): string {
+  const order = consoleOrder(layout)
+  return order[(requireIndex(layout, id) + 1) % order.length].id
+}
+
+/** The console one step back toward the entrance. Wraps. */
+export function prevConsole(layout: MuseumLayout, id: string): string {
+  const order = consoleOrder(layout)
+  return order[(requireIndex(layout, id) - 1 + order.length) % order.length].id
+}
+
+/** The first console of a generation, in walk order — the ↑/↓ generation step. */
+export function firstOfGeneration(layout: MuseumLayout, generation: Generation): string | null {
+  return layout.bays.find((b) => b.generation === generation)?.artifacts[0]?.id ?? null
+}
+
+/** The generation one station deeper into the hall. Clamps at the far end. */
+export function nextGeneration(layout: MuseumLayout, generation: Generation): Generation {
+  const gens = layout.bays.map((b) => b.generation)
+  const i = gens.indexOf(generation)
+  if (i === -1) return generation
+  return gens[Math.min(i + 1, gens.length - 1)]
+}
+
+/** The generation one station nearer the entrance. Clamps at the near end. */
+export function prevGeneration(layout: MuseumLayout, generation: Generation): Generation {
+  const gens = layout.bays.map((b) => b.generation)
+  const i = gens.indexOf(generation)
+  if (i === -1) return generation
+  return gens[Math.max(i - 1, 0)]
+}
+
+/** The console whose earliest release year is `year`, or null. */
+export function consoleAtYear(layout: MuseumLayout, year: number): string | null {
+  for (const artifact of consoleOrder(layout)) {
+    const entry = getConsole(artifact.id)
+    if (entry && yearOf(entry) === year) return artifact.id
+  }
+  return null
 }

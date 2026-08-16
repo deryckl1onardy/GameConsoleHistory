@@ -1,5 +1,9 @@
+import { useState } from 'react'
 import { MUSEUM_LAYOUT } from '@/three/museum/layout'
 import { useScene } from '@/store/scene'
+import { ConsoleSearch } from './shelf/ConsoleSearch'
+import { TimelineStrip } from './shelf/TimelineStrip'
+import { useShelfKeyboard } from './shelf/useShelfKeyboard'
 
 /**
  * The gallery's 2D chrome: a header saying where you are, a rail of the
@@ -44,6 +48,10 @@ export function ShelfOverlay() {
   // changing.
   const approach = useScene((s) => s.approach)
   const show = approach === 'idle'
+  const [searchOpen, setSearchOpen] = useState(false)
+  const openSearch = () => setSearchOpen(true)
+  const closeSearch = () => setSearchOpen(false)
+  useShelfKeyboard(searchOpen, openSearch, closeSearch)
 
   return (
     <div
@@ -96,8 +104,10 @@ export function ShelfOverlay() {
         rail on the right and keeps the left column — header above, controls
         below — reading as one edge rather than four floating islands.
       */}
-      <div className="absolute bottom-8 left-8 flex flex-col items-start gap-3">
-        <p className="text-[11px] opacity-45">Scroll to walk the hall · click a console to enter</p>
+      <div className="absolute bottom-16 left-8 flex flex-col items-start gap-3">
+        <p className="text-[11px] opacity-45">
+          ← → or scroll through the hall · / to search · Enter to visit
+        </p>
         {hallView === 'station' && (
           <button
             type="button"
@@ -108,6 +118,10 @@ export function ShelfOverlay() {
           </button>
         )}
       </div>
+
+      <TimelineStrip />
+
+      {searchOpen && <ConsoleSearch onClose={closeSearch} />}
     </div>
   )
 }

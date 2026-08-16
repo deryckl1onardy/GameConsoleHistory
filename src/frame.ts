@@ -50,6 +50,29 @@ export const ROOM_CHROME = {
 export type FrameOffset = { dx: number; dy: number }
 export const NO_OFFSET: FrameOffset = { dx: 0, dy: 0 }
 
+/**
+ * The shelf's own bottom chrome — the timeline strip. Much shorter than the
+ * room's detail panel (a strip of year marks, not a thirds-of-the-screen
+ * panel) but real: with the strip in place the shelf camera has to lift the
+ * subject clear of it just like the room does. Fraction of the viewport the
+ * strip occupies.
+ */
+const SHELF_CHROME_PANEL_H = 0.09
+
+/**
+ * The offset that clears the shelf's timeline strip — the shelf half of the
+ * frame-offset contract. Same shape as `frameOffsetFor` (a vertical lift, no
+ * horizontal dodge) with the shelf's own chrome fractions; see the file
+ * header for why the mechanism is identical.
+ */
+export function shelfFrameOffsetFor(width: number, height: number): FrameOffset {
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return NO_OFFSET
+  }
+  const dy = clamp(SHELF_CHROME_PANEL_H / 2, 0, MAX_DY)
+  return { dx: 0, dy }
+}
+
 /** How far the subject may be lifted, as a safety rail on the arithmetic below. */
 const MAX_DY = 0.2
 
