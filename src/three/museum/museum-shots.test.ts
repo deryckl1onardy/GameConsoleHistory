@@ -4,7 +4,7 @@ import { CONSOLES } from '@/data/consoles'
 import { applyFrameOffset, frameOffsetFor } from '@/frame'
 import { MAX_DOLLY, shotCameraPosition, shotsFor } from '../shots'
 import { artifactAtX, layoutMuseum } from './shelf-layout'
-import { approachShot, bayShot, hallOverviewShot, roomDelta, translate } from './museum-shots'
+import { approachShot, hallOverviewShot, roomDelta, stageShot, translate } from './museum-shots'
 import {
   getHallOffset,
   hallOffsetFor,
@@ -214,8 +214,10 @@ describe('the glide invariant', () => {
   than left to be noticed in a screenshot.
 */
 describe('every museum shot stays inside the hall', () => {
+  // The museum's camera has exactly two poses now: the overview, and the
+  // stage every console presents on. Both must stay inside the shell.
   const shots = [
-    ...layout.bays.map((b) => ({ what: `gen ${b.generation}`, shot: bayShot(b) })),
+    { what: 'the stage', shot: stageShot() },
     { what: 'the overview', shot: hallOverviewShot(layout) },
   ]
 
@@ -249,35 +251,41 @@ describe('every museum shot stays inside the hall', () => {
   gallery exists to offer, and the entry point to the transition.
 
   It runs through one invisible plane per station (ShelfBay's BayHitPlane),
-  which resolves the artifact from the world X of the hit rather than
-  raycasting 180k triangles of console geometry. That indirection is fast but
-  it is also silent: if the plane drifted off its station, or stopped covering
-  the consoles' height, or `artifactAtX` disagreed with where the models
-  actually stand, clicks would land on the wrong console — or on nothing — and
-  nothing else in the suite would notice.
+  which resolves the artifact from the X of the hit rather than raycasting
+  180k triangles of console geometry. That indirection is fast but it is also
+  silent: if the plane drifted off its station, or stopped covering the
+  consoles' height, or `artifactAtX` disagreed with where the models actually
+  stand, clicks would land on the wrong console — or on nothing — and nothing
+  else in the suite would notice.
 
-  So this casts the real ray: from each station's own camera, through each
-  console on it, onto that station's hit plane, and asserts the hit lands
-  inside the plane AND resolves back to the console aimed at.
+  The hall GLIDES now, so the ray test has to exercise the real geometry: the
+  stage camera (the only shelf camera there is), each artifact glided to its
+  stage pose, the hit plane carried along with the hall, and the world→local
+  X conversion ShelfBay applies before resolving. A glide with any X component
+  silently selects the NEIGHBOURING console if that conversion is wrong —
+  this test is what catches it.
 */
 describe('clicking a console picks that console', () => {
   /** Matches BayHitPlane's own height in ShelfBay.tsx — see the marker test for why it stays a literal. */
   const HIT_PLANE_HEADROOM = 0.22
 
   for (const bay of layout.bays) {
-    const shot = bayShot(bay)
-    const planeZ = bay.boardCenter[2] + bay.boardDepth / 2
+    const planeLocalZ = bay.boardCenter[2] + bay.boardDepth / 2
     const planeHeight = bay.tallest + HIT_PLANE_HEADROOM
 
     for (const artifact of bay.artifacts) {
-      it(`resolves ${artifact.id} from a ray through it`, () => {
+      it(`resolves ${artifact.id} from a ray through it, glided to the stage`, () => {
         for (const dolly of DOLLIES) {
-          const cam = shotCameraPosition(shot, dolly)
-          // Aim at the middle of the console, the way a pointer would.
+          const cam = shotCameraPosition(stageShot(), dolly)
+          // When THIS artifact is focused, the hall carries its offset.
+          const offset = hallOffsetFor(layout, artifact.id)
+          const planeZ = planeLocalZ + offset[2]
+
+          // Aim at the middle of the glided console, the way a pointer would.
           const aim: [number, number, number] = [
-            artifact.position[0],
+            artifact.position[0] + offset[0],
             artifact.position[1] + artifact.size.height / 2,
-            artifact.position[2],
+            artifact.position[2] + offset[2],
           ]
           const dir = [aim[0] - cam[0], aim[1] - cam[1], aim[2] - cam[2]]
 
@@ -294,9 +302,9 @@ describe('clicking a console picks that console', () => {
           const hitX = cam[0] + dir[0] * t
           const hitY = cam[1] + dir[1] * t
 
-          // Inside the plane's own rectangle.
+          // Inside the plane's own rectangle (its centre moved with the hall).
           expect(
-            Math.abs(hitX - bay.boardCenter[0]),
+            Math.abs(hitX - (bay.boardCenter[0] + offset[0])),
             `${artifact.id} hit off the plane's width @ ${dolly}`,
           ).toBeLessThanOrEqual(bay.boardLength / 2)
           expect(hitY, `${artifact.id} hit below the plane @ ${dolly}`).toBeGreaterThanOrEqual(
@@ -306,9 +314,10 @@ describe('clicking a console picks that console', () => {
             bay.boardY + planeHeight,
           )
 
-          // And resolving that hit gives back the console actually aimed at.
+          // And resolving that hit — through ShelfBay's world→local X
+          // conversion — gives back the console actually aimed at.
           expect(
-            artifactAtX(bay, hitX)?.id,
+            artifactAtX(bay, hitX - offset[0])?.id,
             `${artifact.id} resolved to the wrong console @ ${dolly}`,
           ).toBe(artifact.id)
         }
@@ -317,73 +326,32 @@ describe('clicking a console picks that console', () => {
   }
 })
 
-describe('bay shots', () => {
-  it('keeps every museum camera above the floor', () => {
-    for (const bay of layout.bays) {
-      const [, y] = shotCameraPosition(bayShot(bay))
-      expect(y, `gen ${bay.generation}`).toBeGreaterThan(0)
-    }
+describe('the stage shot', () => {
+  it('keeps the camera above the floor', () => {
+    const [, y] = shotCameraPosition(stageShot())
+    expect(y).toBeGreaterThan(0)
   })
 
-  it('normalises every direction to unit length', () => {
-    for (const bay of layout.bays) {
-      const [x, y, z] = bayShot(bay).direction
-      expect(Math.hypot(x, y, z), `gen ${bay.generation}`).toBeCloseTo(1, 9)
-    }
+  it('normalises its direction to unit length', () => {
+    const [x, y, z] = stageShot().direction
+    expect(Math.hypot(x, y, z)).toBeCloseTo(1, 9)
   })
 
   it('sits inside its own orbit clamps', () => {
-    for (const bay of layout.bays) {
-      const s = bayShot(bay)
-      expect(s.minDistance, `gen ${bay.generation}`).toBeLessThan(s.distance)
-      expect(s.maxDistance, `gen ${bay.generation}`).toBeGreaterThan(s.distance)
+    const s = stageShot()
+    expect(s.minDistance).toBeLessThan(s.distance)
+    expect(s.maxDistance).toBeGreaterThan(s.distance)
+  })
+
+  it('presents every console at the same stage point — per-console framing by construction', () => {
+    // The replacement for per-station framing: one fixed camera frames every
+    // console identically because the hall brings each of them to the same
+    // world point. (The present step in Phase 6 adds a per-console standoff
+    // on top; until then the stage pose is literally identical for all 22.)
+    const poses = CONSOLES.map((c) => stageWorldPos(c.id))
+    for (const pose of poses) {
+      expect(pose).toEqual(poses[0])
     }
   })
 
-  it('frames by whichever constraint actually binds, height or width', () => {
-    /*
-      A bay is framed by max(width-fit, height-fit): a short-but-tall bay (one
-      standing console) and a long-but-flat one (four slabs) each have to be
-      pulled back by the term that actually binds them.
-
-      Tested on synthetic bays rather than two named consoles. The original
-      version compared the PS5's bay against the PS4's and asserted their board
-      lengths matched — which was only ever true by coincidence of how many
-      consoles happened to be built in each generation, and broke the moment
-      gen 8 gained a fourth. Holding one variable fixed by construction tests
-      the actual rule and cannot be invalidated by the roster growing.
-    */
-    const base = layout.bays[0]
-    const flat = { ...base, boardLength: 1.2, tallest: 0.08 }
-    const tall = { ...base, boardLength: 1.2, tallest: 0.42 }
-    const wide = { ...base, boardLength: 4.0, tallest: 0.08 }
-
-    // Same width, more height — the height term takes over.
-    expect(bayShot(tall).distance).toBeGreaterThan(bayShot(flat).distance)
-    // Same height, more width — the width term takes over.
-    expect(bayShot(wide).distance).toBeGreaterThan(bayShot(flat).distance)
-  })
-
-  it('frames a real bay of standing consoles by its height', () => {
-    // The roster-level consequence of the rule above, on the one bay that
-    // holds consoles which stand upright rather than lie flat.
-    //
-    // Deliberately states NOTHING about how this bay's width compares to any
-    // other's: an earlier version of this assertion pinned it as the narrowest
-    // bay, which was true only until gen 9 gained a second and third console —
-    // the same roster-coupling that broke the test this replaced.
-    const ps5Bay = layout.bays.find((b) => b.artifacts.some((a) => a.id === 'ps5'))!
-    // Flatten the same bay and it would be framed by width alone. That the
-    // real one sits further back is exactly what "height binds here" means.
-    expect(bayShot(ps5Bay).distance).toBeGreaterThan(
-      bayShot({ ...ps5Bay, tallest: 0.05 }).distance,
-    )
-  })
-
-  it('centres on the artifacts rather than the board', () => {
-    for (const bay of layout.bays) {
-      const s = bayShot(bay)
-      expect(s.target[1], `gen ${bay.generation}`).toBeGreaterThan(bay.boardY)
-    }
-  })
 })

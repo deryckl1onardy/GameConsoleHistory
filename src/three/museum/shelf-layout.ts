@@ -256,32 +256,6 @@ export function layoutMuseum(consoles: ConsoleEntry[]): MuseumLayout {
 }
 
 /**
- * Which generation the camera is currently nearest, given how far down the
- * hall it is looking.
- *
- * Measured against each station's own Z — the same point `bayShot` targets —
- * so "nearest" means the same thing to this function as it does to the camera
- * that framed it.
- *
- * Exists because travelling the hall used to move the camera without telling
- * anything about it: the generation rail and the accent light both kept
- * pointing at the station you had left. See `syncFocusGeneration` in the
- * scene store.
- */
-export function generationNearestZ(layout: MuseumLayout, z: number): Generation {
-  let best = layout.bays[0]
-  let bestDistance = Infinity
-  for (const bay of layout.bays) {
-    const distance = Math.abs(bay.boardCenter[2] - z)
-    if (distance < bestDistance) {
-      bestDistance = distance
-      best = bay
-    }
-  }
-  return best.generation
-}
-
-/**
  * Which artifact sits under a given X on a station's plinth, or null for a gap.
  * The shelf hit-tests with one plane per station and resolves the artifact
  * here, rather than raycasting 180k triangles of console geometry.

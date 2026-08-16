@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import type { Group } from 'three'
 import { useCursor } from '@react-three/drei'
 import * as THREE from 'three'
 import gsap from 'gsap'
@@ -6,7 +7,9 @@ import { useScene } from '@/store/scene'
 import { MuseumLights } from './MuseumLights'
 import { ShelfBay } from './ShelfBay'
 import { MUSEUM_LAYOUT } from './layout'
+import { getHallOffset } from './hall-glide'
 import { APPROACH_TIMING } from './approach'
+import { MUSEUM_SHELL_LAYER } from './layers'
 
 /**
  * The Shelf of History: the collection as a gallery hall you walk down.
@@ -48,6 +51,12 @@ import { APPROACH_TIMING } from './approach'
 const WALL_COLOR = '#eeeeea'
 const FLOOR_COLOR = '#c3c4c0'
 const CEILING_COLOR = '#f7f7f4'
+
+/** Ref callback that moves a mesh onto the shell-only layer, once, on mount.
+ *  See layers.ts for why the shell needs its own layer at all. */
+function onShellMesh(o: THREE.Object3D | null) {
+  o?.layers.set(MUSEUM_SHELL_LAYER)
+}
 
 /**
  * The far wall closing the hall.
@@ -106,7 +115,7 @@ function FarWall({
   }, [])
 
   return (
-    <mesh position={[0, centerY, z]} receiveShadow>
+    <mesh ref={onShellMesh} position={[0, centerY, z]} receiveShadow>
       <planeGeometry args={[width, height]} />
       <meshStandardMaterial
         ref={matRef}
@@ -196,6 +205,17 @@ function YearLine({
   )
 }
 
+/**
+ * The hall group CameraRig glides — the whole museum as one movable object.
+ * The camera is bolted down while browsing, so the collection presents
+ * itself by sliding this group in 2-D until the focused console stands on
+ * the stage (see hall-glide.ts). Module ref, in the same spirit as
+ * `heroGroupRef`: the tween is imperative, and both the hero (via
+ * shelfWorldPose) and the hit-testing (ShelfBay's world→local X) need the
+ * CURRENT offset between renders.
+ */
+export const hallGroupRef: { current: Group | null } = { current: null }
+
 export function MuseumScene() {
   const { bays, hall } = MUSEUM_LAYOUT
   const hovered = useScene((s) => s.hoveredId !== null)
@@ -208,12 +228,27 @@ export function MuseumScene() {
   const shellCenterZ = hall.entranceZ + 4 - shellLength / 2
   const halfWidth = hall.width / 2
 
+  /*
+    The hall REMOUNTS fresh at 'retreating' (see useSceneMounts), and a first
+    frame at offset zero would paint the hall un-glided while the hero — which
+    lives outside the group — is already standing at the glided spot. Restore
+    the group's position from the module's live offset the moment it mounts,
+    so the very first painted frame is the right one.
+  */
+  useLayoutEffect(() => {
+    const g = hallGroupRef.current
+    if (!g) return
+    const offset = getHallOffset()
+    g.position.set(offset[0], offset[1], offset[2])
+  }, [])
+
   return (
-    <group>
+    <group ref={hallGroupRef}>
       <MuseumLights />
 
       {/* Floor. The surface the whole hall reads its depth against. */}
       <mesh
+        ref={onShellMesh}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, hall.floorY, shellCenterZ]}
         receiveShadow
@@ -224,6 +259,7 @@ export function MuseumScene() {
 
       {/* Ceiling, which is what actually tells you this is an interior. */}
       <mesh
+        ref={onShellMesh}
         rotation={[Math.PI / 2, 0, 0]}
         position={[0, hall.height, shellCenterZ]}
       >
@@ -233,6 +269,7 @@ export function MuseumScene() {
 
       {/* Side walls. Rotated to face inward down the length of the hall. */}
       <mesh
+        ref={onShellMesh}
         rotation={[0, Math.PI / 2, 0]}
         position={[-halfWidth, hall.height / 2, shellCenterZ]}
         receiveShadow
@@ -241,6 +278,7 @@ export function MuseumScene() {
         <meshStandardMaterial color={WALL_COLOR} roughness={0.94} metalness={0} />
       </mesh>
       <mesh
+        ref={onShellMesh}
         rotation={[0, -Math.PI / 2, 0]}
         position={[halfWidth, hall.height / 2, shellCenterZ]}
         receiveShadow
@@ -268,6 +306,7 @@ export function MuseumScene() {
       {[-1, 1].map((sideSign) => (
         <mesh
           key={sideSign}
+          ref={onShellMesh}
           rotation={[Math.PI / 2, 0, 0]}
           position={[sideSign * hall.width * 0.24, hall.height - 0.02, shellCenterZ]}
         >

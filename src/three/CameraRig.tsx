@@ -6,17 +6,23 @@ import gsap from 'gsap'
 import { INTRO, aspectDolly, shotCameraPosition, shotsFor, type Shot } from './shots'
 import {
   approachShot as computeApproachShot,
-  bayShots,
   hallOverviewShot,
   roomDelta,
+  stageShot,
 } from './museum/museum-shots'
 import { applyFrameOffset, frameOffsetFor, shelfFrameOffsetFor } from '@/frame'
 import { MUSEUM_LAYOUT } from './museum/layout'
 import { MUSEUM_SHELL_LAYER } from './museum/layers'
-import { generationNearestZ } from './museum/shelf-layout'
-import { shelfWorldPose } from './museum/hall-glide'
+import {
+  hallOffsetFor,
+  nextConsole,
+  prevConsole,
+  setHallOffset,
+  shelfWorldPose,
+} from './museum/hall-glide'
 import { APPROACH_TIMING } from './museum/approach'
 import { heroGroupRef } from './HeroConsole'
+import { hallGroupRef } from './museum/MuseumScene'
 import { useActiveConsole, useActiveDiorama, useScene } from '@/store/scene'
 
 /**
@@ -51,14 +57,6 @@ const REST_MAX_POLAR = Math.PI / 2.15
  */
 const MUSEUM_AZIMUTH = 0.62
 
-/**
- * How long after the last travel event the camera settles onto a station.
- *
- * Long enough that a wheel burst or a hesitating drag reads as one gesture,
- * short enough that the settle still feels like a consequence of letting go.
- */
-const SETTLE_DELAY_MS = 220
-
 export function CameraRig() {
   const controls = useRef<OrbitControlsImpl>(null)
   const camera = useThree((s) => s.camera)
@@ -87,19 +85,19 @@ export function CameraRig() {
   const reframeNonce = useScene((s) => s.reframeNonce)
 
   const screen = useScene((s) => s.screen)
-  const focusGeneration = useScene((s) => s.focusGeneration)
   const museumIntroDone = useScene((s) => s.museumIntroDone)
   const setMuseumIntroDone = useScene((s) => s.setMuseumIntroDone)
   const approach = useScene((s) => s.approach)
   const approachNonce = useScene((s) => s.approachNonce)
   const advanceApproach = useScene((s) => s.advanceApproach)
   const setScreen = useScene((s) => s.setScreen)
-  const setFocusGeneration = useScene((s) => s.setFocusGeneration)
-  const focusNavNonce = useScene((s) => s.focusNavNonce)
+  const poseNonce = useScene((s) => s.poseNonce)
+  const glideNonce = useScene((s) => s.glideNonce)
   const hallView = useScene((s) => s.hallView)
+  const setHallMotion = useScene((s) => s.setHallMotion)
 
   const shots = useMemo(() => shotsFor(entry, spec), [entry, spec])
-  const museumShots = useMemo(() => bayShots(MUSEUM_LAYOUT), [])
+  const stage = useMemo(() => stageShot(), [])
   const hallOverview = useMemo(() => hallOverviewShot(MUSEUM_LAYOUT), [])
   const dolly = aspectDolly(width / Math.max(1, height))
 
@@ -113,13 +111,14 @@ export function CameraRig() {
    */
   const restingShot = useMemo((): Shot | null => {
     if (onShelf) {
-      return hallView === 'overview'
-        ? hallOverview
-        : (museumShots.get(focusGeneration) ?? null)
+      // Exactly two shelf poses: the whole hall from the entrance, and the
+      // stage where the focused console presents itself. The camera is bolted
+      // down while browsing — focus moves the HALL, never this camera.
+      return hallView === 'overview' ? hallOverview : stage
     }
     const shotId = MODE_TO_SHOT[mode as keyof typeof MODE_TO_SHOT]
     return shotId ? shots[shotId] : null
-  }, [onShelf, hallView, hallOverview, museumShots, focusGeneration, mode, shots])
+  }, [onShelf, hallView, hallOverview, stage, mode, shots])
 
   /** Every tween runs through here so only one can ever own the camera. */
   const active = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null)
@@ -270,15 +269,12 @@ export function CameraRig() {
   /*
     What counts as "the user asked to go somewhere new".
 
-    In the room that is a mode change. On the shelf it is a RAIL CLICK
-    specifically — `focusNavNonce` — and deliberately NOT `focusGeneration`
-    itself, because that field now also changes passively as a pan discovers
-    it has arrived near a different bay (`syncFocusGeneration`). Keying the
-    effect below on the generation would make every such sync re-apply that
-    bay's shot and yank the camera out of the drag the user is still in the
-    middle of. Navigation moves the camera; noticing where you are does not.
+    In the room that is a mode change. On the shelf it is a POSE change
+    (`poseNonce`): overview <-> station, the camera's only two moves. Focus
+    changes deliberately do NOT bump this — the camera stays put and the
+    hall glides, which is `glideNonce`'s job (see the glide effect below).
   */
-  const destinationKey = onShelf ? `bay:${focusNavNonce}` : `mode:${mode}`
+  const destinationKey = onShelf ? `pose:${poseNonce}` : `mode:${mode}`
 
   // Any change of destination drives the camera — a mode change in the room, a
   // bay change in the museum. One effect for both, so they cannot disagree.
@@ -367,148 +363,116 @@ export function CameraRig() {
   }, [reframeNonce])
 
   /**
-   * The hall's gesture set: left-drag AND the wheel both WALK THE CAMERA DOWN
-   * THE HALL, never around the room and never in and out of it. The museum is
-   * a gallery hall of generation stations receding along Z, so the gesture
-   * that browses it is travel — scrolling down carries you deeper into the
-   * hall and forward through time. OrbitControls' rotate AND zoom are
-   * therefore OFF on the shelf (see the JSX below) and this handler owns both
-   * gestures.
+   * The glide: the hall presents the focused console by sliding in 2-D so
+   * that console arrives at the stage. This is what REPLACED the travelling
+   * camera — the camera is bolted down, and browsing moves the world instead.
    *
-   * Travel is applied to BOTH the camera and the orbit target by the same
-   * world-Z delta, so the relative offset OrbitControls derives from is
-   * unchanged and its own update() loop stays idempotent with it. Horizontal
-   * drag movement is deliberately ignored — only the vertical component
-   * drives travel, because "drag up to go forward" is the same muscle memory
-   * as scrolling a page. The wheel travels by its pixel delta with the same
-   * per-pixel scale as the drag.
-   *
-   * This used to pan along Y, back when the collection was a wall of shelves
-   * stacked vertically. In a hall that gesture would slide the camera up
-   * through the ceiling.
+   * Keyed on `glideNonce`, which bumps on every focus change and on every
+   * return to the overview (which glides the hall back to rest). The target
+   * is a pure function of state: hallOffsetFor(focusedId), or zero for the
+   * overview. While a transition is in flight the target is snapped, not
+   * animated — the approach reads the console's pose at FOCUS_HOLD and
+   * consumes it at the handoff, so the hall must be standing exactly still
+   * there (guard 2 of three against mid-flight corruption).
+   */
+  useEffect(() => {
+    const g = hallGroupRef.current
+    if (!g) return
+    const s = useScene.getState()
+    const target: [number, number, number] =
+      s.hallView === 'overview' ? [0, 0, 0] : hallOffsetFor(MUSEUM_LAYOUT, s.focusedId)
+
+    /*
+      The hero console lives OUTSIDE the glided hall group, so every time the
+      hall moves the hero must be re-parked at shelfWorldPose(active console)
+      — otherwise the active console's GLB sits at the un-glided spot while
+      its plinth glides away (it only re-renders on console/screen changes,
+      never on the glide). Followed here, per frame, exactly like the offset
+      itself.
+    */
+    const followHero = () => {
+      const hero = heroGroupRef.current
+      if (!hero) return
+      const current = useScene.getState()
+      if (current.screen !== 'shelf') return
+      const pose = shelfWorldPose(MUSEUM_LAYOUT, current.consoleId)
+      hero.position.set(...pose.position)
+      hero.rotation.set(...pose.rotation)
+    }
+
+    gsap.killTweensOf(g.position)
+    if (reducedMotion || s.approach !== 'idle') {
+      g.position.set(target[0], target[1], target[2])
+      setHallOffset(target)
+      followHero()
+      setHallMotion('settled')
+      return
+    }
+
+    setHallMotion('gliding')
+    gsap.to(g.position, {
+      x: target[0],
+      y: target[1],
+      z: target[2],
+      duration: 0.9,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        setHallOffset([g.position.x, g.position.y, g.position.z])
+        followHero()
+      },
+      onComplete: () => {
+        setHallOffset([g.position.x, g.position.y, g.position.z])
+        followHero()
+        setHallMotion('settled')
+      },
+    })
+    // `hallView`/`focusedId` are read fresh from the store; only the nonce
+    // re-triggers this (and mount/settle runs are handled by the restore in
+    // MuseumScene).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [glideNonce, onShelf, reducedMotion, setHallMotion])
+
+  /**
+   * Wheel = walk the hall, now by FOCUS instead of by camera travel. Scrolling
+   * down steps one console deeper into history (the old scroll-to-travel
+   * muscle memory, pointed at the new mechanism); the hall glides the focused
+   * console to the stage while the camera never moves. A pixel threshold
+   * turns a burst of wheel notches into one step per ~60px, so momentum
+   * scrolls through the hall without flinging through all twenty-two at once.
    */
   useEffect(() => {
     if (!onShelf) return
     const el = gl.domElement
-    let dragging = false
-    let lastClientY = 0
+    const STEP_PX = 60
+    let accum = 0
 
-    // Pixel delta -> world delta at the camera's current standoff: the world
-    // height visible through the lens divided by the canvas height. Travel
-    // reads at the same rate as the scene moves under the cursor.
-    const travelHall = (dyPx: number) => {
-      const c = controls.current
-      if (!c || dyPx === 0) return
-      const dist = camera.position.distanceTo(c.target)
-      // The scene's camera is always a PerspectiveCamera (see Scene.tsx's
-      // CAMERA); the union type just needs the narrow before reading fov.
-      const fov = 'fov' in camera ? camera.fov : 50
-      const worldHeight = 2 * dist * Math.tan(((fov * Math.PI) / 180) / 2)
-      const worldPerPx = worldHeight / Math.max(1, el.clientHeight)
-      // Scrolling down / dragging up (positive dyPx) carries you DEEPER into
-      // the hall, which is −Z. The target moves with the camera so the view
-      // translates down the hall without swinging.
-      const delta = -dyPx * worldPerPx
-      camera.position.z += delta
-      c.target.z += delta
-      c.update()
-
-      /*
-        Tell the rest of the app which station we are now in front of. Without
-        this the travel was silent: the generation rail kept highlighting the
-        station you started from, and the accent light — the one thing
-        MuseumLights calls "what says you are here" — stayed parked over it.
-
-        A passive sync, never `setFocusGeneration`: this must not feed back
-        into the destination effect and re-aim the camera mid-drag.
-      */
-      useScene.getState().syncFocusGeneration(generationNearestZ(MUSEUM_LAYOUT, c.target.z))
-    }
-
-    /*
-      The detent. When a travel gesture ends, settle in front of whichever
-      station you stopped nearest.
-
-      This is what makes browsing feel like a sequence of ARRIVALS rather than
-      a free glide — the old shelf let you drift to a halt halfway between two
-      bays, looking at nothing in particular, with no sense of having got
-      anywhere. `setFocusGeneration` is deliberately how it settles rather than
-      a bespoke tween: it bumps the nav nonce, so the ordinary destination
-      effect animates there with the same easing as every other camera move,
-      and it flips `hallView` to 'station', which is also how travelling out of
-      the opening overview closes you in without a separate code path.
-
-      Debounced, because a wheel gesture is a burst of events with no end
-      event of its own — settling on the first notch would fight the rest of
-      the scroll.
-    */
-    let settleTimer = 0
-    const cancelSettle = () => {
-      if (settleTimer) window.clearTimeout(settleTimer)
-      settleTimer = 0
-    }
-    const scheduleSettle = () => {
-      cancelSettle()
-      settleTimer = window.setTimeout(() => {
-        const s = useScene.getState()
-        const c = controls.current
-        if (!c || s.screen !== 'shelf' || s.approach !== 'idle') return
-        s.setFocusGeneration(generationNearestZ(MUSEUM_LAYOUT, c.target.z))
-      }, SETTLE_DELAY_MS)
-    }
-
-    const onDown = (e: PointerEvent) => {
-      if (e.button !== 0) return
-      dragging = true
-      lastClientY = e.clientY
-      // A new gesture cancels a settle the previous one had queued.
-      cancelSettle()
-    }
-    const onMove = (e: PointerEvent) => {
-      if (!dragging) return
-      const s = useScene.getState()
-      // The approach owns the camera while it is in flight; a drag that
-      // started before 'focusing' must not fight it.
-      if (s.screen !== 'shelf' || s.approach !== 'idle') {
-        dragging = false
-        return
-      }
-      const dyPx = e.clientY - lastClientY
-      lastClientY = e.clientY
-      travelHall(dyPx)
-    }
-    const onUp = () => {
-      if (!dragging) return
-      dragging = false
-      scheduleSettle()
-    }
-
-    // Wheel = the same travel. Non-passive so it can preventDefault (the page
-    // is overflow-hidden anyway; this keeps the gesture clean on trackpads
-    // with momentum). deltaMode normalises lines/pages to pixels.
     const onWheel = (e: WheelEvent) => {
       const s = useScene.getState()
       if (s.screen !== 'shelf' || s.approach !== 'idle') return
       e.preventDefault()
-      let dyPx = e.deltaY
-      if (e.deltaMode === 1) dyPx *= 16
-      else if (e.deltaMode === 2) dyPx *= Math.max(1, el.clientHeight)
-      travelHall(dyPx)
-      scheduleSettle()
+      let dy = e.deltaY
+      if (e.deltaMode === 1) dy *= 16
+      else if (e.deltaMode === 2) dy *= Math.max(1, el.clientHeight)
+      accum += dy
+      // Re-read the store inside the loop: setFocusedConsole replaces the
+      // state object, so a single getState() snapshot would step toward the
+      // same console every time. A long scroll walks the hall one console at
+      // a time.
+      while (accum >= STEP_PX) {
+        accum -= STEP_PX
+        const current = useScene.getState()
+        current.setFocusedConsole(nextConsole(MUSEUM_LAYOUT, current.focusedId))
+      }
+      while (accum <= -STEP_PX) {
+        accum += STEP_PX
+        const current = useScene.getState()
+        current.setFocusedConsole(prevConsole(MUSEUM_LAYOUT, current.focusedId))
+      }
     }
 
-    el.addEventListener('pointerdown', onDown)
-    el.addEventListener('pointermove', onMove)
     el.addEventListener('wheel', onWheel, { passive: false })
-    window.addEventListener('pointerup', onUp)
-    return () => {
-      cancelSettle()
-      el.removeEventListener('pointerdown', onDown)
-      el.removeEventListener('pointermove', onMove)
-      el.removeEventListener('wheel', onWheel)
-      window.removeEventListener('pointerup', onUp)
-    }
-  }, [onShelf, gl, camera])
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [onShelf, gl])
 
   useEffect(() => {
     const state = useScene.getState().approach
@@ -549,6 +513,28 @@ export function CameraRig() {
 
       after(focusMs, () => {
         if (!advanceApproach('approaching')) return
+        /*
+          The approach shot is computed from the console's SETTLED pose
+          (stageWorldPos), so the hall must be standing exactly there before
+          the flight begins — kill the glide and snap it to its target on the
+          same beat (guard 2 of three against mid-flight corruption; the
+          flight then reads the pose a few lines later, and the handoff
+          consumes it 1400ms after that, with no animated value in between).
+        */
+        const g = hallGroupRef.current
+        if (g) {
+          gsap.killTweensOf(g.position)
+          const target = hallOffsetFor(MUSEUM_LAYOUT, entry.id)
+          g.position.set(target[0], target[1], target[2])
+          setHallOffset(target)
+          const hero = heroGroupRef.current
+          if (hero) {
+            const pose = shelfWorldPose(MUSEUM_LAYOUT, entry.id)
+            hero.position.set(...pose.position)
+            hero.rotation.set(...pose.rotation)
+          }
+          setHallMotion('settled')
+        }
         /*
           The frame offset ramps in DURING the flight, not after the handoff:
           the console arrives at its final, lifted screen position while the
@@ -663,24 +649,27 @@ export function CameraRig() {
         } else if (import.meta.env.DEV) {
           console.warn('[CameraRig] retreat handoff missing the hero console or its shelf slot.')
         }
-        // Land back on the bay this console actually came from, whatever
-        // `focusGeneration` happened to be before (it shouldn't have moved,
-        // but this is the authoritative source, not an assumption).
-        setFocusGeneration(entry.generation)
+        // Land the focus back on the console we came from (the camera is
+        // bolted down now, so "back" means back to the stage, and the hall
+        // glides this console onto it), and refocus it via the store so the
+        // chrome and the glide agree.
+        useScene.getState().setFocusedConsole(entry.id)
         setScreen('shelf')
 
         // Offset out during the pull-back, so the view settles as the camera
-        // returns to the bay instead of stepping before it moves. Lands on the
-        // SHELF's own offset (its timeline strip), not NO_OFFSET — the shelf
-        // camera is framed clear of its chrome just like the room's is.
+        // returns to the stage instead of stepping before it moves. Lands on
+        // the SHELF's own offset (its timeline strip), not NO_OFFSET — the
+        // shelf camera is framed clear of its chrome just like the room's is.
         tweenOffsetTo(shelfFrameOffsetFor(width, height), flightMs, 'power2.inOut')
 
         // `finish()` inside `applyShot` reads `screen` fresh (see its own
         // comment) rather than a value captured when this closure was
         // created, so calling it in the very same tick as `setScreen` above
         // is safe — it will apply the museum's clamps, not the room's.
-        const shot = museumShots.get(entry.generation)
-        if (shot) applyShot(shot, { animate: !reducedMotion, duration: APPROACH_TIMING.RETREAT_FLIGHT_MS })
+        applyShot(stage, {
+          animate: !reducedMotion,
+          duration: APPROACH_TIMING.RETREAT_FLIGHT_MS,
+        })
       })
 
       after(fadeMs + flightMs, () => {

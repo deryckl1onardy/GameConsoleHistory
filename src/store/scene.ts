@@ -148,22 +148,23 @@ type SceneState = {
   /**
    * Which generation's station the museum camera rests on. Derived from
    * `focusedId` by every setter that moves focus, so the two can never
-   * disagree; the one independent writer left — the passive pan sync from
-   * `syncFocusGeneration` — is deleted along with the pan in Phase 4.
+   * disagree.
    */
   focusGeneration: Generation
   /**
-   * Bumped only when the user asks to GO to a generation (the rail), never
-   * when the camera merely notices it has arrived near one by panning.
-   *
-   * Both are the same fact — "which generation is current" — so they share
-   * one field rather than drifting as two. But only one of them should move
-   * the camera: keying CameraRig's destination effect on `focusGeneration`
-   * itself meant a passive sync would yank the camera to that bay's shot
-   * mid-drag, which is exactly why the sync could never be added before and
-   * why the rail and the accent light have been lying about where you are.
+   * Bumped whenever the camera's POSE should change — overview <-> station.
+   * The camera has exactly two poses now (the hall overview, and the stage),
+   * so this is the only signal CameraRig's destination effect listens for on
+   * the shelf. Focus changes do NOT bump it: the camera is bolted down while
+   * browsing, and the HALL glides instead.
    */
-  focusNavNonce: number
+  poseNonce: number
+  /**
+   * Bumped whenever the GLIDE target changes — every focus change, and every
+   * return to the overview (which glides the hall back to rest). Drives the
+   * hall group's 2-D tween in CameraRig, independent of the camera pose.
+   */
+  glideNonce: number
   /** Artifact under the pointer on the shelf, or null. */
   hoveredId: string | null
   /** Whether the museum's opening move has played this session. */
@@ -178,6 +179,15 @@ type SceneState = {
    * itself mid-flight. This changes exactly once per genuine new request.
    */
   approachNonce: number
+
+  /**
+   * Whether the hall group is mid-glide. `selectArtifact` refuses while
+   * gliding, so the approach can never read a half-moved hall — the first of
+   * the three guards against mid-flight corruption (the approach shot is
+   * computed at FOCUS_HOLD and consumed at the handoff; an animated offset
+   * between those two reads would move the console by the difference).
+   */
+  setHallMotion: (m: 'settled' | 'gliding') => void
 
   setConsole: (id: string) => void
   setVariant: (id: string | null) => void
@@ -206,11 +216,6 @@ type SceneState = {
   setFocusedConsole: (id: string) => void
   /** Navigate TO a generation's station — focuses its first console. */
   setFocusGeneration: (g: Generation) => void
-  /**
-   * Record which generation the camera is already nearest, without moving it.
-   * What the accent light and the rail highlight follow while you travel.
-   */
-  syncFocusGeneration: (g: Generation) => void
   /** Pull back to take in the whole hall. */
   showHallOverview: () => void
   setHovered: (id: string | null) => void
@@ -260,7 +265,8 @@ export const useScene = create<SceneState>((set, get) => ({
   // The gallery opens on the whole hall — you take in how much history there
   // is before going to look at any of it.
   hallView: 'overview',
-  focusNavNonce: 0,
+  poseNonce: 0,
+  glideNonce: 0,
   hoveredId: null,
   museumIntroDone: false,
   approachNonce: 0,
@@ -341,7 +347,18 @@ export const useScene = create<SceneState>((set, get) => ({
    * and undo the handoff. The approach IS this console's opening move, so it
    * marks the intro already done.
    */
-  selectArtifact: (id) =>
+  selectArtifact: (id) => {
+    // Guard 1 of three against mid-flight corruption: the approach reads the
+    // console's pose at FOCUS_HOLD and consumes it at the handoff, so the
+    // hall must be standing still — exactly at its target — when the user
+    // commits. Refusing while gliding is the cheap, honest answer; the UI
+    // (keyboard Enter, the click-to-enter in Phase 7) can retry once settled.
+    if (get().hallMotion !== 'settled') {
+      if (import.meta.env.DEV) {
+        console.warn(`[scene] selectArtifact(${id}) ignored — hall is gliding`)
+      }
+      return
+    }
     set((s) => ({
       consoleId: id,
       variantId: null,
@@ -351,9 +368,15 @@ export const useScene = create<SceneState>((set, get) => ({
       playback: 'browsing',
       selectedGameRank: null,
       hoveredId: null,
+      // Mirror the focus so the chrome points at the console being entered —
+      // a plain write, deliberately not setFocusedConsole (that would bump the
+      // glide/pose nonces mid-transition).
+      focusedId: id,
+      focusGeneration: MUSEUM_LAYOUT.byId[id]?.generation ?? s.focusGeneration,
       approach: 'focusing',
       approachNonce: s.approachNonce + 1,
-    })),
+    }))
+  },
 
   /**
    * Bypasses `advanceApproach`'s guard by design, exactly like `setConsole`
@@ -386,19 +409,23 @@ export const useScene = create<SceneState>((set, get) => ({
   },
 
   setScreen: (screen) => set({ screen }),
-  // Focusing a console is asking to go and stand in front of its generation's
-  // station, so this closes in from the overview as well as aiming. Both
-  // changes bump the same nonce, which is the one signal CameraRig treats as
-  // "move". The generation is derived from the id, never accepted separately.
+  // Focusing a console changes the GLIDE target (the hall brings it to the
+  // stage) and, when it pulls the camera in from the overview, the POSE. The
+  // two are deliberately separate nonces: the pose is one of two fixed
+  // cameras, the glide is a 2-D tween of the whole hall — independent
+  // animations that must not share a signal. The generation is derived from
+  // the id, never accepted separately.
   setFocusedConsole: (focusedId) =>
     set((s) => {
       const artifact = MUSEUM_LAYOUT.byId[focusedId]
       if (!artifact) return {}
+      const closingIn = s.hallView !== 'station'
       return {
         focusedId,
         focusGeneration: artifact.generation,
         hallView: 'station' as HallView,
-        focusNavNonce: s.focusNavNonce + 1,
+        glideNonce: s.glideNonce + 1,
+        poseNonce: s.poseNonce + (closingIn ? 1 : 0),
       }
     }),
   // A generation jump is shorthand for focusing its first console.
@@ -407,10 +434,15 @@ export const useScene = create<SceneState>((set, get) => ({
     if (!id) return
     useScene.getState().setFocusedConsole(id)
   },
-  syncFocusGeneration: (focusGeneration) =>
-    set((s) => (s.focusGeneration === focusGeneration ? {} : { focusGeneration })),
   showHallOverview: () =>
-    set((s) => ({ hallView: 'overview' as HallView, focusNavNonce: s.focusNavNonce + 1 })),
+    set((s) => ({
+      // Back out to the whole hall: the camera flies to the overview AND the
+      // hall glides back to rest (its natural, un-glided position).
+      hallView: 'overview' as HallView,
+      glideNonce: s.glideNonce + 1,
+      poseNonce: s.poseNonce + 1,
+    })),
+  setHallMotion: (hallMotion) => set({ hallMotion }),
   setHovered: (hoveredId) => set({ hoveredId }),
   setMuseumIntroDone: (museumIntroDone) => set({ museumIntroDone }),
 }))

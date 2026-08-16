@@ -3,7 +3,6 @@ import { CONSOLES } from '@/data/consoles'
 import {
   SHELF_CONSTANTS,
   artifactAtX,
-  generationNearestZ,
   layoutMuseum,
   rotatedFootprintX,
 } from './shelf-layout'
@@ -65,37 +64,12 @@ describe('museum layout', () => {
   })
 
   /*
-    `generationNearestZ` is what lets travelling the hall tell the rest of the
-    app where it ended up — the fix for a rail and an accent light that both
-    kept pointing at the station you had already left. It has to agree with the
-    camera: it measures to the same point `bayShot` targets, so "nearest" means
-    one thing to both.
+    `generationNearestZ` — "which station is the camera in front of" — was
+    deleted with the travelling camera it served (the camera no longer
+    travels; the hall presents instead). Its coverage migrated to the console
+    order helpers above: next/prev generation stepping, firstOfGeneration and
+    the walk order are the navigation facts the hall now exposes.
   */
-  describe('generationNearestZ', () => {
-    it('returns each station when asked at that station’s own depth', () => {
-      for (const bay of layout.bays) {
-        expect(generationNearestZ(layout, bay.boardCenter[2]), `gen ${bay.generation}`).toBe(
-          bay.generation,
-        )
-      }
-    })
-
-    it('clamps to the end stations beyond either end of the hall', () => {
-      const first = layout.bays[0]
-      const last = layout.bays[layout.bays.length - 1]
-      // Stations recede along −Z, so the FIRST is nearest the entrance.
-      expect(generationNearestZ(layout, first.boardCenter[2] + 100)).toBe(first.generation)
-      expect(generationNearestZ(layout, last.boardCenter[2] - 100)).toBe(last.generation)
-    })
-
-    it('never answers with a generation that has no station', () => {
-      const known = new Set(layout.bays.map((b) => b.generation))
-      for (let z = 5; z >= layout.hall.farZ - 5; z -= 0.25) {
-        expect(known.has(generationNearestZ(layout, z)), `z=${z.toFixed(2)}`).toBe(true)
-      }
-    })
-  })
-
   it('orders stations oldest first, receding into the hall through time', () => {
     const gens = layout.bays.map((b) => b.generation)
     expect(gens).toEqual([...gens].sort((a, b) => a - b))

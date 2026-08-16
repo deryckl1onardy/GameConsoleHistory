@@ -19,15 +19,15 @@ import { layoutShelf, shelfExtent } from './geometry/gameBox'
 export type RoomShotId = 'console' | 'diorama' | 'library' | 'controller' | 'tv'
 
 /**
- * `bay` and `hall` belong to the museum, which has no DioramaSpec to derive
+ * `stage` and `hall` belong to the museum, which has no DioramaSpec to derive
  * from — they are built by museum-shots.ts instead. They join the union so
  * CameraRig can hold one shot type, but stay out of `shotsFor`'s exhaustive
  * record.
  *
- * `bay` frames one generation's station; `hall` is the wide opening view of
- * the whole gallery from its entrance.
+ * `stage` frames the point every focused console presents on; `hall` is the
+ * wide opening view of the whole gallery from its entrance.
  */
-export type ShotId = RoomShotId | 'bay' | 'hall'
+export type ShotId = RoomShotId | 'stage' | 'hall'
 
 export type Shot = {
   id: ShotId

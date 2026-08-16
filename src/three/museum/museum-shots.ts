@@ -1,7 +1,7 @@
 import type { ConsoleEntry, DioramaSpec } from '@/types/console'
 import { type Shot, shotsFor } from '../shots'
-import { hallOffsetFor } from './hall-glide'
-import type { MuseumLayout, ShelfBay } from './shelf-layout'
+import { STAGE_ANCHOR, hallOffsetFor, stageWorldPos } from './hall-glide'
+import type { MuseumLayout } from './shelf-layout'
 
 /**
  * The camera maths that makes the museum-to-room move read as one continuous
@@ -33,6 +33,12 @@ const sub = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
 /**
  * Room pose minus shelf pose. Pure translation — see the file comment.
  *
+ * Reads only module constants (STAGE_ANCHOR, presentOffset) plus the room
+ * spec — NEVER the layout's positions or any live animated value — so it is
+ * incapable of being mid-flight: whatever the hall is doing, the translation
+ * that hands the console to the room is the same, and the approach and the
+ * retreat cannot disagree about it.
+ *
  * The "not on any shelf" guard lives in hall-glide's `hallOffsetFor`, shared
  * with the glide and the hero pose; routing through it here means the three
  * places that must agree about where a console lives throw from the same
@@ -41,8 +47,7 @@ const sub = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
 export function roomDelta(layout: MuseumLayout, entry: ConsoleEntry, spec: DioramaSpec): Vec3 {
   // Throws for a console that is not on any shelf.
   hallOffsetFor(layout, entry.id)
-  const artifact = layout.byId[entry.id]
-  return sub(spec.consolePosition as Vec3, artifact.position)
+  return sub(spec.consolePosition as Vec3, stageWorldPos(entry.id))
 }
 
 /** Apply the translation to a point. */
@@ -72,41 +77,35 @@ export function approachShot(
 }
 
 /**
- * Framing for one generation's station.
+ * The one shot the shelf camera ever takes while browsing — framing the
+ * STAGE, where every focused console presents itself.
  *
- * Distance fits the plinth in frame AND the station's height, whichever is
- * more demanding — so a lonely single-artifact station is framed as tightly
- * as a crowded one, and the vertical PS5 pulls the camera back on its own
- * without a special case. That is what keeps a console the same on-screen
- * size whichever station it lives on.
+ * The camera is bolted down now: instead of travelling to a station, the
+ * whole hall glides until the focused console stands on the stage (see
+ * hall-glide.ts), so a single shot frames every console in the collection
+ * identically. That is what keeps "a console is the same on-screen size
+ * wherever it lives" true by construction — one target, one distance — and
+ * the per-console present step (Phase 6) then equalizes the on-screen size
+ * further for the machines the fixed framing would otherwise dwarf.
  *
- * The lens is fixed at 24 degrees vertical (Scene.tsx CAMERA), so the fit
- * factors below are constants of that lens at 16:9, with a 1.25 margin.
+ * The lens is fixed at 24 degrees vertical (Scene.tsx CAMERA). The distance
+ * frames the stage plinth and the air around the console — close enough to
+ * read the hardware, far enough that the hall is still visibly around it.
  */
-const H_FIT = 1.654 // plinth length -> distance, at 16:9
-const V_FIT = 2.94 // station height -> distance
-/** Room above the artifacts for the museum label to breathe. */
-const LABEL_ROOM = 0.28
-
-export function bayShot(bay: ShelfBay): Shot {
-  const height = bay.tallest + LABEL_ROOM
-  const distance = Math.max(H_FIT * bay.boardLength, V_FIT * height)
-
+export function stageShot(): Shot {
+  const distance = 1.9
+  const height = 0.1 // a mid-sized console's half-height, roughly
   return {
-    id: 'bay',
-    label: bay.label,
-    // Centre on the artifacts, not the plinth, or a tall station sits low in
-    // frame. The station's own X and Z put the camera in front of THIS
-    // station rather than out on the hall's centre line — you walk over to a
-    // display to look at it.
-    target: [bay.boardCenter[0], bay.boardY + bay.tallest / 2, bay.boardCenter[2]],
-    // Nearly square on, from the entrance side. A gallery piece is
-    // photographed straight, not dramatically — and the slight lift reads the
-    // plinth surface the artifacts rest on.
-    direction: normalise([0.1, 0.22, 1]),
+    id: 'stage',
+    label: 'The stage',
+    target: [STAGE_ANCHOR[0], STAGE_ANCHOR[1] + height, STAGE_ANCHOR[2]],
+    // Nearly square on, from the entrance side, slightly lifted — the same
+    // posture as the old station shots: a gallery piece is photographed
+    // straight, and the lift reads the plinth the artifact rests on.
+    direction: normalise([0.1, 0.2, 1]),
     distance,
-    minDistance: distance * 0.45,
-    maxDistance: distance * 2.4,
+    minDistance: distance * 0.5,
+    maxDistance: distance * 2.2,
   }
 }
 
@@ -162,11 +161,6 @@ export function hallOverviewShot(layout: MuseumLayout): Shot {
     minDistance: distance * 0.45,
     maxDistance: distance * 1.6,
   }
-}
-
-/** Every station shot, keyed by generation, for the museum's own navigation. */
-export function bayShots(layout: MuseumLayout): Map<number, Shot> {
-  return new Map(layout.bays.map((b) => [b.generation as number, bayShot(b)]))
 }
 
 function normalise([x, y, z]: Vec3): Vec3 {

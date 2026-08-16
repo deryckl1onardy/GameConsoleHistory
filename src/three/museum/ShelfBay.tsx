@@ -4,6 +4,7 @@ import { useScene } from '@/store/scene'
 import { ArtifactLabel } from './ArtifactLabel'
 import { ArtifactSlot } from './ArtifactSlot'
 import { SHELF_CONSTANTS, artifactAtX, type ShelfBay as Bay } from './shelf-layout'
+import { getHallOffset } from './hall-glide'
 
 /**
  * One generation's station: a plinth standing on the hall floor, carrying that
@@ -76,7 +77,7 @@ function BayHitPlane({ bay }: { bay: Bay }) {
 
   const resolve = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation()
-    const id = artifactAtX(bay, e.point.x)?.id ?? null
+    const id = artifactAtX(bay, localX(e.point.x))?.id ?? null
     if (id === lastId.current) return
     lastId.current = id
     setHovered(id)
@@ -98,11 +99,21 @@ function BayHitPlane({ bay }: { bay: Bay }) {
     // truth at click time, not whatever the last render happened to close
     // over.
     if (useScene.getState().approach !== 'idle') return
-    const id = artifactAtX(bay, e.point.x)?.id
+    const id = artifactAtX(bay, localX(e.point.x))?.id
     if (id) selectArtifact(id)
   }
 
   const height = bay.tallest + 0.22
+
+  /*
+    The hall glides: this plane is a child of the glided group, so a ray hit
+    arrives in WORLD X while `artifactAtX` compares against LAYOUT-LOCAL X.
+    Subtracting the live glide offset converts one to the other — without
+    this, a glide with any X component silently selects the NEIGHBOURING
+    console (the plan's world-vs-local trap; it fails quietly, so it is
+    pinned here by the ray test in museum-shots.test.ts).
+  */
+  const localX = (worldX: number) => worldX - getHallOffset()[0]
 
   return (
     <mesh
