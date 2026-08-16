@@ -72,20 +72,31 @@ export function ArtifactSlot({ artifact }: { artifact: ShelfArtifact }) {
   // forward on its own plinth.
   const presenting = hallView === 'station' && focusedId === artifact.id
 
+  /*
+    Non-focused consoles sit back (Phase 7): the hover step-forward is a
+    CLICK affordance — "this can be acted on" — and in the station view the
+    only thing worth acting on is the console on the stage. The neighbours
+    stay put while the focused one presents; in the overview, where every
+    console is an equal click target, hover still lifts whatever the pointer
+    is over. The hover LIGHTING (MuseumLights) still follows any hovered
+    console — it is cursor feedback, not emphasis.
+  */
+  const hoverForward = hovered && (hallView !== 'station' || artifact.id === focusedId)
+
   useEffect(() => {
     const g = hoverRef.current
     if (!g) return
     const duration = reducedMotion ? 0 : HOVER_DURATION
     // Relative to the artifact's own resting pose, which its parent carries.
-    gsap.to(g.position, { z: hovered ? HOVER_FORWARD : 0, duration, ease: 'power2.out' })
+    gsap.to(g.position, { z: hoverForward ? HOVER_FORWARD : 0, duration, ease: 'power2.out' })
     gsap.to(g.scale, {
-      x: hovered ? HOVER_SCALE : 1,
-      y: hovered ? HOVER_SCALE : 1,
-      z: hovered ? HOVER_SCALE : 1,
+      x: hoverForward ? HOVER_SCALE : 1,
+      y: hoverForward ? HOVER_SCALE : 1,
+      z: hoverForward ? HOVER_SCALE : 1,
       duration,
       ease: 'power2.out',
     })
-  }, [hovered, reducedMotion])
+  }, [hoverForward, reducedMotion])
 
   // The presenting step: the SAME number shelfWorldPose/stageWorldPos read
   // (presentOffset in hall-glide.ts), so the hero console and this slot can

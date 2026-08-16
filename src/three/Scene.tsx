@@ -67,24 +67,30 @@ const fxParam =
     : null
 
 /**
- * Post-processing, and it is NOT the same for both screens.
+ * Post-processing, and it follows the SUBJECT rather than the screen (Phase
+ * 7).
  *
  * The tilt-shift band is a MINIATURE effect: it blurs by screen position so a
  * real-sized room reads as a model on a table. That is exactly right for the
- * room and exactly wrong for the shelf, where the subject is a whole
- * collection and the neighbouring generations are the content — blurring them
- * dissolved every bay but one into an unreadable smear and fought the one
- * thing the shelf exists to do. It used to apply to both screens because this
- * component never knew which screen it was on.
+ * room, and exactly right for the shelf's STATION view — the stage presents
+ * one console on a pedestal, a subject in exactly the way a room is — but
+ * exactly wrong for the OVERVIEW, where the subject is a whole collection
+ * and the neighbouring generations are the content: blurring them would
+ * dissolve every bay but one into an unreadable smear and fight the one
+ * thing the shelf exists to do. It used to apply to both screens because
+ * this component never knew which hall view it was on.
  *
- * The shelf keeps the effects that describe SOLID OBJECTS IN A SPACE —
- * ambient occlusion and antialiasing — and drops the ones that fake a lens:
- * the band, the bloom, and the heavy vignette (which on a bright gallery
- * would read as dirt in the corners rather than as focus).
+ * Everything keeps the effects that describe SOLID OBJECTS IN A SPACE —
+ * ambient occlusion and antialiasing. The lens effects (band, bloom, heavy
+ * vignette) apply only where there is a single subject: the room keeps its
+ * full kit, the stage takes the band and the AO but not the bloom or the
+ * heavy vignette (on a bright gallery they read as dirt in the corners
+ * rather than as focus), and the overview keeps none of them.
  */
 function Effects() {
   const quality = useScene((s) => s.quality)
   const screen = useScene((s) => s.screen)
+  const hallView = useScene((s) => s.hallView)
   // The room's frame offset lifts the subject up on screen (frame.ts), so the
   // focus band has to rise with it or the console renders permanently blurred
   // while the chrome says it's sharp. CameraRig mirrors the applied offset
@@ -98,55 +104,75 @@ function Effects() {
   if (fxParam === 'none') return null
 
   const onShelf = screen === 'shelf'
+  /*
+    The miniature kit follows the SUBJECT, not the screen (Phase 7). The
+    shelf/room split was justified by "the neighbouring generations are the
+    content" — true at the overview, where the collection IS the content and
+    blurring the neighbours would dissolve the hall into a smear — and false
+    at the stage, where one console on a pedestal is a subject in exactly the
+    way a room is. So the decision is per-hallView: the station view takes
+    the tilt-shift band; the overview keeps the clean gallery pass. The
+    stage stays free of bloom and the heavy vignette — a white gallery cannot
+    carry them (see the vignette note below) — the band and the AO are the
+    treatment.
+  */
+  const miniature = onShelf ? hallView === 'station' : true
 
   if (quality === 'low') {
-    // Low quality drops to the two cheapest effects. On the shelf that leaves
-    // nothing worth composing for, so it renders untouched rather than paying
-    // for a pass that only darkens the corners.
-    if (onShelf) return null
+    // Low quality drops to the two cheapest effects. The overview keeps
+    // nothing (a bright gallery pays for composition it doesn't need); the
+    // room and the stage keep the band, and only the room carries the
+    // vignette — on a bright gallery it reads as dirt in the corners.
+    if (!miniature) return null
     return (
       <EffectComposer multisampling={0}>
         <TiltShift2 blur={0.35} taper={0.5} samples={6} start={[0, bandStart]} end={[1, bandEnd]} />
-        <Vignette offset={0.4} darkness={0.22} />
+        {!onShelf && <Vignette offset={0.4} darkness={0.22} />}
       </EffectComposer>
     )
   }
 
-  if (onShelf) {
+  if (miniature) {
     return (
       <EffectComposer multisampling={0}>
+        {/* Contact shadows in every corner — the single biggest "solid object" cue */}
         {fxParam !== 'noao' && (
           <N8AO aoRadius={0.45} intensity={2.2} distanceFalloff={0.8} quality="medium" />
+        )}
+        {/*
+          The focus band is narrow and sits slightly below centre, where the
+          subject actually is. A wide band does nothing — the whole point is
+          that only a shallow slice is sharp, which is what the eye reads as
+          "very close to a small object".
+        */}
+        <TiltShift2 blur={1.15} taper={0.9} samples={14} start={[0, bandStart]} end={[1, bandEnd]} />
+        {/* The room keeps the rest of its kit; the bright stage cannot. */}
+        {!onShelf && <Bloom intensity={0.4} luminanceThreshold={0.75} luminanceSmoothing={0.3} mipmapBlur />}
+        {!onShelf && <HueSaturation saturation={0.16} />}
+        {!onShelf && (
+          /*
+            A near-black backdrop could carry a heavy vignette; a white
+            gallery one cannot — the same darkening that used to read as
+            cinematic focus reads as dirt smeared into the corners of a
+            bright room. Kept faint rather than removed: the room still
+            wants a soft lens falloff, just not one heavy enough to fight
+            its own backdrop.
+          */
+          <Vignette offset={0.4} darkness={0.22} />
         )}
         <SMAA />
       </EffectComposer>
     )
   }
 
+  // The overview: the whole collection is the content, so only the effects
+  // that describe solid objects in a space — ambient occlusion and
+  // antialiasing — apply.
   return (
     <EffectComposer multisampling={0}>
-      {/* Contact shadows in every corner — the single biggest "solid object" cue */}
       {fxParam !== 'noao' && (
         <N8AO aoRadius={0.45} intensity={2.2} distanceFalloff={0.8} quality="medium" />
       )}
-      {/*
-        The focus band is narrow and sits slightly below centre, where the set
-        actually is. A wide band does nothing — the whole point is that only a
-        shallow slice is sharp, which is what the eye reads as "very close to a
-        small object".
-      */}
-      <TiltShift2 blur={1.15} taper={0.9} samples={14} start={[0, bandStart]} end={[1, bandEnd]} />
-      <Bloom intensity={0.4} luminanceThreshold={0.75} luminanceSmoothing={0.3} mipmapBlur />
-      <HueSaturation saturation={0.16} />
-      {/*
-        A near-black backdrop could carry a heavy vignette; a white gallery
-        one cannot — the same darkening that used to read as cinematic focus
-        reads as dirt smeared into the corners of a bright room (the exact
-        reason the shelf itself dropped this effect entirely, see Effects()
-        above). Kept faint rather than removed: the room still wants a soft
-        lens falloff, just not one heavy enough to fight its own backdrop.
-      */}
-      <Vignette offset={0.4} darkness={0.22} />
       <SMAA />
     </EffectComposer>
   )
