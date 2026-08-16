@@ -272,6 +272,99 @@ export const CONSOLE_FORMS: Record<string, ConsoleForm> = {
     ],
     vents: [],
   },
+
+  'xbox-360': {
+    shell: {
+      kind: 'swept',
+      // Lying horizontally, the side silhouette is a shallow slab that swells
+      // slightly toward the middle and tucks in at both ends.
+      //
+      // The 360's signature is its CONCAVE WAIST — the left and right faces
+      // pinch inward at the middle, which is what makes it read as an hourglass
+      // from the front. A swept profile is constant across the sweep, so this
+      // form cannot express it: it produces the correct side silhouette with
+      // flat sides. Dimensionally right, characteristically incomplete — the
+      // waist wants a bespoke registry override (see registry.tsx).
+      profile: [
+        [0, 0], // front-bottom
+        [0, 70], // front face
+        [16, 79], // chamfer up
+        [70, 83], // full height
+        [190, 83], // flat top
+        [240, 78],
+        [258, 66], // rear chamfer
+        [258, 0], // back face straight down
+      ],
+      cornerRadiusMm: 7,
+      bevelMm: 1.5,
+    },
+    finish: 'gloss',
+    // The launch console was glossy off-white with a chrome disc tray and a
+    // green power ring — not the matte black of the later Slim revision.
+    palette: { shell: '#eceae4', accent: '#8ac43f', dark: '#7e7c77' },
+    intake: {
+      kind: 'front-tray',
+      position: [-52, 46],
+      widthMm: 150,
+      heightMm: 24,
+    },
+    controls: [
+      // The ring of light around the power button is the console's face, and
+      // the target of its most famous failure state.
+      { mesh: 'power_button', kind: 'round-button', position: [96, 44], sizeMm: 26, color: 'dark' },
+      { mesh: 'power_ring', kind: 'jewel', position: [96, 44], sizeMm: 40, color: 'accent' },
+      { mesh: 'eject_button', kind: 'round-button', position: [40, 22], sizeMm: 12, color: 'dark' },
+    ],
+    ports: [
+      { mesh: 'memory_slot_1', position: [-118, 22], widthMm: 26, heightMm: 10 },
+      { mesh: 'memory_slot_2', position: [-88, 22], widthMm: 26, heightMm: 10 },
+      { mesh: 'usb_port_1', position: [136, 22], widthMm: 16, heightMm: 8 },
+    ],
+    vents: [],
+  },
+
+  wii: {
+    shell: {
+      kind: 'swept',
+      // Authored STANDING, the orientation Nintendo shows it in and the one
+      // the data's dimensions describe: 44mm across, 157mm tall, 215.4mm deep.
+      // The silhouette is a plain slab with softened top and bottom edges —
+      // the Wii's character is in how small it is, not in its outline.
+      profile: [
+        [0, 0], // front-bottom
+        [0, 148], // front face, nearly full height
+        [7, 157], // top front chamfer
+        [208, 157], // flat top
+        [215.4, 148], // top rear chamfer
+        [215.4, 0], // back face straight down
+      ],
+      cornerRadiusMm: 4,
+      bevelMm: 1.2,
+    },
+    finish: 'gloss',
+    // Glossy white with a pale blue slot light — the console is almost
+    // entirely one colour, and the slot's glow is the only accent it has.
+    palette: { shell: '#f2f1ed', accent: '#4aa8d8', dark: '#b9b7b1' },
+    intake: {
+      // Standing, the disc slot is a vertical letterbox on the front face.
+      kind: 'front-slot',
+      position: [0, 96],
+      widthMm: 18,
+      heightMm: 128,
+    },
+    controls: [
+      { mesh: 'power_button', kind: 'round-button', position: [-13, 40], sizeMm: 12, color: 'dark' },
+      { mesh: 'eject_button', kind: 'rect-button', position: [-13, 22], sizeMm: 12, aspect: 0.55, color: 'dark' },
+      { mesh: 'reset_button', kind: 'round-button', position: [13, 40], sizeMm: 9, color: 'dark' },
+      // The slot itself glows blue for a message waiting — the console's one
+      // piece of ambient communication.
+      { mesh: 'slot_led', kind: 'jewel', position: [0, 30], sizeMm: 7, color: 'accent' },
+    ],
+    // SD card slot behind the front flap; the GameCube ports are under the
+    // top flap and are not modelled on the front face.
+    ports: [{ mesh: 'sd_slot', position: [13, 22], widthMm: 14, heightMm: 7 }],
+    vents: [],
+  },
 }
 
 export function consoleForm(id: string): ConsoleForm | undefined {

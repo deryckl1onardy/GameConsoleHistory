@@ -131,9 +131,13 @@ describe('console roster', () => {
       if (c.mediaKind === 'cartridge') {
         expect(c.animatedParts.slot, `${c.id} needs a slot mesh`).toBeTruthy()
       } else if (c.mediaKind === 'optical') {
+        // Tray, lid OR slot: a slot-loader has neither a tray nor a lid, and
+        // IntakeKind already names 'front-slot' for exactly this group (Wii,
+        // PS3, Xbox 360 S, PS5). Requiring tray-or-lid here was narrower than
+        // the schema it is checking.
         expect(
-          c.animatedParts.tray ?? c.animatedParts.lid,
-          `${c.id} needs a tray or lid mesh`,
+          c.animatedParts.tray ?? c.animatedParts.lid ?? c.animatedParts.slot,
+          `${c.id} needs a tray, lid or slot mesh`,
         ).toBeTruthy()
       }
       expect(c.animatedParts.powerSwitch, `${c.id} needs a power switch`).toBeTruthy()

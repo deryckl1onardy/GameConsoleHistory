@@ -495,6 +495,63 @@ export const CONTROLLER_FORMS: Record<string, ControllerForm> = {
     bevelMm: 2,
     palette: { shell: '#585196', accent: '#57b89b', accent2: '#948dcb', dark: '#2e2b45' },
   },
+
+  'xbox-360-pad': {
+    // Rounder and considerably smaller than the Duke it replaced, with the
+    // grips swept back and slightly outward. Anchored to the ~155 x 105mm
+    // footprint; the near-edge grip points run past ±52.5 as the DualShock's
+    // handles do.
+    plan: [
+      [-50, -52.5],
+      [50, -52.5],
+      [62, -48],
+      [72, -38],
+      [77.5, -22],
+      [77.5, -4],
+      [70, 14],
+      [57, 31],
+      [40, 44],
+      [22, 52],
+      [8, 55],
+      [-8, 55],
+      [-22, 52],
+      [-40, 44],
+      [-57, 31],
+      [-70, 14],
+      [-77.5, -4],
+      [-77.5, -22],
+      [-72, -38],
+      [-62, -48],
+    ],
+    thicknessMm: 62,
+    domeMm: 6,
+    bevelMm: 2,
+    palette: { shell: '#eceae4', accent: '#8ac43f', dark: '#3d3c39' },
+  },
+
+  'wii-remote': {
+    // The one genuinely non-pad shape in this kit: a wand, not a controller.
+    // The outline is a long rounded rectangle — 36.2mm across and 148mm along
+    // its length — with the corners taken off at the nose (where the infrared
+    // camera looks out) and a slight taper toward the tail. Wound the same way
+    // as the pads: far edge left-to-right, then back along the near edge.
+    plan: [
+      [-15, -74],
+      [15, -74],
+      [18.1, -68],
+      [18.1, 62],
+      [16, 70],
+      [10, 74],
+      [-10, 74],
+      [-16, 70],
+      [-18.1, 62],
+      [-18.1, -68],
+    ],
+    thicknessMm: 30.8,
+    domeMm: 2,
+    bevelMm: 1.5,
+    palette: { shell: '#f2f1ed', accent: '#4aa8d8', dark: '#b9b7b1' },
+  },
 }
 
 export function controllerForm(id: string): ControllerForm | undefined {
