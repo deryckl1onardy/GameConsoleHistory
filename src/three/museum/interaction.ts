@@ -12,9 +12,6 @@
 /** Pixels the pointer may travel between down and up before it stops being a click. */
 export const DRAG_THRESHOLD_PX = 6
 
-/** Max gap between two clicks that still counts as a double-click (ms). */
-export const DOUBLE_CLICK_MS = 260
-
 /**
  * A press-release pair is a DRAG (and therefore not a click) if the pointer
  * moved beyond the threshold between down and up. Squared distances: no sqrt,

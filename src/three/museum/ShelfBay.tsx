@@ -1,11 +1,11 @@
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useRef } from 'react'
 import type { ThreeEvent } from '@react-three/fiber'
 import { useScene } from '@/store/scene'
 import { ArtifactLabel } from './ArtifactLabel'
 import { ArtifactSlot } from './ArtifactSlot'
 import { SHELF_CONSTANTS, artifactAtX, type ShelfBay as Bay } from './shelf-layout'
 import { getHallOffset } from './hall-glide'
-import { DOUBLE_CLICK_MS, isDrag } from './interaction'
+import { isDrag } from './interaction'
 
 /**
  * One generation's station: a plinth standing on the hall floor, carrying that
@@ -72,7 +72,6 @@ const PLINTH_REVEAL_COLOR = '#a3a4a0'
 function BayHitPlane({ bay }: { bay: Bay }) {
   const setHovered = useScene((s) => s.setHovered)
   const selectArtifact = useScene((s) => s.selectArtifact)
-  const setFocusedConsole = useScene((s) => s.setFocusedConsole)
   // Avoids dispatching a store update on every pixel of pointer movement —
   // only the artifact actually under the cursor changing triggers a commit.
   const lastId = useRef<string | null>(null)
@@ -81,30 +80,11 @@ function BayHitPlane({ bay }: { bay: Bay }) {
     Where the pointer went DOWN, in screen pixels. The drag check compares
     this against the release position: R3F fires onClick on release over the
     object however far the pointer travelled, so the threshold in
-    interaction.ts is the only thing that keeps a drag from committing a
-    click. Never cleared eagerly — the next pointerdown overwrites it — so
-    the dblclick that follows the second click of a double-click can still
-    read it (the click handler only ever reads, never consumes).
+    interaction.ts is the only thing that keeps a drag from opening the
+    console it started on. Never cleared eagerly — the next pointerdown
+    overwrites it.
   */
   const downPos = useRef<[number, number] | null>(null)
-  /*
-    Single click FOCUSES (glide to the stage); a double-click ENTERS. The
-    timer is the disambiguation: the first click waits one double-click
-    window before committing its focus, and a second click within that window
-    belongs to onDoubleClick, which cancels the pending focus and enters
-    instead. Without the wait, a double-click would start a glide on the
-    first click and the enter would then be ignored by the hall-motion guard.
-  */
-  const clickTimer = useRef<number | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (clickTimer.current !== null) {
-        clearTimeout(clickTimer.current)
-        clickTimer.current = null
-      }
-    }
-  }, [])
 
   const resolve = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation()
@@ -125,10 +105,10 @@ function BayHitPlane({ bay }: { bay: Bay }) {
   }
 
   /*
-    The one gesture guard both click paths share: a drag is not a click, and
-    mid-transition clicks are ignored rather than queued (selectArtifact sets
-    `approach` unconditionally, and firing it while a flight is already under
-    way would strand CameraRig's choreography between two destinations).
+    The one gesture guard: a drag is not a click, and mid-transition clicks
+    are ignored rather than queued (selectArtifact sets `approach`
+    unconditionally, and firing it while a flight is already under way would
+    strand CameraRig's choreography between two destinations).
     `useScene.getState()` — not a reactive prop — so the check is against the
     truth at click time, not whatever the last render happened to close over.
   */
@@ -139,27 +119,10 @@ function BayHitPlane({ bay }: { bay: Bay }) {
     return useScene.getState().approach === 'idle'
   }
 
+  // A click opens the console's detail room directly — no disambiguation
+  // wait, no double-click requirement. Browsing gestures (arrows, wheel,
+  // search, the rail) still focus; the commit is the click.
   const click = (e: ThreeEvent<MouseEvent>) => {
-    e.stopPropagation()
-    if (!commitGuard(e)) return
-    const id = artifactAtX(bay, localX(e.point.x))?.id
-    if (!id) return
-    // Second click of a double-click: the pending timer belongs to
-    // onDoubleClick, which fires next and cancels it — do nothing here.
-    if (clickTimer.current !== null) return
-    clickTimer.current = window.setTimeout(() => {
-      clickTimer.current = null
-      setFocusedConsole(id)
-    }, DOUBLE_CLICK_MS)
-  }
-
-  const dblClick = (e: ThreeEvent<MouseEvent>) => {
-    // Cancel the first click's pending focus — the double-click owns the
-    // commit now.
-    if (clickTimer.current !== null) {
-      clearTimeout(clickTimer.current)
-      clickTimer.current = null
-    }
     e.stopPropagation()
     if (!commitGuard(e)) return
     const id = artifactAtX(bay, localX(e.point.x))?.id
@@ -191,7 +154,6 @@ function BayHitPlane({ bay }: { bay: Bay }) {
       onPointerLeave={clear}
       onPointerDown={pressed}
       onClick={click}
-      onDoubleClick={dblClick}
     >
       <planeGeometry args={[bay.boardLength, height]} />
       <meshBasicMaterial transparent opacity={0} depthWrite={false} />

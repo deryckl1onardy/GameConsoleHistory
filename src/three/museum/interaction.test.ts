@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { DOUBLE_CLICK_MS, DRAG_THRESHOLD_PX, isDrag } from './interaction'
+import { DRAG_THRESHOLD_PX, isDrag } from './interaction'
 
 /**
- * The shelf's pointer rules (Phase 7): the ONLY thing separating a click
- * from a drag on a pointer is how far it travelled between down and up
- * (R3F fires onClick on release over the object regardless), and a
- * double-click is a click pair closer than DOUBLE_CLICK_MS. These tests pin
- * the numbers every interactive station shares.
+ * The shelf's pointer rules: the ONLY thing separating a click from a drag on
+ * a pointer is how far it travelled between down and up (R3F fires onClick on
+ * release over the object regardless), so a drag that starts over a console
+ * must not open it. These tests pin the number every interactive station
+ * shares.
  */
 describe('the shelf pointer rules', () => {
   it('treats a stationary press-release as a click', () => {
@@ -30,10 +30,5 @@ describe('the shelf pointer rules', () => {
     // swallow it while staying far short of a real gesture.
     expect(DRAG_THRESHOLD_PX).toBeGreaterThanOrEqual(3)
     expect(DRAG_THRESHOLD_PX).toBeLessThanOrEqual(10)
-  })
-
-  it('the double-click window is short enough to feel like one gesture', () => {
-    expect(DOUBLE_CLICK_MS).toBeGreaterThanOrEqual(150)
-    expect(DOUBLE_CLICK_MS).toBeLessThanOrEqual(400)
   })
 })

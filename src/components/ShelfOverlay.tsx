@@ -106,7 +106,7 @@ export function ShelfOverlay() {
       */}
       <div className="absolute bottom-16 left-8 flex flex-col items-start gap-3">
         <p className="text-[11px] opacity-45">
-          ← → or scroll to focus · / to search · click to focus · double-click or Enter to visit
+          ← → or scroll to focus · / to search · click to visit
         </p>
         {hallView === 'station' && (
           <button
