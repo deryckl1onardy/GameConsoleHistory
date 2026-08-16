@@ -3,6 +3,8 @@ import * as THREE from 'three'
 import {
   addRectHole,
   extrude,
+  profileHeightAtDepth,
+  roundedPadGeometry,
   roundedRectShape,
   shapeFromPoints,
   sweepPlanVertically,
@@ -245,6 +247,73 @@ describe('sweepPlanVertically — controller shell construction', () => {
       [-60, 20],
     ]
     const geom = sweepPlanVertically(offsetPlan, 20)
+    geom.computeBoundingBox()
+    const box = geom.boundingBox!
+    expect((box.min.x + box.max.x) / 2).toBeCloseTo(0, 6)
+    expect((box.min.z + box.max.z) / 2).toBeCloseTo(0, 6)
+  })
+})
+
+describe('profileHeightAtDepth', () => {
+  // A miniature of the SNES silhouette: low front deck, a rise, a tall rear
+  // deck, then straight back down and along the floor.
+  const profile: [number, number][] = [
+    [0, 0],
+    [0, 40],
+    [48, 40],
+    [100, 68],
+    [254, 68],
+    [254, 0],
+  ]
+
+  it('reads the flat front deck', () => {
+    expect(profileHeightAtDepth(profile, 14)).toBeCloseTo(40, 6)
+    expect(profileHeightAtDepth(profile, 48)).toBeCloseTo(40, 6)
+  })
+
+  it('interpolates across the rise rather than snapping to either deck', () => {
+    // Halfway along the 48->100 rise, which climbs 40->68.
+    expect(profileHeightAtDepth(profile, 74)).toBeCloseTo(54, 6)
+  })
+
+  it('reads the rear deck', () => {
+    expect(profileHeightAtDepth(profile, 190)).toBeCloseTo(68, 6)
+  })
+
+  it('returns the top surface, never the floor the profile also crosses', () => {
+    // Every interior depth is crossed twice — once on top, once along the
+    // closing floor segment. Returning the lower crossing would bury every
+    // top-mounted control inside the shell.
+    for (const d of [0, 20, 74, 150, 254]) {
+      expect(profileHeightAtDepth(profile, d)).toBeGreaterThan(0)
+    }
+  })
+
+  it('clamps past either end instead of throwing', () => {
+    expect(profileHeightAtDepth(profile, -20)).toBeCloseTo(40, 6)
+    expect(profileHeightAtDepth(profile, 400)).toBeCloseTo(68, 6)
+  })
+})
+
+describe('roundedPadGeometry', () => {
+  it('lies flat with its underside on y=0, so it rests on the surface it sits on', () => {
+    const geom = roundedPadGeometry(46, 14, 4)
+    geom.computeBoundingBox()
+    const box = geom.boundingBox!
+    expect(box.min.y).toBeCloseTo(0, 6)
+    expect(box.max.y).toBeCloseTo(4 / 1000, 6)
+  })
+
+  it('puts length on X and depth on Z', () => {
+    const geom = roundedPadGeometry(46, 14, 4)
+    geom.computeBoundingBox()
+    const box = geom.boundingBox!
+    expect(box.max.x - box.min.x).toBeCloseTo(46 / 1000, 4)
+    expect(box.max.z - box.min.z).toBeCloseTo(14 / 1000, 4)
+  })
+
+  it('stays centred on X and Z', () => {
+    const geom = roundedPadGeometry(46, 14, 4)
     geom.computeBoundingBox()
     const box = geom.boundingBox!
     expect((box.min.x + box.max.x) / 2).toBeCloseTo(0, 6)

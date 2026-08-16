@@ -1,0 +1,110 @@
+<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1400" height="900" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="700" y="40" font-size="32" font-weight="600" text-anchor="middle" fill="#1a1a1a">
+    Console Display 2D Layout
+  </text>
+  <text x="700" y="70" font-size="14" text-anchor="middle" fill="#666666">
+    Museum Artifact Display Specification
+  </text>
+
+  <!-- LEFT SECTION: DEFAULT STATE -->
+  <g>
+    <!-- Section title -->
+    <text x="350" y="120" font-size="18" font-weight="600" fill="#1a1a1a">
+      DEFAULT STATE
+    </text>
+
+    <!-- Container background -->
+    <rect x="80" y="150" width="540" height="680" fill="none" stroke="#cccccc" stroke-width="2" stroke-dasharray="5,5"/>
+
+    <!-- Top label -->
+    <text x="350" y="190" font-size="12" text-anchor="middle" fill="#999999" letter-spacing="2">
+      VARIANT / CODE
+    </text>
+
+    <!-- Model viewport box -->
+    <rect x="150" y="220" width="400" height="320" fill="#f5f5f5" stroke="#cccccc" stroke-width="1"/>
+    <text x="350" y="385" font-size="16" text-anchor="middle" fill="#999999" font-style="italic">
+      3D Console Model
+    </text>
+
+    <!-- Bottom labels section -->
+    <text x="350" y="600" font-size="18" font-weight="600" text-anchor="middle" fill="#1a1a1a">
+      PlayStation 2
+    </text>
+    <text x="350" y="630" font-size="13" text-anchor="middle" fill="#666666">
+      2000 • Sony
+    </text>
+
+    <!-- Spacing indicators -->
+    <line x1="120" y1="180" x2="120" y2="200" stroke="#cccccc" stroke-width="1"/>
+    <line x1="110" y1="190" x2="130" y2="190" stroke="#cccccc" stroke-width="1"/>
+    <text x="90" y="195" font-size="11" fill="#999999">24px</text>
+
+    <line x1="120" y1="640" x2="120" y2="670" stroke="#cccccc" stroke-width="1"/>
+    <line x1="110" y1="655" x2="130" y2="655" stroke="#cccccc" stroke-width="1"/>
+    <text x="85" y="660" font-size="11" fill="#999999">32px</text>
+  </g>
+
+  <!-- RIGHT SECTION: HOVER STATE -->
+  <g>
+    <!-- Section title -->
+    <text x="1050" y="120" font-size="18" font-weight="600" fill="#1a1a1a">
+      HOVER STATE
+    </text>
+
+    <!-- Container background with highlight -->
+    <rect x="780" y="150" width="540" height="680" fill="none" stroke="#0066cc" stroke-width="2" stroke-dasharray="5,5"/>
+
+    <!-- Soft light indication -->
+    <ellipse cx="1050" cy="380" rx="160" ry="140" fill="#0066cc" opacity="0.08"/>
+
+    <!-- Top label (more visible) -->
+    <text x="1050" y="190" font-size="12" text-anchor="middle" fill="#666666" letter-spacing="2" font-weight="500">
+      VARIANT / CODE
+    </text>
+
+    <!-- Model viewport box (slightly forward, scaled) -->
+    <rect x="840" y="210" width="420" height="340" fill="#f5f5f5" stroke="#0066cc" stroke-width="2" opacity="0.85" transform="translate(10, -8)"/>
+    <text x="1050" y="390" font-size="16" text-anchor="middle" fill="#999999" font-style="italic">
+      3D Console Model
+    </text>
+
+    <!-- Bottom labels section (clearer) -->
+    <text x="1050" y="610" font-size="19" font-weight="700" text-anchor="middle" fill="#1a1a1a">
+      PlayStation 2
+    </text>
+    <text x="1050" y="642" font-size="13" text-anchor="middle" fill="#666666" font-weight="500">
+      2000 • Sony
+    </text>
+
+    <!-- Hover indicator label -->
+    <text x="1050" y="690" font-size="11" text-anchor="middle" fill="#0066cc" font-weight="600" letter-spacing="1">
+      ↑ SUBTLE LIFT & SCALE
+    </text>
+  </g>
+
+  <!-- BOTTOM SECTION: SPECIFICATIONS -->
+  <g transform="translate(0, 700)">
+    <!-- Specs container -->
+    <rect x="60" y="20" width="1280" height="140" fill="#f5f5f5" stroke="#cccccc" stroke-width="1" rx="4"/>
+
+    <!-- Title -->
+    <text x="80" y="50" font-size="14" font-weight="600" fill="#1a1a1a">
+      Key Specifications
+    </text>
+
+    <!-- Columns -->
+    <text x="80" y="80" font-size="12" font-weight="600" fill="#1a1a1a">Model Container:</text>
+    <text x="80" y="98" font-size="11" fill="#666666">• Centered horizontally  • Primary visual focus  • Responsive to hover</text>
+
+    <text x="520" y="80" font-size="12" font-weight="600" fill="#1a1a1a">Labels (Museum Style):</text>
+    <text x="520" y="98" font-size="11" fill="#666666">• Top: variant/code (subtle)  • Bottom: name (primary)  • Year + maker (secondary)</text>
+
+    <text x="80" y="125" font-size="12" font-weight="600" fill="#1a1a1a">Hover Effects:</text>
+    <text x="80" y="143" font-size="11" fill="#666666">• Subtle forward movement (Z depth)  • Slight scale increase  • Soft directional light  • Adjacent dimming  • Enhanced label clarity</text>
+  </g>
+</svg>

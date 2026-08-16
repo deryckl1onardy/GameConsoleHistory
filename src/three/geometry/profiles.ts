@@ -159,6 +159,77 @@ export function sweepProfileAlongX(
   return geometry
 }
 
+/**
+ * The height of a swept profile's top surface at a given depth back from the
+ * front face, in mm — i.e. "how high is the shell where I want to put this?".
+ *
+ * Top-mounted fixtures need this. Authoring their height by hand duplicates a
+ * number the profile already knows, and the two drift the moment the profile
+ * is corrected: the SNES profile was revised to curve into its rear deck, and
+ * any hand-authored height for a control sitting on that curve would silently
+ * have become wrong. Reading it back means a control cannot float above its
+ * own deck or sink into it.
+ *
+ * Returns the *highest* surface at that depth, since a closed profile crosses
+ * every interior depth at least twice (once on the top, once along the floor).
+ * Depths outside the profile return the nearest end's height rather than
+ * throwing — a fixture authored slightly off the back edge should land on the
+ * shell, not crash the scene.
+ */
+export function profileHeightAtDepth(profile: Vec2Mm[], depthMm: number): number {
+  const depths = profile.map(([d]) => d)
+  const clamped = Math.min(Math.max(depthMm, Math.min(...depths)), Math.max(...depths))
+
+  let highest = -Infinity
+  for (let i = 0; i < profile.length; i++) {
+    const [d1, h1] = profile[i]
+    const [d2, h2] = profile[(i + 1) % profile.length]
+    const lo = Math.min(d1, d2)
+    const hi = Math.max(d1, d2)
+    if (clamped < lo || clamped > hi) continue
+
+    // A vertical segment (front face, back face) spans no depth range, so both
+    // its endpoints are candidates; interpolation would divide by zero.
+    if (d1 === d2) {
+      highest = Math.max(highest, h1, h2)
+      continue
+    }
+    const t = (clamped - d1) / (d2 - d1)
+    highest = Math.max(highest, h1 + t * (h2 - h1))
+  }
+
+  return highest === -Infinity ? 0 : highest
+}
+
+/**
+ * A flat cap with rounded ends, lying in the X–Z plane with its thickness on
+ * Y and its underside at y=0 — the shape of a key sitting on a horizontal
+ * surface. Width runs along X, depth along Z.
+ *
+ * A capsule primitive is the obvious reach for a stadium shape and the wrong
+ * one here: it is a half-cylinder at each end, so a cap wide enough to read as
+ * the SNES's power key also stands 14mm tall. This is the same rounded-rect
+ * extrusion the shells use, so cap and shell share one silhouette language.
+ */
+export function roundedPadGeometry(
+  widthMm: number,
+  depthMm: number,
+  thicknessMm: number,
+  radiusMm = Math.min(widthMm, depthMm) / 2,
+): THREE.BufferGeometry {
+  const shape = roundedRectShape(widthMm, depthMm, radiusMm)
+  const geometry = extrude(shape, { depthMm: thicknessMm, bevelMm: 0, curveSegments: 10 })
+  // extrude() leaves width on X, depth on Y, thickness on Z centred at 0.
+  // rotateX(-90°) maps (x, y, z) -> (x, z, -y): width on X, thickness on Y,
+  // depth on Z. Then lift it so the underside rests on y=0 rather than
+  // straddling it, matching how every other fixture is placed against the
+  // surface it sits on.
+  geometry.rotateX(-Math.PI / 2)
+  geometry.translate(0, (thicknessMm * MM) / 2, 0)
+  geometry.computeVertexNormals()
+  return geometry
+}
+
 /** A plan outline (in the X–Z plane: width × depth) swept vertically — a controller shell. */
 export function sweepPlanVertically(
   plan: Vec2Mm[],

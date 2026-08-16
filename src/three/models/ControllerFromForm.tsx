@@ -35,7 +35,13 @@ function ButtonMesh({ button, form }: { button: ControllerButton; form: Controll
 
   const size = (button.sizeMm ?? 12) * MM
   const [x, z] = button.position
-  const top = form.thicknessMm * MM + form.domeMm * MM * 0.4
+  // The bevel grows the shell by `bevelMm` at BOTH ends of the sweep, so a pad
+  // authored 25mm thick is really 28mm tall. Placing buttons at the authored
+  // thickness put every low-profile cap — the d-pad cross, both concave face
+  // buttons, select and start — *inside* the shell, where they rendered as
+  // nothing at all. Only the tall convex domes poked out far enough to survive,
+  // which is why the pad read as two purple pills on a blank slab.
+  const top = (form.thicknessMm + 2 * form.bevelMm) * MM + form.domeMm * MM * 0.4
   // Convex and concave are deliberately different colours when the data
   // provides accent2 — on the SNES pad this is the whole visible difference
   // between A/B (purple) and X/Y (lavender), which a single accent colour
@@ -167,10 +173,20 @@ export function ControllerFromForm({
   )
 
   const positioned = controller.buttons.filter((b) => b.position && b.shape)
-  const missing = controller.buttons.length - positioned.length
-  if (missing > 0 && import.meta.env.DEV) {
+
+  // A d-pad is four inputs on ONE moulded cross: only the first carries the
+  // position and shape, and its siblings name the same `mesh` deliberately.
+  // Counting those as gaps warned about every pad on the roster and buried
+  // the real cases — a button with no cap and no positioned sibling to
+  // stand in for it, like the 2600 stick's lone fire button.
+  const drawnMeshes = new Set(positioned.map((b) => b.mesh))
+  const unrepresented = controller.buttons.filter(
+    (b) => !(b.position && b.shape) && !drawnMeshes.has(b.mesh),
+  )
+  if (unrepresented.length > 0 && import.meta.env.DEV) {
     console.warn(
-      `[ControllerFromForm] ${controller.id}: ${missing} button(s) missing position/shape, skipped rather than guessed.`,
+      `[ControllerFromForm] ${controller.id}: ${unrepresented.length} button(s) with no cap and no ` +
+        `positioned sibling (${unrepresented.map((b) => b.id).join(', ')}) — skipped rather than guessed.`,
     )
   }
 

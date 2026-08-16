@@ -1,0 +1,2846 @@
+{
+  "targetName": "Super Nintendo Entertainment System console",
+  "targetId": "super-nintendo-entertainment-system-console",
+  "schemaVersion": "2.1",
+  "terminologyProfile": {
+    "domain": "real-time procedural Three.js asset",
+    "geometryTerms": [
+      "silhouette",
+      "topology",
+      "primitive",
+      "bevel",
+      "chamfer",
+      "taper",
+      "bend",
+      "boolean cut",
+      "edge loop",
+      "surface normal",
+      "displacement"
+    ],
+    "materialTerms": [
+      "albedo",
+      "baseColor",
+      "roughness",
+      "metalness",
+      "normal map",
+      "bump map",
+      "ambient occlusion",
+      "cavity dirt",
+      "edge wear",
+      "clearcoat"
+    ],
+    "lightingTerms": [
+      "key light",
+      "fill light",
+      "rim light",
+      "HDRI/environment reflection",
+      "contact shadow"
+    ],
+    "descriptionRule": "Use measurable 3D graphics terms. Avoid vague words unless they are paired with concrete geometry/material/shader parameters."
+  },
+  "sourceImage": ".img2threejs/refs/snes-quarter.png",
+  "referenceCamera": {
+    "solved": false,
+    "fovDegrees": 35.0,
+    "aspect": 1.7778,
+    "orientation": {
+      "yaw": 35.0,
+      "pitch": 28.0,
+      "roll": 0.0
+    },
+    "positionHint": [
+      0.0,
+      0.03,
+      0.55
+    ],
+    "note": "Agent-estimated starting pose from solve_camera_pose.py (confidence 0.35, all orientation/position fields agentFill). Not yet confirmed by overlay review against the render -- that confirmation happens in Phase 5 render capture, per the tool doc: render the fitted mesh from this camera and adjust until silhouette/landmark alignment matches before trusting it."
+  },
+  "suitability": "conditional",
+  "scores": {
+    "object_isolation": 0,
+    "silhouette_readability": 0,
+    "depth_inference": 0,
+    "primitive_decomposition": 0,
+    "material_procedurality": 0,
+    "occlusion_risk": 0,
+    "interaction_fit": 0
+  },
+  "preSpecAssessment": {
+    "objectClass": {
+      "primaryType": "game console",
+      "primaryDomain": "object",
+      "formLanguage": [
+        "geometric",
+        "hard-surface"
+      ],
+      "structureKind": [
+        "assembled-shell",
+        "swept-profile"
+      ],
+      "motionPotential": [
+        "cartridge-slot-cover",
+        "eject-lever-throw",
+        "power-slider-throw",
+        "reset-button-travel"
+      ],
+      "materialFamilies": [
+        "matte-abs-plastic",
+        "satin-abs-plastic-accent"
+      ],
+      "notes": "Console-shaped hard-surface object. Bilateral silhouette: a low front control deck rising through a genuine curve (not a step) into a flat raised rear deck holding the cartridge bay. See Layer 1-3 of .img2threejs/analysis.md."
+    },
+    "complexity": {
+      "tier": "moderate",
+      "scores": {
+        "silhouetteComplexity": 1,
+        "componentCount": 2,
+        "hierarchyDepth": 1,
+        "repetitionDensity": 0,
+        "materialLayerCount": 1,
+        "localDetailDensity": 2,
+        "occlusionRisk": 1,
+        "actionReadinessNeed": 1
+      },
+      "estimatedCounts": {
+        "macroComponents": 2,
+        "mesoComponents": 4,
+        "microFeatureGroups": 3,
+        "materialLayers": 2,
+        "repetitionSystems": 0
+      },
+      "reasoning": [
+        "Single swept-profile shell (front deck -> curve -> rear deck) is a moderate silhouette: one dominant curve, no organic surfacing, so silhouetteComplexity is mid-low.",
+        "Two macro components (shell, cartridge bay as its own macro since it is a genuine cut-in volume, not a decal) and four meso components (left front block, right front block, recessed eject column, raised rear deck) is a real but shallow hierarchy for a moderate tier.",
+        "Micro feature groups: the power/reset key pair, the eject pad, and the controller-port pair with pin rows -- three distinct groups, matching or exceeding the moderate floor of 2.",
+        "No repetition systems: nothing on this shell repeats at meaningful density (no vent grille exists on the real hardware per the primary reference, no fastener array).",
+        "Two material layers only: matte shell ABS and satin accent-key ABS. No metal, no glass, no fabric.",
+        "occlusionRisk is moderate because the rear face, underside and both flanks are unseen in every reference image; those regions are approximated from known bilateral symmetry, not measured."
+      ]
+    },
+    "specDepthDecision": {
+      "requiredDepth": "moderate",
+      "minimumComponentLevels": [
+        "macro",
+        "meso"
+      ],
+      "needsRepetitionSystems": false,
+      "needsMaterialLocalOverrides": true,
+      "needsMultipleReviewViews": true,
+      "needsActionReadyHierarchy": true,
+      "rationale": "Moderate tier per COMPLEXITY_MINIMUMS: silhouette and hierarchy are real but shallow (one curve, four meso parts), no repetition system exists on the actual hardware, and two materials with local overrides (accent-key gloss, eject-pad wear) cover every visible surface distinction. needsMaterialLocalOverrides=true because the eject pad and eject column read as visually distinct sub-regions of the shell material, not full separate materials."
+    },
+    "unknownsToResolveBeforeImplementation": [],
+    "detailInventory": {
+      "scanMethod": "grid-3x3",
+      "targetMinDetails": 6,
+      "note": "Enumerate every identity-defining small detail before authoring the spec. Each detail must map to a component.localFeatures entry or material.localOverrides entry, never prose only. Use forge/stage1_intake/build_detail_inventory.py to scan zones.",
+      "details": [
+        {
+          "id": "rear-deck-styling-ridge-lines",
+          "kind": "groove",
+          "description": "Two shallow parallel ridge/groove lines across the raised rear deck's top face, near its front edge.",
+          "region": {
+            "x": 0.3333,
+            "y": 0.0,
+            "width": 0.3333,
+            "height": 0.3333,
+            "units": "normalized"
+          },
+          "scale": "meso",
+          "affects": "geometry",
+          "mapsTo": {
+            "type": "component.localFeatures",
+            "ref": "rear-deck-styling-ridge-lines"
+          },
+          "evidenceRef": "E:\\H5 Projects\\GameConsoleHistory\\.img2threejs\\detail-inventory\\zone-r0c1.png",
+          "confidence": 0.85
+        },
+        {
+          "id": "nintendo-logo-emboss",
+          "kind": "decal",
+          "description": "Embossed pill-outline 'Nintendo' wordmark on the rear deck's top face, near its front-right corner.",
+          "region": {
+            "x": 0.6667,
+            "y": 0.0,
+            "width": 0.3333,
+            "height": 0.3333,
+            "units": "normalized"
+          },
+          "scale": "micro",
+          "affects": "material",
+          "mapsTo": {
+            "type": "material.localOverrides",
+            "ref": "nintendo-logo-emboss"
+          },
+          "evidenceRef": "E:\\H5 Projects\\GameConsoleHistory\\.img2threejs\\detail-inventory\\zone-r0c2.png",
+          "confidence": 0.75
+        },
+        {
+          "id": "front-block-bevel-edge",
+          "kind": "bevel",
+          "description": "Front-left relief block's outer corner shows a distinct stepped bevel edge where the block meets the lower shell.",
+          "region": {
+            "x": 0.0,
+            "y": 0.3333,
+            "width": 0.3333,
+            "height": 0.3333,
+            "units": "normalized"
+          },
+          "scale": "meso",
+          "affects": "geometry",
+          "mapsTo": {
+            "type": "component.localFeatures",
+            "ref": "front-block-bevel-edge"
+          },
+          "evidenceRef": "E:\\H5 Projects\\GameConsoleHistory\\.img2threejs\\detail-inventory\\zone-r1c0.png",
+          "confidence": 0.8
+        },
+        {
+          "id": "power-reset-embossed-text",
+          "kind": "bevel",
+          "description": "POWER/RESET purple stadium-capsule keys, each with a bevel ring around the cap and embossed white text; EJECT sits between them as a darker grey recessed-looking pad, also with embossed text.",
+          "region": {
+            "x": 0.3333,
+            "y": 0.3333,
+            "width": 0.3333,
+            "height": 0.3333,
+            "units": "normalized"
+          },
+          "scale": "meso",
+          "affects": "both",
+          "mapsTo": {
+            "type": "material.localOverrides",
+            "ref": "power-reset-embossed-text"
+          },
+          "evidenceRef": "E:\\H5 Projects\\GameConsoleHistory\\.img2threejs\\detail-inventory\\zone-r1c1.png",
+          "confidence": 0.95
+        },
+        {
+          "id": "controller-port-1-inset",
+          "kind": "contour",
+          "description": "Controller port 1 shown in full: a rounded-rectangle recess with visible depth/shadow and a segmented pin-socket ridge inside.",
+          "region": {
+            "x": 0.3333,
+            "y": 0.6667,
+            "width": 0.3333,
+            "height": 0.3333,
+            "units": "normalized"
+          },
+          "scale": "micro",
+          "affects": "geometry",
+          "mapsTo": {
+            "type": "component.localFeatures",
+            "ref": "controller-port-inset-recess"
+          },
+          "evidenceRef": "E:\\H5 Projects\\GameConsoleHistory\\.img2threejs\\detail-inventory\\zone-r2c1.png",
+          "confidence": 0.85
+        },
+        {
+          "id": "controller-port-2-inset",
+          "kind": "contour",
+          "description": "Controller port 2's corner, partially visible -- confirms the same inset-recess construction as port 1.",
+          "region": {
+            "x": 0.0,
+            "y": 0.6667,
+            "width": 0.3333,
+            "height": 0.3333,
+            "units": "normalized"
+          },
+          "scale": "micro",
+          "affects": "geometry",
+          "mapsTo": {
+            "type": "component.localFeatures",
+            "ref": "controller-port-inset-recess"
+          },
+          "evidenceRef": "E:\\H5 Projects\\GameConsoleHistory\\.img2threejs\\detail-inventory\\zone-r2c0.png",
+          "confidence": 0.7
+        },
+        {
+          "id": "eject-pad-tint",
+          "kind": "stain",
+          "description": "EJECT pad reads as a distinctly darker grey than the surrounding shell -- confirmed by direct pixel sampling, not shading alone.",
+          "region": {
+            "x": 0.44,
+            "y": 0.44,
+            "width": 0.06,
+            "height": 0.06,
+            "units": "normalized"
+          },
+          "scale": "micro",
+          "affects": "material",
+          "mapsTo": {
+            "type": "material.localOverrides",
+            "ref": "eject-pad-tint"
+          },
+          "evidenceRef": "E:\\H5 Projects\\GameConsoleHistory\\.img2threejs\\crops\\eject-pad.png",
+          "confidence": 0.7
+        }
+      ]
+    },
+    "anatomy": {
+      "applies": false,
+      "styleHeads": 0.0,
+      "proportions": {
+        "headUnit": 0.0,
+        "torso": 0.0,
+        "legs": 0.0,
+        "shoulderWidth": 0.0,
+        "hipWidth": 0.0
+      },
+      "pose": {
+        "type": "unassessed",
+        "jointAngles": {}
+      },
+      "faceLandmarks": {
+        "eyeLine": 0.0,
+        "eyeSpacing": 0.0,
+        "noseBase": 0.0,
+        "mouthLine": 0.0,
+        "hairline": 0.0
+      },
+      "features": [],
+      "confidence": 0.0,
+      "note": "Only meaningful when objectClass.primaryDomain is character or hybrid. Set applies=true and fill from forge/stage1_intake/extract_landmarks.py. See grimoire/character/reconstruction.md and grimoire/character/likeness_maximization.md."
+    },
+    "sourceImage": ".img2threejs/refs/snes-quarter.png"
+  },
+  "qualityContract": {
+    "qualityBar": "moderate",
+    "definitionOfDone": [
+      "The rendered model matches the reference silhouette, primary proportions, visible component hierarchy, material response, and most recognizable local features for the selected fidelity tier."
+    ],
+    "minimumSpecDepth": {
+      "macroComponents": 2,
+      "mesoComponents": 3,
+      "microFeatureGroups": 2,
+      "materialLayers": 2,
+      "repetitionSystems": 0,
+      "reviewViewpoints": 3
+    },
+    "featureGroups": [
+      {
+        "id": "overall-silhouette",
+        "name": "Overall silhouette and proportions",
+        "required": true,
+        "qualityCriteria": [
+          "Bounding shape, dominant curves, negative spaces, and scale relationships are explicitly described."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "model reads as a generic placeholder instead of the reference object",
+          "major proportions are guessed without evidence"
+        ]
+      },
+      {
+        "id": "primary-structure",
+        "name": "Primary structure and hierarchy",
+        "required": true,
+        "qualityCriteria": [
+          "Major parts, joints, seams, contact points, and parent-child relationships are named before code generation."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "large visible parts are merged into one mesh",
+          "component hierarchy is too shallow for the observed complexity"
+        ]
+      },
+      {
+        "id": "attachment-joint-correctness",
+        "name": "Attachment and joint correctness",
+        "required": true,
+        "qualityCriteria": [
+          "Every visible child appendage, branch, limb, handle, connector, tube, cable, horn, wing, leg, or hinged part has an attachment contract with parent socket, localStart/localEnd, contact type, embed/overlap, and gap tolerance."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "child part root floats away from the parent",
+          "branch/limb/tube is centered in space instead of pivoting from its root",
+          "parent-child transform mixes world and local coordinates"
+        ]
+      },
+      {
+        "id": "surface-material-response",
+        "name": "Surface material response",
+        "required": true,
+        "qualityCriteria": [
+          "Albedo zones, roughness, normal/bump/displacement intent, cavity dirt, edge wear, and local overrides are specified where visible.",
+          "Important materials define independent albedo, roughness, height/normal, and AO responses instead of reusing one texture for unrelated PBR channels.",
+          "Surface response is decomposed into macro, meso, and micro frequency bands with scale and amplitude tied to object scale."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "surface looks like flat plastic",
+          "local material variation is missing or not tied to image evidence"
+        ]
+      },
+      {
+        "id": "reference-lookdev",
+        "name": "Reference color, material, and lighting response",
+        "required": true,
+        "qualityCriteria": [
+          "Material-pass names the reference-derived albedo palette, roughness variation, tactile normal/bump/displacement response, and local masks.",
+          "When a source image is available, run reference PBR extraction and require confidence >= 0.7 before treating maps as implementation-ready.",
+          "Lighting-pass names key/fill/rim or environment light, exposure, tone mapping, background, and contact shadow behavior.",
+          "Neutral, grazing-angle, and reference-matched renders prove that surface relief survives relighting and is not painted into albedo."
+        ],
+        "evidenceRefs": [
+          "full-object"
+        ],
+        "failureModes": [
+          "model has acceptable shape but reads as flat shaded or plastic",
+          "colors are a generic average instead of reference-observed local color zones",
+          "lighting is evenly ambient and cannot reproduce the source value range"
+        ]
+      }
+    ],
+    "visualDeltaChecks": [
+      "silhouette and negative-space delta",
+      "component hierarchy depth delta",
+      "repetition density and distribution delta",
+      "material albedo/roughness/normal response delta",
+      "local feature placement and scale delta"
+    ],
+    "antiShallowSpecRules": [
+      "Do not proceed to code if qualityContract.qualityBar is unassessed.",
+      "Do not proceed to code if the spec only contains a root component for a moderate or complex object.",
+      "Do not proceed to code if required featureGroups are not represented by componentTree, materials, or repetitionSystems.",
+      "Do not proceed to code if visible local features are described only in prose and not attached to components/materials/evidenceRefs.",
+      "Do not proceed past structural-pass if attached child parts lack attachment.parentSocket, localStart, localEnd, embedDepth/overlap, and gapTolerance.",
+      "Do not pass material look-dev when albedo is reused as roughness, height, normal, or AO.",
+      "Do not pass material look-dev without macro, meso, and micro surface frequency bands for close-up materials.",
+      "Do not pass reference-fidelity material look-dev from a source image without usable referencePbr maps or an explicit documented limitation.",
+      "Do not patch a spec with extracted PBR maps when extraction confidence is below the target threshold unless the user explicitly accepts lower fidelity.",
+      "Do not place adjacent separate-geometry parts below 0.02 world-unit seam overlap (source: grimoire/build/geometry_patterns.md).",
+      "Do not satisfy raised or recessed relief, fasteners, or grip structure with a map alone when the feature affects form; use geometry or displacement (source: grimoire/build/geometry_patterns.md)."
+    ],
+    "mustNotDo": [
+      "Do not add a vent grille or slot array to the top deck -- confirmed absent from the primary reference photo; a prior hand-built pass invented one and it was the most visible wrong feature on the model.",
+      "Do not mount the power/reset keys on the vertical front face -- both sit flat on the horizontal top face of the front deck.",
+      "Do not render the eject control as anything but the centre, grey control between the two purple keys -- left-to-right order is power, eject, reset.",
+      "Do not model the cartridge bay opening as a flat decal/plane painted on the surface -- it is a genuine recessed cut into the rear deck's top face and must read as a real cavity under the current lighting.",
+      "Do not guess unseen-geometry detail (rear face, underside, flanks) beyond the bilateral symmetry and flat-panel assumption already recorded in unknownsToResolveBeforeImplementation.",
+      "Adjacent components must overlap by at least 0.02 world units at shared seams (source: grimoire/build/geometry_patterns.md).",
+      "Raised or recessed relief and fasteners must be geometry, instanced micro-parts, or displacement; a map alone is an approximation (source: grimoire/build/geometry_patterns.md)."
+    ]
+  },
+  "qualityTargets": {
+    "targetFidelity": 0.7,
+    "mustMatch": [
+      "macro silhouette and proportions",
+      "primary material albedo/roughness response",
+      "reference-derived PBR material response at or above 0.7 confidence when source pixels are usable",
+      "most recognizable local features"
+    ],
+    "niceToHave": [
+      "micro scratches, stains, chips, and dirt masks",
+      "secondary lighting match"
+    ],
+    "fpsTarget": 60,
+    "reviewViewpoints": [
+      "front",
+      "three-quarter",
+      "side",
+      "thickness-axis",
+      "long-axis"
+    ]
+  },
+  "selfCorrectLoop": {
+    "enabled": true,
+    "visualAcceptance": {
+      "reviewer": "ai-vision",
+      "threshold": 0.7,
+      "comparisonArtifactRequired": true,
+      "layerScoresRequired": true,
+      "codePixelDiffIsAcceptanceAuthority": false,
+      "scoringRule": "AI vision must inspect a side-by-side reference/render sheet and score the current pass from 0 to 1. Pixel-diff code may assist diagnostics but cannot approve a pass.",
+      "requiredLayerScores": [
+        "silhouetteProportion",
+        "componentStructure",
+        "formDetail",
+        "materialSurface",
+        "lightingCamera"
+      ],
+      "featureReviewPolicy": {
+        "enabled": true,
+        "reviewUnit": "semantic-subsystem",
+        "maxCriticalFeaturesPerPass": 5,
+        "maxImportantFeaturesPerPass": 3,
+        "criticalDefaultThreshold": 0.8,
+        "importantAverageThreshold": 0.65,
+        "adaptiveEscalation": true,
+        "singleImagePairOnly": true,
+        "selectionRule": "Choose only the most visually salient, identity-defining, user-prioritized, or high-risk semantic systems. Group repeated parts instead of reviewing every mesh. AI vision scores every selected feature from the same full reference/render pair."
+      }
+    },
+    "reviewAfterPasses": [
+      "blockout",
+      "structural-pass",
+      "form-refinement",
+      "material-pass",
+      "surface-pass",
+      "lighting-pass",
+      "interaction-pass",
+      "optimization-pass"
+    ],
+    "allowedActions": [
+      "continue",
+      "refine-spec",
+      "refine-code",
+      "request-input",
+      "stop"
+    ],
+    "specRefineTriggers": [
+      "missing component",
+      "wrong primitive family",
+      "wrong proportions",
+      "material layer under-specified",
+      "local feature not traceable to viewEvidence",
+      "reference ambiguity discovered during implementation"
+    ],
+    "codeRefineTriggers": [
+      "spec is adequate but generated geometry/material does not match",
+      "browser render differs from reference",
+      "performance budget exceeded",
+      "lighting hides geometry or material response"
+    ],
+    "stopCriteria": [
+      "target fidelity reached or user accepts current approximation",
+      "remaining gaps require new reference images or manual art"
+    ],
+    "screenshotPolicy": {
+      "requiredForPasses": [
+        "blockout",
+        "structural-pass",
+        "form-refinement",
+        "material-pass",
+        "surface-pass",
+        "lighting-pass",
+        "interaction-pass"
+      ],
+      "preferredCapture": "in-app-browser-screenshot",
+      "fallbackCapture": "user-supplied-screenshot-path",
+      "minimumEvidence": "Each visual pass needs a reference image, rendered screenshot, side-by-side comparison sheet, AI vision score, layer scores, and critique before choosing continue.",
+      "reviewPairRule": "Compare the same camera/viewpoint whenever possible; do not judge a front reference against a random render angle.",
+      "acceptanceAuthority": "AI vision review of the comparison sheet. Code-generated pixel similarity is not sufficient evidence."
+    }
+  },
+  "featureReviewTargets": [
+    {
+      "id": "front-deck-curve-transition",
+      "name": "Front-to-rear deck curve transition",
+      "tier": "critical",
+      "passIds": [
+        "blockout"
+      ],
+      "minimumScore": 0.8,
+      "mustPass": true,
+      "componentRefs": [
+        "console-shell"
+      ],
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "cartridge-bay-presence",
+      "name": "Cartridge bay opening on the rear deck",
+      "tier": "critical",
+      "passIds": [
+        "blockout",
+        "structural-pass"
+      ],
+      "minimumScore": 0.75,
+      "mustPass": true,
+      "componentRefs": [
+        "cartridge-bay-insert"
+      ],
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "power-eject-reset-order",
+      "name": "POWER / EJECT / RESET left-to-right order and colour",
+      "tier": "critical",
+      "passIds": [
+        "structural-pass",
+        "form-refinement"
+      ],
+      "minimumScore": 0.8,
+      "mustPass": true,
+      "componentRefs": [
+        "front-block-left",
+        "front-block-right",
+        "eject-column",
+        "power-key",
+        "reset-key",
+        "eject-pad"
+      ],
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "front-block-relief",
+      "name": "Front-face relief blocks stand proud of the shell",
+      "tier": "important",
+      "passIds": [
+        "structural-pass"
+      ],
+      "minimumScore": 0.65,
+      "mustPass": false,
+      "componentRefs": [
+        "front-block-left",
+        "front-block-right"
+      ],
+      "evidenceRefs": [
+        "full-object"
+      ]
+    },
+    {
+      "id": "controller-port-inset",
+      "name": "Controller ports read as inset openings, not decals",
+      "tier": "important",
+      "passIds": [
+        "form-refinement"
+      ],
+      "minimumScore": 0.65,
+      "mustPass": false,
+      "componentRefs": [
+        "controller-port-1",
+        "controller-port-2"
+      ],
+      "evidenceRefs": [
+        "full-object"
+      ]
+    }
+  ],
+  "sculptPipeline": {
+    "passGateMode": "locked-sequential",
+    "passOrder": [
+      "blockout",
+      "structural-pass",
+      "form-refinement",
+      "material-pass",
+      "surface-pass",
+      "lighting-pass",
+      "interaction-pass",
+      "optimization-pass"
+    ],
+    "currentPass": "blockout",
+    "completedPasses": [],
+    "lastCompletedPass": "",
+    "blockedReason": "",
+    "nextRequiredEvidence": [
+      "Silhouette reads correctly without materials.",
+      "Quality contract has named all required macro feature groups before code generation.",
+      "AI vision comparison score meets selfCorrectLoop.visualAcceptance.threshold.",
+      "browser render screenshot from your agent's browser/screenshot tool",
+      "side-by-side reference/render comparison sheet for AI vision review",
+      "AI vision score at or above the visual acceptance threshold",
+      "all critical semantic feature scores from the shared image pair at or above their thresholds",
+      "self-correction review appended with action=continue before the next pass"
+    ]
+  },
+  "lookDevTargets": {
+    "qualityPriority": "reference-fidelity",
+    "materialPass": {
+      "albedoPaletteRequired": true,
+      "roughnessVariationRequired": true,
+      "normalOrBumpRequired": true,
+      "localOverridesRequired": true,
+      "minimumTextureResolution": 1024,
+      "preferredTextureResolution": 2048,
+      "independentMapChannels": [
+        "albedo",
+        "roughness",
+        "height",
+        "normal",
+        "ambient-occlusion"
+      ],
+      "requiredSurfaceFrequencyBands": [
+        "macro",
+        "meso",
+        "micro"
+      ],
+      "geometryReliefRequiredWhenSilhouetteAffected": true,
+      "referencePbrExtraction": {
+        "requiredWhenSourceImagePresent": true,
+        "targetThreshold": 0.7,
+        "stopOnLowConfidence": true,
+        "script": "forge/stage1_intake/extract_pbr_evidence.py",
+        "acceptedLimitation": "single-image extraction is reference-derived inference, not exact photogrammetry"
+      },
+      "mustAvoid": [
+        "single flat albedo per material",
+        "uniform roughness",
+        "albedo texture reused as roughness/height/normal/AO",
+        "single-frequency random noise",
+        "plastic-looking smooth bark, stone, cloth, foliage, or aged material",
+        "local color/detail described only in prose without material masks",
+        "claiming exact PBR recovery when confidence is below the target threshold"
+      ]
+    },
+    "lightingPass": {
+      "requiredTerms": [
+        "key light",
+        "fill light",
+        "rim or environment light",
+        "exposure",
+        "tone mapping",
+        "background",
+        "contact shadow"
+      ],
+      "mustAvoid": [
+        "ambient-only lighting",
+        "flat value range",
+        "missing contact shadow",
+        "reference lighting copied without separating material readability"
+      ]
+    },
+    "screenshotReview": [
+      "Compare albedo palette and local color zones.",
+      "Compare roughness/normal/bump response under light.",
+      "Compare cavity dirt, edge wear, stains, moss, scratches, or other local masks.",
+      "Compare key/fill/rim structure, exposure, tone mapping, background, and contact shadows.",
+      "Capture a neutral-light render to verify material readability without reference lighting.",
+      "Capture a grazing-light close-up to expose flat normals, uniform roughness, tiling, and plastic highlights.",
+      "Capture a reference-matched render from the same camera framing as the source."
+    ]
+  },
+  "actionReadiness": {
+    "contract": "Every macro/meso component should be generated as a stable named Object3D pivot node with a mesh child, action metadata, optional sockets, collider proxy, and destruction metadata.",
+    "defaultRigType": "action-ready-static-rig",
+    "rootMotionNode": "root",
+    "requiredComponentFields": [
+      "id",
+      "parent",
+      "transform",
+      "attachment for child appendages, connectors, limbs, tubes, handles, legs, horns, wings, branches, or cables",
+      "actionProfile.animationRole",
+      "actionProfile.pivot",
+      "actionProfile.collider",
+      "actionProfile.destruction"
+    ],
+    "transformChannels": [
+      "translate",
+      "rotate",
+      "scale",
+      "bend",
+      "twist",
+      "detach",
+      "visibility",
+      "material-state"
+    ],
+    "authoringRules": [
+      "Do not collapse independently movable parts into one mesh.",
+      "Put transforms on component pivot groups, not only on raw meshes.",
+      "For attached child parts, put the pivot at the semantic root/socket and build visible geometry from localStart to localEnd.",
+      "Represent hinge, socket, detachable, and breakable intent even when no animation is implemented yet.",
+      "Use simplified collider proxies for runtime physics instead of visual mesh colliders by default."
+    ],
+    "destructionPolicy": {
+      "defaultBreakable": false,
+      "fractureGroupNaming": "Use stable semantic names such as body-shell, left-hinge, glass-panel, branch-segment.",
+      "debrisStrategy": "Prefer detachable component groups and a small number of procedural fragments over random mesh explosion."
+    }
+  },
+  "assumptions": [
+    {
+      "id": "rear-underside-flanks",
+      "statement": "Rear face, underside, and both flanks are unseen in every reference image; approximated as flat panels with bilateral symmetry, matching the SNES's published design.",
+      "confidence": 0.6
+    },
+    {
+      "id": "profile-curve-interpolation",
+      "statement": "The front-to-rear deck curve is interpolated from a single 3/4-angle view, not measured from an orthographic side profile; treated as an approximation.",
+      "confidence": 0.65
+    },
+    {
+      "id": "wordmark-representation",
+      "statement": "Wordmark geometry (SUPER NINTENDO ENTERTAINMENT SYSTEM text, Nintendo logo) is below the resolution needed to trace as relief geometry; represented as a material-level local override (embossed emboss look), not modelled as separate geometry.",
+      "confidence": 0.6
+    }
+  ],
+  "coordinateFrame": {
+    "front": "camera-facing side in the reference image",
+    "up": "image up direction",
+    "scaleReference": "unit scale; adjust after first browser render"
+  },
+  "silhouette": {
+    "boundingShape": "a squat rectangular prism with a stepped-then-curved top profile: low flat front deck, a genuine curve (not a step) rising into a flat raised rear deck",
+    "aspectRatios": [
+      "width:depth approx 0.80:1 (203.2mm:254mm)",
+      "front-deck-height:rear-deck-height approx 0.59:1 (40mm:68mm)"
+    ],
+    "symmetry": "bilateral about the depth axis (front-to-back centerline)",
+    "dominantCurves": [
+      "a single continuous rise from the front control deck (40mm) to the rear deck (68mm), spanning roughly 48-142mm back from the front face -- not a step, a real curve"
+    ],
+    "negativeSpaces": [
+      "the recessed centre column between the two front relief blocks, carrying the EJECT control"
+    ],
+    "landmarks": [
+      "POWER key (purple, left)",
+      "EJECT pad (grey, centre)",
+      "RESET key (purple, right)",
+      "cartridge bay opening (rear deck top)",
+      "Nintendo wordmark (rear deck top, right)",
+      "SUPER NINTENDO ENTERTAINMENT SYSTEM wordmark (rear deck front face)"
+    ]
+  },
+  "viewEvidence": [
+    {
+      "id": "full-object",
+      "view": "primary",
+      "imageRegion": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0,
+        "units": "normalized"
+      },
+      "observations": [
+        "Bilateral shell, single swept profile: low front deck -> genuine curve -> raised rear deck holding the cartridge bay.",
+        "Front deck carries two raised relief blocks (left holds POWER + a controller port, right holds RESET + a controller port), separated by a flush recessed column carrying EJECT.",
+        "POWER and RESET are purple stadium-capsule keys mounted flat on the TOP face of their blocks, each with a bevelled cap edge and embossed white text.",
+        "EJECT is a grey pad, visually darker than the shell, set in the flush column between the two blocks, with embossed text.",
+        "Cartridge bay is a real recessed opening cut into the rear deck's top face, not a decal -- confirmed by visible depth/shadow at its edge.",
+        "Two shallow parallel styling ridge lines run across the rear deck's top face near its front edge.",
+        "Embossed pill-outline Nintendo wordmark sits on the rear deck's top face, near the front-right corner.",
+        "Shell material reads as matte/satin dielectric plastic: no metallic reflections, no anisotropic brushing, low saturation, roughness in the 0.6-0.7 range under diffuse studio light.",
+        "Controller ports are genuine inset rounded-rect recesses (visible depth at the opening edge) with a segmented pin-socket ridge visible inside, not flat dark decals."
+      ],
+      "confidence": 0.85
+    }
+  ],
+  "componentTree": [
+    {
+      "id": "console-shell",
+      "name": "SNES console shell (swept profile)",
+      "level": "macro",
+      "role": "body",
+      "importance": 1.0,
+      "confidence": 0.85,
+      "primitive": "extrude",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "A single moulded ABS shell: hard-edged panels with a genuine curved transition between deck heights, not an organic/continuous sculpt -- confirmed a curve, not a step, in the primary reference.",
+      "geometryDescriptor": {
+        "topologyIntent": "extruded side profile (depth x height) swept across the shell's width -- the exact construction the local spec search confirmed (ExtrudeGeometry + bevel) for a moulded plastic shell",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.0012,
+          "segments": 2
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry",
+        "profile2D": {
+          "points": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.04
+            ],
+            [
+              0.048,
+              0.04
+            ],
+            [
+              0.072,
+              0.045
+            ],
+            [
+              0.098,
+              0.056
+            ],
+            [
+              0.122,
+              0.065
+            ],
+            [
+              0.142,
+              0.068
+            ],
+            [
+              0.254,
+              0.068
+            ],
+            [
+              0.254,
+              0.0
+            ]
+          ],
+          "depth": 0.2032
+        }
+      },
+      "parent": null,
+      "attachment": null,
+      "dimensions": {
+        "width": 0.254,
+        "height": 0.068,
+        "depth": 0.2032,
+        "units": "m",
+        "confidence": 0.85
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "root",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "shell-plastic",
+      "materialLayers": [
+        "shell-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [
+        "rear-deck-styling-ridge-lines",
+        "nintendo-logo-emboss"
+      ],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(210, 211, 223, 1.0)",
+        "secondaryAlbedo": "rgba(205, 206, 218, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85
+      }
+    },
+    {
+      "id": "cartridge-bay-insert",
+      "name": "Cartridge bay insert (rear deck top)",
+      "level": "macro",
+      "role": "insert",
+      "importance": 0.9,
+      "confidence": 0.75,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "A distinct moulded insert framing the cartridge opening -- a real raised/recessed volume the reference shows depth and shadow at its edge for, not a flat decal painted on the deck.",
+      "geometryDescriptor": {
+        "topologyIntent": "hard-surface moulded part with bevel-ready edges",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.002,
+          "segments": 2
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry"
+      },
+      "parent": "console-shell",
+      "attachment": null,
+      "dimensions": {
+        "width": 0.024,
+        "height": 0.006,
+        "depth": 0.14,
+        "units": "m",
+        "confidence": 0.75
+      },
+      "transform": {
+        "position": [
+          0.19,
+          0.07100000000000001,
+          0.1016
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "part",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "shell-plastic",
+      "materialLayers": [
+        "shell-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "blockout",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(210, 211, 223, 1.0)",
+        "secondaryAlbedo": "rgba(205, 206, 218, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85
+      }
+    },
+    {
+      "id": "front-block-left",
+      "name": "Front-left relief block",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.8,
+      "confidence": 0.75,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "A raised volume standing proud of the front face with its own bevelled edge -- confirmed a real stepped edge, not a shaded flat panel, in the reference close-up (zone-r1c0).",
+      "geometryDescriptor": {
+        "topologyIntent": "hard-surface moulded part with bevel-ready edges",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.002,
+          "segments": 2
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry"
+      },
+      "parent": "console-shell",
+      "attachment": null,
+      "dimensions": {
+        "width": 0.0025,
+        "height": 0.04,
+        "depth": 0.08,
+        "units": "m",
+        "confidence": 0.75
+      },
+      "transform": {
+        "position": [
+          -0.00125,
+          0.02,
+          0.04359999999999999
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "part",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "shell-plastic",
+      "materialLayers": [
+        "shell-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [
+        "front-block-bevel-edge"
+      ],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "structural-pass",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(210, 211, 223, 1.0)",
+        "secondaryAlbedo": "rgba(205, 206, 218, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85
+      }
+    },
+    {
+      "id": "front-block-right",
+      "name": "Front-right relief block",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.8,
+      "confidence": 0.75,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "Mirror of front-block-left across the shell's width centreline -- same bevelled proud edge.",
+      "geometryDescriptor": {
+        "topologyIntent": "hard-surface moulded part with bevel-ready edges",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.002,
+          "segments": 2
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry"
+      },
+      "parent": "console-shell",
+      "attachment": null,
+      "dimensions": {
+        "width": 0.0025,
+        "height": 0.04,
+        "depth": 0.08,
+        "units": "m",
+        "confidence": 0.75
+      },
+      "transform": {
+        "position": [
+          -0.00125,
+          0.02,
+          0.1596
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "part",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "shell-plastic",
+      "materialLayers": [
+        "shell-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "structural-pass",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(210, 211, 223, 1.0)",
+        "secondaryAlbedo": "rgba(205, 206, 218, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85
+      }
+    },
+    {
+      "id": "eject-column",
+      "name": "Eject column (flush centre strip)",
+      "level": "meso",
+      "role": "body",
+      "importance": 0.6,
+      "confidence": 0.7,
+      "primitive": "box",
+      "topologyClass": "surface-relief",
+      "topologyRationale": "The negative space between the two relief blocks: flush with the base shell front face (not proud like the blocks), carrying the EJECT pad -- a shallow surface region, not a standalone volume.",
+      "geometryDescriptor": {
+        "topologyIntent": "hard-surface moulded part with bevel-ready edges",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.002,
+          "segments": 2
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry"
+      },
+      "parent": "console-shell",
+      "attachment": null,
+      "dimensions": {
+        "width": 0.001,
+        "height": 0.04,
+        "depth": 0.036,
+        "units": "m",
+        "confidence": 0.7
+      },
+      "transform": {
+        "position": [
+          0.0005,
+          0.02,
+          0.1016
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "part",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "shell-plastic",
+      "materialLayers": [
+        "shell-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "structural-pass",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(210, 211, 223, 1.0)",
+        "secondaryAlbedo": "rgba(205, 206, 218, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85
+      }
+    },
+    {
+      "id": "power-key",
+      "name": "POWER key (purple stadium cap)",
+      "level": "micro",
+      "role": "control",
+      "importance": 0.85,
+      "confidence": 0.75,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "A discrete moulded stadium-capsule cap sitting proud of the block's top face, approximated as a heavily bevelled box -- a true capsule primitive would round the wrong axis (a full 3D capsule, not a flat stadium key).",
+      "geometryDescriptor": {
+        "topologyIntent": "flat stadium cap: heavy bevel approximates the rounded-capsule silhouette seen in the reference close-up",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.005,
+          "segments": 4
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry"
+      },
+      "parent": "front-block-left",
+      "attachment": null,
+      "dimensions": {
+        "width": 0.004,
+        "height": 0.014,
+        "depth": 0.046,
+        "units": "m",
+        "confidence": 0.75
+      },
+      "transform": {
+        "position": [
+          -0.00125,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "part",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "accent-plastic",
+      "materialLayers": [
+        "accent-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [
+        "power-reset-embossed-text"
+      ],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "form-refinement",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(120, 110, 160, 1.0)",
+        "secondaryAlbedo": "rgba(154, 147, 188, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85
+      }
+    },
+    {
+      "id": "reset-key",
+      "name": "RESET key (purple stadium cap)",
+      "level": "micro",
+      "role": "control",
+      "importance": 0.85,
+      "confidence": 0.75,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "Same construction as power-key -- confirmed identical stadium-cap shape and colour in the reference close-up (zone-r1c1), differing only in embossed text and position.",
+      "geometryDescriptor": {
+        "topologyIntent": "flat stadium cap: heavy bevel approximates the rounded-capsule silhouette seen in the reference close-up",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.005,
+          "segments": 4
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry"
+      },
+      "parent": "front-block-right",
+      "attachment": null,
+      "dimensions": {
+        "width": 0.004,
+        "height": 0.014,
+        "depth": 0.046,
+        "units": "m",
+        "confidence": 0.75
+      },
+      "transform": {
+        "position": [
+          -0.00125,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "part",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "accent-plastic",
+      "materialLayers": [
+        "accent-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "form-refinement",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(120, 110, 160, 1.0)",
+        "secondaryAlbedo": "rgba(154, 147, 188, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.85
+      }
+    },
+    {
+      "id": "eject-pad",
+      "name": "EJECT pad (grey, flush centre column)",
+      "level": "micro",
+      "role": "control",
+      "importance": 0.7,
+      "confidence": 0.65,
+      "primitive": "box",
+      "topologyClass": "surface-relief",
+      "topologyRationale": "A shallow, distinctly darker-grey pad set into the flush eject column -- a colour/material distinction confirmed by direct pixel sampling (crops/eject-pad.png), not a modelled cavity.",
+      "geometryDescriptor": {
+        "topologyIntent": "hard-surface moulded part with bevel-ready edges",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.002,
+          "segments": 2
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry"
+      },
+      "parent": "eject-column",
+      "attachment": null,
+      "dimensions": {
+        "width": 0.001,
+        "height": 0.023,
+        "depth": 0.032,
+        "units": "m",
+        "confidence": 0.65
+      },
+      "transform": {
+        "position": [
+          0.0005,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "part",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "shell-plastic",
+      "materialLayers": [
+        "shell-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "form-refinement",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(150, 148, 158, 1.0)",
+        "secondaryAlbedo": "rgba(210, 211, 223, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.7
+      }
+    },
+    {
+      "id": "controller-port-1",
+      "name": "Controller port 1 (opening)",
+      "level": "micro",
+      "role": "connector",
+      "importance": 0.6,
+      "confidence": 0.6,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "A genuine inset rounded-rect opening with visible depth and a segmented pin-socket ridge inside, confirmed in the reference close-up (zone-r2c1) -- not a flat dark decal.",
+      "geometryDescriptor": {
+        "topologyIntent": "hard-surface moulded part with bevel-ready edges",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.002,
+          "segments": 2
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry"
+      },
+      "parent": "front-block-left",
+      "attachment": {
+        "parentSocket": "front-block-left-port-socket",
+        "parentId": "front-block-left",
+        "localStart": [
+          -0.00125,
+          0,
+          -0.013
+        ],
+        "localEnd": [
+          -0.00125,
+          0,
+          0.013
+        ],
+        "contactType": "insert",
+        "embedDepth": 0.0015,
+        "gapTolerance": 0.0005
+      },
+      "dimensions": {
+        "width": 0.003,
+        "height": 0.013,
+        "depth": 0.026,
+        "units": "m",
+        "confidence": 0.6
+      },
+      "transform": {
+        "position": [
+          0.0015,
+          -0.006,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "part",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "shell-plastic",
+      "materialLayers": [
+        "shell-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [
+        "controller-port-inset-recess"
+      ],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "form-refinement",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(20, 19, 18, 1.0)",
+        "secondaryAlbedo": "rgba(60, 58, 56, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.6
+      }
+    },
+    {
+      "id": "controller-port-2",
+      "name": "Controller port 2 (opening)",
+      "level": "micro",
+      "role": "connector",
+      "importance": 0.6,
+      "confidence": 0.55,
+      "primitive": "box",
+      "topologyClass": "assembled-solid",
+      "topologyRationale": "Mirror of controller-port-1 on the right block -- partially visible corner confirmed in the reference close-up (zone-r2c0).",
+      "geometryDescriptor": {
+        "topologyIntent": "hard-surface moulded part with bevel-ready edges",
+        "edgeTreatment": {
+          "type": "bevel",
+          "bevelRadius": 0.002,
+          "segments": 2
+        },
+        "deformationStack": [],
+        "uvStrategy": "generated procedural coordinates",
+        "normalStrategy": "vertex normals from generated geometry"
+      },
+      "parent": "front-block-right",
+      "attachment": {
+        "parentSocket": "front-block-right-port-socket",
+        "parentId": "front-block-right",
+        "localStart": [
+          -0.00125,
+          0,
+          -0.013
+        ],
+        "localEnd": [
+          -0.00125,
+          0,
+          0.013
+        ],
+        "contactType": "insert",
+        "embedDepth": 0.0015,
+        "gapTolerance": 0.0005
+      },
+      "dimensions": {
+        "width": 0.003,
+        "height": 0.013,
+        "depth": 0.026,
+        "units": "m",
+        "confidence": 0.55
+      },
+      "transform": {
+        "position": [
+          0.0015,
+          -0.006,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "actionProfile": {
+        "animationRole": "part",
+        "pivot": {
+          "mode": "center",
+          "localPosition": [
+            0,
+            0,
+            0
+          ],
+          "axis": [
+            0,
+            1,
+            0
+          ],
+          "confidence": 0.6
+        },
+        "transformChannels": {
+          "translate": true,
+          "rotate": true,
+          "scale": false,
+          "bend": false,
+          "twist": false,
+          "detach": false,
+          "visibility": true,
+          "materialState": true
+        },
+        "sockets": [],
+        "collider": {
+          "type": "box",
+          "offset": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "isTrigger": false,
+          "notes": ""
+        },
+        "destruction": {
+          "breakable": false,
+          "fractureGroup": null,
+          "minImpulse": 0.0
+        }
+      },
+      "material": "shell-plastic",
+      "materialLayers": [
+        "shell-plastic"
+      ],
+      "deformations": [],
+      "joints": [],
+      "seams": [],
+      "localFeatures": [
+        "controller-port-inset-recess"
+      ],
+      "surfaceDetail": {
+        "macroRoughness": 0.4,
+        "microRoughness": 0.15,
+        "bumpAmplitude": 0.003
+      },
+      "evidenceRefs": [
+        "full-object"
+      ],
+      "details": [],
+      "fidelityTier": "form-refinement",
+      "colorMaterialRecipe": {
+        "dominantAlbedo": "rgba(20, 19, 18, 1.0)",
+        "secondaryAlbedo": "rgba(60, 58, 56, 1.0)",
+        "materialClass": "plastic",
+        "materialClassConfidence": 0.6
+      }
+    }
+  ],
+  "materials": [
+    {
+      "id": "shell-plastic",
+      "name": "Console shell ABS (matte)",
+      "type": "standard",
+      "shaderModel": "MeshStandardMaterial / PBR approximation",
+      "baseColor": "#D2D3DF",
+      "color": "#D2D3DF",
+      "albedo": {
+        "dominant": "#D2D3DF",
+        "secondary": [
+          "#CDCEDA",
+          "#7E7E8B"
+        ],
+        "samplingNotes": "Sampled from a real crop of the primary reference (.img2threejs/crops/shell-plastic-final.png) spanning a moulding seam and facet transition; palette extracted by extract_pbr_evidence.py, not averaged/guessed."
+      },
+      "colorVariation": {
+        "palette": [
+          "#D2D3DF",
+          "#ECEEF0",
+          "#DADBE7",
+          "#CDCEDA",
+          "#7E7E8B"
+        ],
+        "pattern": "mottled",
+        "amplitude": 0.1,
+        "heightCorrelation": 0.25
+      },
+      "textureResolution": 1024,
+      "textureProjection": {
+        "mode": "uv",
+        "repeat": [
+          2.0,
+          2.0
+        ],
+        "anisotropy": 8,
+        "texelDensityIntent": "Preserve stable world-scale detail across the shell; do not stretch seam/grain detail with component scale."
+      },
+      "surfaceFrequencyBands": [
+        {
+          "id": "macro",
+          "frequency": 2.0,
+          "amplitude": 0.35,
+          "role": "broad color and height breakup across the shell's panels"
+        },
+        {
+          "id": "meso",
+          "frequency": 14.0,
+          "amplitude": 0.12,
+          "role": "moulding seams, panel-edge ridges, styling grooves"
+        },
+        {
+          "id": "micro",
+          "frequency": 60.0,
+          "amplitude": 0.05,
+          "role": "fine moulding grain, highlight breakup under grazing light"
+        }
+      ],
+      "roughness": {
+        "base": 0.62,
+        "variation": 0.08,
+        "map": "independent-procedural-field",
+        "localResponse": "slightly higher roughness in the moulding seam, lower on the raised deck facets that catch more direct light"
+      },
+      "metalness": {
+        "base": 0.0,
+        "variation": 0.0
+      },
+      "normal": {
+        "pattern": "derived-from-independent-height-field",
+        "strength": 0.18,
+        "scale": 22,
+        "space": "tangent"
+      },
+      "bump": {
+        "amplitude": 0.15,
+        "scale": 18
+      },
+      "displacement": {
+        "amplitude": 0.0
+      },
+      "ambientOcclusion": {
+        "cavityStrength": 0.2,
+        "contactShadowBias": 0.3,
+        "notes": "Mild AO in the moulding seam and around the cartridge bay opening and controller port recesses."
+      },
+      "wear": {
+        "edgeWear": 0.03,
+        "scratches": [],
+        "chips": []
+      },
+      "dirt": {
+        "amount": 0.02,
+        "cavityBias": 0.05
+      },
+      "localOverrides": [
+        {
+          "id": "rear-deck-styling-ridge-lines",
+          "description": "Two shallow parallel groove lines across the rear deck top face near its front edge.",
+          "region": "rear-deck-top-front-edge",
+          "effect": "height-groove",
+          "evidenceRef": "detail-inventory/zone-r0c1.png"
+        },
+        {
+          "id": "nintendo-logo-emboss",
+          "description": "Embossed pill-outline Nintendo wordmark, rear deck top face near front-right corner.",
+          "region": "rear-deck-top-right-corner",
+          "effect": "emboss-decal",
+          "evidenceRef": "detail-inventory/zone-r0c2.png"
+        },
+        {
+          "id": "eject-pad-tint",
+          "description": "EJECT pad reads as a distinctly darker grey than the surrounding shell, roughly rgba(150,148,158,1.0) vs the shell's rgba(210,211,223,1.0).",
+          "region": "eject-column-pad",
+          "effect": "albedo-tint-darker",
+          "evidenceRef": "crops/eject-pad.png"
+        }
+      ],
+      "shaderNotes": [
+        "Finish-classifier heuristic (analyze_texture.py) proposed finishClass=brushed-steel/metalness=1.0 on this crop; overridden by direct visual observation (Layer 5/6 of analysis.md) -- no metallic reflections or anisotropic brushing are visible in any reference image, and the object is a known ABS-moulded console shell. Documented per the skill's self-correction transparency rule rather than silently accepted."
+      ],
+      "referencePbr": {
+        "usable": true,
+        "confidence": 0.716,
+        "maps": {
+          "albedo": {
+            "url": "/material-evidence/shell-plastic_albedo.png",
+            "path": "/material-evidence/shell-plastic_albedo.png"
+          },
+          "roughness": {
+            "url": "/material-evidence/shell-plastic_roughness.png",
+            "path": "/material-evidence/shell-plastic_roughness.png"
+          },
+          "height": {
+            "url": "/material-evidence/shell-plastic_height.png",
+            "path": "/material-evidence/shell-plastic_height.png"
+          },
+          "normal": {
+            "url": "/material-evidence/shell-plastic_normal.png",
+            "path": "/material-evidence/shell-plastic_normal.png"
+          },
+          "ao": {
+            "url": "/material-evidence/shell-plastic_ao.png",
+            "path": "/material-evidence/shell-plastic_ao.png"
+          }
+        }
+      }
+    },
+    {
+      "id": "accent-plastic",
+      "name": "Accent key ABS (satin, violet)",
+      "type": "standard",
+      "shaderModel": "MeshStandardMaterial / PBR approximation",
+      "baseColor": "#786EA0",
+      "color": "#786EA0",
+      "albedo": {
+        "dominant": "#786EA0",
+        "secondary": [
+          "#9A93BC",
+          "#524581"
+        ],
+        "samplingNotes": "Sampled from a real crop of the POWER key (.img2threejs/crops/accent-plastic.png). The finish-classifier's blue-collapse hue-risk correction was NOT applied -- this is an observed violet ABS accent colour, not a metal-hue artifact; see shaderNotes."
+      },
+      "colorVariation": {
+        "palette": [
+          "#9A93BC",
+          "#786EA0",
+          "#524581",
+          "#493B77",
+          "#554683"
+        ],
+        "pattern": "gradient",
+        "amplitude": 0.2,
+        "heightCorrelation": 0.4
+      },
+      "textureResolution": 1024,
+      "textureProjection": {
+        "mode": "uv",
+        "repeat": [
+          1.0,
+          1.0
+        ],
+        "anisotropy": 8,
+        "texelDensityIntent": "Small parts (keys); stable texel density at key scale, not shell scale."
+      },
+      "surfaceFrequencyBands": [
+        {
+          "id": "macro",
+          "frequency": 2.0,
+          "amplitude": 0.35,
+          "role": "broad color and height breakup across the shell's panels"
+        },
+        {
+          "id": "meso",
+          "frequency": 14.0,
+          "amplitude": 0.12,
+          "role": "moulding seams, panel-edge ridges, styling grooves"
+        },
+        {
+          "id": "micro",
+          "frequency": 60.0,
+          "amplitude": 0.05,
+          "role": "fine moulding grain, highlight breakup under grazing light"
+        }
+      ],
+      "roughness": {
+        "base": 0.4,
+        "variation": 0.1,
+        "map": "independent-procedural-field",
+        "localResponse": "lower roughness along the cap's domed highlight, higher near the bevel groove"
+      },
+      "metalness": {
+        "base": 0.0,
+        "variation": 0.0
+      },
+      "normal": {
+        "pattern": "derived-from-independent-height-field",
+        "strength": 0.22,
+        "scale": 30,
+        "space": "tangent"
+      },
+      "bump": {
+        "amplitude": 0.1,
+        "scale": 24
+      },
+      "displacement": {
+        "amplitude": 0.0
+      },
+      "ambientOcclusion": {
+        "cavityStrength": 0.3,
+        "contactShadowBias": 0.35,
+        "notes": "AO in the groove/bevel ring around each key cap."
+      },
+      "wear": {
+        "edgeWear": 0.02,
+        "scratches": [],
+        "chips": []
+      },
+      "dirt": {
+        "amount": 0.0,
+        "cavityBias": 0.0
+      },
+      "localOverrides": [
+        {
+          "id": "power-reset-embossed-text",
+          "description": "Embossed white 'POWER'/'RESET' text on the cap face.",
+          "region": "key-cap-face",
+          "effect": "emboss-decal",
+          "evidenceRef": "detail-inventory/zone-r1c1.png"
+        }
+      ],
+      "shaderNotes": [
+        "Finish-classifier heuristic (analyze_texture.py) proposed finishClass=painted-metal with clearcoat=1.0 and a blue-collapse hue correction; overridden by direct visual observation -- this is a satin ABS accent, not a painted/clearcoated metal part. The extracted palette (5 real sampled swatches) is used as-is; the suggested hue-corrected RGBs are not."
+      ],
+      "referencePbr": {
+        "usable": true,
+        "confidence": 0.799,
+        "maps": {
+          "albedo": {
+            "url": "/material-evidence/accent-plastic_albedo.png",
+            "path": "/material-evidence/accent-plastic_albedo.png"
+          },
+          "roughness": {
+            "url": "/material-evidence/accent-plastic_roughness.png",
+            "path": "/material-evidence/accent-plastic_roughness.png"
+          },
+          "height": {
+            "url": "/material-evidence/accent-plastic_height.png",
+            "path": "/material-evidence/accent-plastic_height.png"
+          },
+          "normal": {
+            "url": "/material-evidence/accent-plastic_normal.png",
+            "path": "/material-evidence/accent-plastic_normal.png"
+          },
+          "ao": {
+            "url": "/material-evidence/accent-plastic_ao.png",
+            "path": "/material-evidence/accent-plastic_ao.png"
+          }
+        }
+      }
+    }
+  ],
+  "repetitionSystems": [],
+  "buildPasses": [
+    {
+      "id": "blockout",
+      "goal": "Match macro silhouette and proportions.",
+      "componentRefs": [
+        "console-shell",
+        "cartridge-bay-insert"
+      ],
+      "acceptance": [
+        "Silhouette reads correctly without materials.",
+        "Quality contract has named all required macro feature groups before code generation.",
+        "AI vision comparison score meets selfCorrectLoop.visualAcceptance.threshold."
+      ]
+    },
+    {
+      "id": "structural-pass",
+      "goal": "Build the component hierarchy implied by the pre-spec complexity assessment.",
+      "componentRefs": [
+        "console-shell",
+        "cartridge-bay-insert",
+        "front-block-left",
+        "front-block-right",
+        "eject-column"
+      ],
+      "acceptance": [
+        "Macro, meso, and repeated structures meet qualityContract.minimumSpecDepth.",
+        "Parent-child relations, joints, seams, sockets, and contact points are explicit.",
+        "Every attached child appendage/connector has parentSocket, localStart/localEnd, contactType, embedDepth or overlap, and gapTolerance.",
+        "AI vision comparison score meets selfCorrectLoop.visualAcceptance.threshold."
+      ]
+    },
+    {
+      "id": "form-refinement",
+      "goal": "Refine shape, deformation, bevels, tapers, curves, asymmetry, and visible local geometry.",
+      "componentRefs": [
+        "console-shell",
+        "cartridge-bay-insert",
+        "front-block-left",
+        "front-block-right",
+        "eject-column",
+        "power-key",
+        "reset-key",
+        "eject-pad",
+        "controller-port-1",
+        "controller-port-2"
+      ],
+      "acceptance": [
+        "Important visible forms are represented in component geometryDescriptor, deformations, localFeatures, or repetitionSystems.",
+        "Endpoint-based child parts are rooted at their attachment sockets and do not visibly float away from parents.",
+        "AI vision comparison score meets selfCorrectLoop.visualAcceptance.threshold."
+      ]
+    },
+    {
+      "id": "material-pass",
+      "goal": "Match material color, roughness, bump, and local variation.",
+      "componentRefs": [
+        "console-shell",
+        "cartridge-bay-insert",
+        "front-block-left",
+        "front-block-right",
+        "eject-column",
+        "power-key",
+        "reset-key",
+        "eject-pad",
+        "controller-port-1",
+        "controller-port-2"
+      ],
+      "acceptance": [
+        "Reference-derived albedo palette records dominant, secondary, and accent colors per visible material.",
+        "Each important material defines roughness variation and at least one normal/bump/displacement response.",
+        "Local material overrides, dirt/wear/stains/moss/chips/scratches or equivalent masks are tied to evidenceRefs.",
+        "Thin, transparent, reflective, wet, or fibrous materials document alpha/transmission/clearcoat/metalness/fiber response when relevant.",
+        "Generated preview uses procedural albedo/roughness/bump texture or vertex color variation instead of one flat color.",
+        "Generated preview uses independent PBR maps at 1024px or higher for the quality-first tier.",
+        "If source pixels are available, referencePbr extraction passed at confidence >= 0.7 or the pass is stopped/requesting better references.",
+        "Macro, meso, and micro surface frequency bands are visible at the intended review distance without obvious tiling.",
+        "AI vision comparison score meets selfCorrectLoop.visualAcceptance.threshold."
+      ]
+    },
+    {
+      "id": "surface-pass",
+      "goal": "Add procedural surface locality such as normal/bump/displacement, AO, dirt, stains, chips, grain, moss, scratches, and wear.",
+      "componentRefs": [
+        "console-shell",
+        "cartridge-bay-insert",
+        "front-block-left",
+        "front-block-right",
+        "eject-column",
+        "power-key",
+        "reset-key",
+        "eject-pad",
+        "controller-port-1",
+        "controller-port-2"
+      ],
+      "acceptance": [
+        "Every required material feature group has local overrides or surfaceDetail tied to evidenceRefs.",
+        "A grazing-angle close-up proves that normal/height detail breaks highlights naturally and does not read as smooth plastic.",
+        "AI vision comparison score meets selfCorrectLoop.visualAcceptance.threshold."
+      ]
+    },
+    {
+      "id": "lighting-pass",
+      "goal": "Make material and form readable under neutral turntable lighting plus optional reference lighting.",
+      "componentRefs": [
+        "console-shell",
+        "cartridge-bay-insert",
+        "front-block-left",
+        "front-block-right",
+        "eject-column",
+        "power-key",
+        "reset-key",
+        "eject-pad",
+        "controller-port-1",
+        "controller-port-2"
+      ],
+      "acceptance": [
+        "lightingFromPhoto identifies key light direction/color/intensity, fill light, rim or environment light, and ambient color.",
+        "Exposure, tone mapping, background color/gradient, shadow softness, and contact shadow behavior are specified.",
+        "Lighting does not hide geometry/material gaps and screenshots can be compared fairly to the reference.",
+        "Neutral, grazing, and reference-matched lighting checks distinguish material errors from lighting errors.",
+        "AI vision comparison score meets selfCorrectLoop.visualAcceptance.threshold."
+      ]
+    },
+    {
+      "id": "interaction-pass",
+      "goal": "Make the model ready for future animation, transformation, physics, or destruction.",
+      "componentRefs": [
+        "console-shell",
+        "cartridge-bay-insert",
+        "front-block-left",
+        "front-block-right",
+        "eject-column",
+        "power-key",
+        "reset-key",
+        "eject-pad",
+        "controller-port-1",
+        "controller-port-2"
+      ],
+      "acceptance": [
+        "Macro and movable meso components have stable pivot nodes.",
+        "Sockets, collider proxies, and destruction metadata are present for future runtime actions.",
+        "AI vision comparison score meets selfCorrectLoop.visualAcceptance.threshold."
+      ]
+    },
+    {
+      "id": "optimization-pass",
+      "goal": "Protect runtime performance after visual fidelity is accepted.",
+      "componentRefs": [
+        "console-shell",
+        "cartridge-bay-insert",
+        "front-block-left",
+        "front-block-right",
+        "eject-column",
+        "power-key",
+        "reset-key",
+        "eject-pad",
+        "controller-port-1",
+        "controller-port-2"
+      ],
+      "acceptance": [
+        "Triangle count, draw calls, instancing, LOD strategy, and FPS target are documented or verified.",
+        "Repeated detail is instanced or simplified where possible without breaking silhouette/material believability."
+      ]
+    }
+  ],
+  "visualEvidence": [
+    {
+      "timestamp": "2026-08-13T14:31:54.816319+00:00",
+      "passId": "blockout",
+      "estimatedFidelity": 0.55,
+      "aiVisionScore": 0.55,
+      "visualAcceptanceThreshold": 0.7,
+      "layerScores": {
+        "silhouetteProportion": 0.6,
+        "componentStructure": 0.3,
+        "formDetail": 0.2,
+        "materialSurface": 0.5,
+        "lightingCamera": 0.5
+      },
+      "featureReviews": [
+        {
+          "id": "front-deck-curve-transition",
+          "score": 0.6,
+          "notes": "The genuine front-deck -> curve -> rear-deck transition is present and reads correctly in the comparison sheet against the primary reference. Real profile points from Nintendo's published dimensions (already validated in this project's own parametric kit). Held back from a higher score by the still-open camera/silhouette IoU gap (0.594 vs 0.85 threshold) and a texture UV-streaking artifact on the shell material that is cosmetic, not geometric."
+        }
+      ],
+      "referenceScreenshot": ".img2threejs/refs/snes-quarter.png",
+      "renderScreenshot": ".img2threejs/shots/blockout-front.png",
+      "comparisonImage": ".img2threejs/cmp-blockout.png",
+      "cameraView": "yaw=30 pitch=45 distance=0.355 fov=35 ox=-200 oy=40 roll=-4 (agent-tuned against Tier1 gate feedback; referenceCamera.solved remains false)",
+      "notes": "",
+      "aiVisionNotes": "Visually the macro shape reads as a recognisable SNES silhouette in the comparison sheet -- the curve, deck heights and cartridge bay are all present and roughly proportioned. The automated IoU gate is a harder bar than the visual match suggests, partly for a real, documented reason (reference mask corruption) and partly from genuine residual camera imprecision that further hand-tuning could still close."
+    }
+  ],
+  "reviewHistory": [
+    {
+      "timestamp": "2026-08-13T14:31:54.816319+00:00",
+      "passId": "blockout",
+      "estimatedFidelity": 0.55,
+      "aiVisionScore": 0.55,
+      "visualAcceptanceThreshold": 0.7,
+      "layerScores": {
+        "silhouetteProportion": 0.6,
+        "componentStructure": 0.3,
+        "formDetail": 0.2,
+        "materialSurface": 0.5,
+        "lightingCamera": 0.5
+      },
+      "featureReviews": [
+        {
+          "id": "front-deck-curve-transition",
+          "score": 0.6,
+          "notes": "The genuine front-deck -> curve -> rear-deck transition is present and reads correctly in the comparison sheet against the primary reference. Real profile points from Nintendo's published dimensions (already validated in this project's own parametric kit). Held back from a higher score by the still-open camera/silhouette IoU gap (0.594 vs 0.85 threshold) and a texture UV-streaking artifact on the shell material that is cosmetic, not geometric."
+        }
+      ],
+      "action": "request-input",
+      "summary": "Blockout (2 macro components: console-shell + cartridge-bay-insert) renders the correct macro silhouette -- real front-deck/curve/rear-deck profile from Nintendo's published dimensions, real sampled shell/accent colours. Camera hand-tuned against Tier 1 gate feedback: aspect-ratio delta 0.022 and scale delta 0.022 both comfortably pass (thresholds 0.05/0.08). Silhouette IoU stalls at 0.594 against the 0.85 threshold. Diagnosed the residual gap with a mask-diff visualization: the reference photo's own foreground mask is corrupted by a real specular highlight on the console's glossy top surface (sampled pixels ~241,243,244 vs background ~240s -- indistinguishable to simple background-difference thresholding), which the admission/masking pipeline cannot separate from true background. turntable_gate also flags small (1-2%) interior holes at 180/270 degrees, traced to the same class of near-white pixel confusion from a texture UV-streaking artifact on the procedural shell material, not a geometric defect (diagnose_render_multi_angle confirms zero degenerate views -- the form holds as a real volume from every angle).",
+      "matched": [
+        "front-deck to rear-deck curve transition",
+        "aspect ratio and scale of the overall silhouette (both pass their gates)",
+        "cartridge bay as a real raised/recessed macro volume, not a decal"
+      ],
+      "mismatches": [
+        "silhouette IoU below threshold, attributable in part to reference-photo mask corruption from a specular highlight",
+        "shell material shows diagonal UV-stretch streaking, a material-pass concern",
+        "no meso/micro detail yet -- by design, blockout only includes macro components"
+      ],
+      "specFixes": [],
+      "codeFixes": [],
+      "evidence": [],
+      "outOfSequence": true,
+      "mapStrippedRender": ".img2threejs/shots/blockout-clay.png",
+      "visualEvidence": {
+        "referenceScreenshot": ".img2threejs/refs/snes-quarter.png",
+        "renderScreenshot": ".img2threejs/shots/blockout-front.png",
+        "comparisonImage": ".img2threejs/cmp-blockout.png",
+        "cameraView": "yaw=30 pitch=45 distance=0.355 fov=35 ox=-200 oy=40 roll=-4 (agent-tuned against Tier1 gate feedback; referenceCamera.solved remains false)",
+        "notes": "",
+        "aiVisionNotes": "Visually the macro shape reads as a recognisable SNES silhouette in the comparison sheet -- the curve, deck heights and cartridge bay are all present and roughly proportioned. The automated IoU gate is a harder bar than the visual match suggests, partly for a real, documented reason (reference mask corruption) and partly from genuine residual camera imprecision that further hand-tuning could still close."
+      }
+    }
+  ],
+  "lodPlan": [
+    {
+      "tier": "near",
+      "distance": 0,
+      "strategy": "full component tree and material layers"
+    },
+    {
+      "tier": "far",
+      "distance": 30,
+      "strategy": "merge static components and reduce local feature geometry"
+    }
+  ],
+  "performanceBudget": {
+    "qualityPriority": "reference-fidelity",
+    "targetTriangles": 250000,
+    "maxDrawCalls": 160,
+    "textureSize": 2048,
+    "fpsTarget": 30,
+    "optimizationPolicy": "Reach accepted visual fidelity first, then optimize without removing reference-critical geometry or surface layers."
+  },
+  "lightingFromPhoto": [
+    {
+      "id": "key",
+      "role": "key",
+      "description": "Soft, large-area key light from upper-left-front, diffuse studio softbox -- long soft shadow falls to the lower-right of the console in the primary reference.",
+      "colorTempK": 5600,
+      "intensity": 1.0
+    },
+    {
+      "id": "fill",
+      "role": "fill",
+      "description": "Broad ambient fill from the white background/surface bounce, keeping shadow-side shell values well above black.",
+      "colorTempK": 5600,
+      "intensity": 0.4
+    },
+    {
+      "id": "exposure-tonemap",
+      "role": "exposure-tonemapping",
+      "description": "Neutral exposure, ACES filmic tone mapping, sRGB output -- matches a clean product-photography look with no blown highlights on the shell.",
+      "exposure": 1.0,
+      "toneMapping": "ACESFilmic"
+    },
+    {
+      "id": "contact-shadow",
+      "role": "contact-shadow",
+      "description": "Soft contact shadow directly under the shell where it meets the surface, consistent with the large soft key light.",
+      "intensity": 0.5
+    }
+  ],
+  "proceduralStrategy": [
+    "Block out macro silhouette first.",
+    "Add component hierarchy and joints.",
+    "Create stable pivot groups, sockets, collider proxies, and destruction metadata before visual polish.",
+    "Refine forms with bevels, tapers, bends, and procedural noise.",
+    "Run reference PBR extraction for important source-image materials and stop when confidence is below the target threshold.",
+    "Add material variation before adding expensive micro-geometry."
+  ],
+  "animationAnchors": [
+    "root pivot node supports whole-object translation, rotation, scale, and visibility changes",
+    "component pivot groups support later local transforms without rebuilding geometry"
+  ],
+  "destructionAnchors": [
+    "actionProfile.destruction.fractureGroup marks detachable or breakable component sets",
+    "component seams and sockets define plausible break points instead of random explosions"
+  ],
+  "risks": [],
+  "localSpecSearch": {
+    "collection": "core_3d",
+    "query": "Super Nintendo Entertainment System console",
+    "index": {
+      "status": "hit",
+      "reason": "current",
+      "fingerprint": "ac4f0bc9028e34083dbb5d5531ae3df7699c8e7641d5f8e6d42e7492ea1be1d0"
+    },
+    "matches": [
+      {
+        "record_id": "core.description-scene-graph-relational-triplets",
+        "file_path": "docs/raw/img2threejs-skill-dataset.json",
+        "heading": null,
+        "key_path": "categories.description_conventions[2]",
+        "score": 2.701183431763,
+        "snippets": [
+          "... tả văn bản tự do về cách các bộ phận liên hệ không gian Three.js target: Array of {subject, predicate, object} triplets driving the THREE.Object3D parent-child attachment hierarchy (see 'UV/Coordinate System Conversion & Attachment Hierarchy')"
+        ],
+        "source_refs": [
+          {
+            "path": "docs/raw/img2threejs-skill-dataset.json",
+            "heading": null,
+            "key_path": "categories.description_conventions[2]"
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "source",
+            "ref": "docs/raw/img2threejs-skill-dataset.json",
+            "note": "img2threejs NotebookLM research distillation"
+          }
+        ]
+      },
+      {
+        "record_id": "core.shader-mapping-uvcoordinate-system-conversion-attachment-hierarchy",
+        "file_path": "docs/raw/img2threejs-skill-dataset.json",
+        "heading": null,
+        "key_path": "categories.rendering_shader_mapping[14]",
+        "score": 2.388596655967,
+        "snippets": [
+          "Handling handedness/up-axis differences (Unity Y-up left-handed vs. USD/glTF right-handed) and representing sub-part attachment via parent-child scene-graph transforms. Xử lý khác biệt tay thuận/trục lên (Unity Y-up trái vs. USD/glTF phải) và ..."
+        ],
+        "source_refs": [
+          {
+            "path": "docs/raw/img2threejs-skill-dataset.json",
+            "heading": null,
+            "key_path": "categories.rendering_shader_mapping[14]"
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "source",
+            "ref": "docs/raw/img2threejs-skill-dataset.json",
+            "note": "img2threejs NotebookLM research distillation"
+          }
+        ]
+      }
+    ]
+  },
+  "tier1Results": [
+    {
+      "passed": false,
+      "checks": {
+        "silhouetteIoU": 0.4396,
+        "aspectRatioDelta": 0.7064,
+        "scaleDelta": 0.4074,
+        "bilateralSymmetryError": 0.1195,
+        "colorDelta": {
+          "checked": 10,
+          "maxDeltaE": 37.46,
+          "perComponent": [
+            {
+              "componentId": null,
+              "deltaE": 9.25
+            },
+            {
+              "componentId": null,
+              "deltaE": 9.25
+            },
+            {
+              "componentId": null,
+              "deltaE": 9.25
+            },
+            {
+              "componentId": null,
+              "deltaE": 9.25
+            },
+            {
+              "componentId": null,
+              "deltaE": 9.25
+            },
+            {
+              "componentId": null,
+              "deltaE": 25.29
+            },
+            {
+              "componentId": null,
+              "deltaE": 25.29
+            },
+            {
+              "componentId": null,
+              "deltaE": 9.52
+            },
+            {
+              "componentId": null,
+              "deltaE": 37.46
+            },
+            {
+              "componentId": null,
+              "deltaE": 37.46
+            }
+          ],
+          "gated": false
+        }
+      },
+      "failures": [
+        "silhouette IoU 0.440 is below threshold 0.85",
+        "aspect-ratio delta 0.706 exceeds threshold 0.05",
+        "scale delta 0.407 exceeds threshold 0.08"
+      ],
+      "maskWarnings": [],
+      "renderHash": "2be3ab806223acf4",
+      "passId": "blockout",
+      "mapStrippedRender": ".img2threejs\\shots\\blockout-clay.png"
+    },
+    {
+      "passed": false,
+      "checks": {
+        "silhouetteIoU": 0.5937,
+        "aspectRatioDelta": 0.0222,
+        "scaleDelta": 0.0222,
+        "bilateralSymmetryError": 0.428,
+        "colorDelta": {
+          "checked": 10,
+          "maxDeltaE": 64.6,
+          "perComponent": [
+            {
+              "componentId": null,
+              "deltaE": 8.47
+            },
+            {
+              "componentId": null,
+              "deltaE": 8.47
+            },
+            {
+              "componentId": null,
+              "deltaE": 8.47
+            },
+            {
+              "componentId": null,
+              "deltaE": 8.47
+            },
+            {
+              "componentId": null,
+              "deltaE": 8.47
+            },
+            {
+              "componentId": null,
+              "deltaE": 36.15
+            },
+            {
+              "componentId": null,
+              "deltaE": 36.15
+            },
+            {
+              "componentId": null,
+              "deltaE": 10.22
+            },
+            {
+              "componentId": null,
+              "deltaE": 64.6
+            },
+            {
+              "componentId": null,
+              "deltaE": 64.6
+            }
+          ],
+          "gated": false
+        }
+      },
+      "failures": [
+        "silhouette IoU 0.594 is below threshold 0.85"
+      ],
+      "maskWarnings": [],
+      "renderHash": "f8628aa52612339a",
+      "passId": "blockout",
+      "mapStrippedRender": ".img2threejs\\shots\\blockout-clay.png"
+    }
+  ]
+}

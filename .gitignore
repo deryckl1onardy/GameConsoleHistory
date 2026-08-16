@@ -22,3 +22,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# img2threejs working artifacts — reference photos (third-party), captured
+# screenshots, evidence JSON/logs, and local pipeline state. Ignore the whole
+# directory, then re-admit only the two files that are the actual source of
+# truth for regenerating the model: the authored spec and its assessment.
+# Everything else here (di.json, analysis.md, gate results, comparison
+# sheets, camera-solve output, crops...) is derived working evidence, cheap
+# to regenerate by re-running the pipeline against the spec.
+.img2threejs/*
+!.img2threejs/object-sculpt-spec.json
+!.img2threejs/assessment.json
+
+# Copied here only so the Vite dev server can serve them as texture URLs for
+# the review harness — the real copies live in .img2threejs/material-evidence/.
+public/material-evidence/
+
+# Local preview/session state from the editor's dev-server integration.
+.freebuff/
