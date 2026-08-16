@@ -2,6 +2,7 @@ import { ROOM_CHROME } from '@/frame'
 import { useActiveConsole, useScene } from '@/store/scene'
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/icons'
 import { PanelSummary } from './PanelSummary'
+import { FunFactCard } from './FunFactCard'
 import { COPY, ROOM_TABS } from './panel-copy'
 import { OverviewTab } from './tabs/OverviewTab'
 import { GamesTab } from './tabs/GamesTab'
@@ -15,8 +16,15 @@ import { HistoryTab } from './tabs/HistoryTab'
  * height, which recomputes the camera's frame offset, which is exactly the
  * coupling this file exists to keep honest.
  *
- * Wide: two columns — the summary left, the tabbed column right. Compact:
- * the same content stacked into one column at 45vh.
+ * Wide: three columns — the lead summary, the tabbed column, and the fun
+ * fact as a genuine third region, each divided by the same self-coloured
+ * hairline. The fact used to float above the panel as its own bordered
+ * card; folding it in here is what actually makes the bottom of the screen
+ * read as one composed object instead of two overlapping panels. It drops
+ * out entirely when the active console has no facts to show, so the grid
+ * never holds a bordered column with nothing in it. Compact: the lead and
+ * tabbed columns stack into one column at 45vh; the fact has nowhere to go
+ * at that width and is left out, same as before.
  *
  * The chevron at the bottom-centre collapses the panel to its slim bar.
  * `panelOpen` is expanded-vs-collapsed (the old side-rail open/close is gone
@@ -33,6 +41,7 @@ export function DetailPanel() {
   const chrome = layout === 'compact' ? ROOM_CHROME.compact : ROOM_CHROME
   const heightVh = (open ? chrome.panelH : chrome.collapsedPanelH) * 100
   const width = layout === 'compact' ? '94%' : '85%'
+  const showAside = layout === 'wide' && entry.facts.length > 0
 
   if (!open) {
     return (
@@ -64,7 +73,12 @@ export function DetailPanel() {
         className="min-h-0 flex-1"
         style={{
           display: 'grid',
-          gridTemplateColumns: layout === 'wide' ? 'minmax(0, 2fr) minmax(0, 3fr)' : '1fr',
+          gridTemplateColumns:
+            layout === 'wide'
+              ? showAside
+                ? 'minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr)'
+                : 'minmax(0, 2fr) minmax(0, 3fr)'
+              : '1fr',
           gridTemplateRows: layout === 'wide' ? '1fr' : 'minmax(0, 2fr) minmax(0, 3fr)',
         }}
       >
@@ -78,7 +92,12 @@ export function DetailPanel() {
           <PanelSummary compact={layout === 'compact'} />
         </div>
 
-        <div className="flex min-h-0 flex-col">
+        <div
+          className={[
+            'flex min-h-0 flex-col',
+            showAside ? 'border-r border-parchment/10' : '',
+          ].join(' ')}
+        >
           <nav className="flex gap-0.5 border-b border-parchment/10 px-5 pt-3" role="tablist">
             {ROOM_TABS.map((t) => (
               <button
@@ -104,6 +123,12 @@ export function DetailPanel() {
             {tab === 'history' && <HistoryTab />}
           </div>
         </div>
+
+        {showAside && (
+          <div className="min-h-0 overflow-y-auto px-6 py-5">
+            <FunFactCard />
+          </div>
+        )}
       </div>
 
       <footer className="flex h-8 shrink-0 items-center justify-center border-t border-parchment/10">

@@ -1,20 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
-import { ROOM_CHROME } from '@/frame'
-import { useActiveConsole, useScene } from '@/store/scene'
+import { useActiveConsole } from '@/store/scene'
 import { COPY } from './panel-copy'
 
 /**
- * The fun-fact card floating above the detail panel's right edge — the one
- * piece of chrome that is allowed to be playful. Rotates through the
- * console's facts so it stays alive without ever demanding attention.
+ * The fun fact — one console fact at a time, rotating so it stays alive
+ * without ever demanding attention.
  *
- * Rendered AFTER DetailPanel in RoomChrome on purpose: there is not a single
- * z-index class in this app, so DOM order is the z-order, and a card mounted
- * before the panel would vanish behind it.
+ * This used to be its own floating card: absolutely positioned above the
+ * panel, with its own border, background, blur and rounded corners — a
+ * second bordered box duplicating the panel's own chrome one level up,
+ * which is exactly why it read as disconnected rather than as part of one
+ * composition. It is now plain content, laid out as the detail panel's
+ * third column (see DetailPanel.tsx) — no position, no card shell, no
+ * height imposed. Whether and where it renders is entirely the panel's
+ * decision; this component only knows how to show a fact.
  */
 export function FunFactCard() {
   const entry = useActiveConsole()
-  const layout = useScene((s) => s.layout)
 
   const facts = entry.facts
   const [index, setIndex] = useState(0)
@@ -36,29 +38,22 @@ export function FunFactCard() {
     }
   }, [facts.length])
 
-  if (layout === 'compact' || facts.length === 0) return null
+  if (facts.length === 0) return null
 
   const fact = facts[index % facts.length]
 
   return (
-    <aside
-      className="pointer-events-none absolute right-8 w-[300px]"
-      style={{ bottom: `calc(${ROOM_CHROME.panelH * 100}vh + 1rem)` }}
-      aria-label={COPY.funFact}
-    >
+    <div aria-label={COPY.funFact}>
       <p
-        className="mb-1.5 text-[10px] uppercase tracking-[0.22em] text-amber/80 transition-opacity duration-300"
+        className="text-[10px] uppercase tracking-[0.22em] text-amber/80 transition-opacity duration-300"
         style={{ opacity }}
       >
         {COPY.funFact}
       </p>
-      <div
-        className="rounded-xl border border-parchment/12 bg-ink/70 p-4 backdrop-blur-xl transition-opacity duration-300"
-        style={{ opacity }}
-      >
-        <h4 className="font-display text-[15px] leading-snug text-parchment">{fact.title}</h4>
-        <p className="mt-1.5 text-[12px] leading-relaxed text-parchment/65">{fact.body}</p>
+      <div className="mt-2 transition-opacity duration-300" style={{ opacity }}>
+        <h4 className="font-display text-lg leading-snug text-parchment">{fact.title}</h4>
+        <p className="mt-2 text-[13px] leading-relaxed text-parchment/70">{fact.body}</p>
       </div>
-    </aside>
+    </div>
   )
 }

@@ -5,18 +5,21 @@ import { useScene } from '@/store/scene'
 import { BrandMark } from './BrandMark'
 import { ConsoleTitle } from './ConsoleTitle'
 import { DetailPanel } from './DetailPanel'
-import { FunFactCard } from './FunFactCard'
 import { ViewportControls } from './ViewportControls'
 
 /**
  * The room screen's 2D chrome, mounted over the 3D scene in App.tsx.
  *
  * The parent overlay is pointer-events-none; each piece opts back in. DOM
- * order is load-bearing (no z-index classes exist anywhere in the app):
- * FunFactCard must come AFTER DetailPanel or it would render behind the
- * panel it floats above. ConsoleTitle and ViewportControls stay transparent
- * to orbit drags — the title covers a third of the screen and must pass
- * input straight through to the canvas.
+ * order is load-bearing (no z-index classes exist anywhere in the app).
+ * ConsoleTitle and ViewportControls stay transparent to orbit drags — the
+ * title covers a third of the screen and must pass input straight through
+ * to the canvas.
+ *
+ * The fun fact used to float here as its own bordered card, disconnected
+ * from the panel it sat above. It is now a genuine third column INSIDE
+ * DetailPanel — see that file — so the room's whole bottom edge reads as
+ * one composed object instead of two panels stacked on top of each other.
  */
 export function RoomChrome() {
   const approach = useScene((s) => s.approach)
@@ -57,7 +60,6 @@ export function RoomChrome() {
       <ConsoleTitle />
       <ViewportControls />
       <DetailPanel />
-      <FunFactCard />
     </div>
   )
 }
