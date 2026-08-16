@@ -86,6 +86,8 @@ export type ShelfBay = {
   generation: Generation
   label: string
   era: string | null
+  /** Earliest release year in this generation — the station's date on the wall. */
+  firstYear: number
   /** Top surface of the plinth: the Y artifacts rest on. Constant across the hall. */
   boardY: number
   boardLength: number
@@ -202,6 +204,10 @@ export function layoutMuseum(consoles: ConsoleEntry[]): MuseumLayout {
       generation,
       label: GENERATION_LABELS[generation],
       era: GENERATION_ERAS[generation] ?? null,
+      // Entries are already sorted oldest-first above, so the first one holds
+      // the generation's own date. Derived, never authored, like everything
+      // else here.
+      firstYear: earliestYear(entries[0]),
       boardY: PLINTH_TOP,
       boardLength,
       boardDepth,

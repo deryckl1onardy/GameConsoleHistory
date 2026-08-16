@@ -129,6 +129,33 @@ describe('museum layout', () => {
     }
   })
 
+  /*
+    The rail shows each station's year and console count instead of eight
+    identical labels, so the year has to be real and has to be the
+    generation's own — derived from the roster, never authored.
+  */
+  it('dates every station from its own earliest console', () => {
+    for (const bay of layout.bays) {
+      const years = bay.artifacts.map((a) => {
+        const entry = CONSOLES.find((c) => c.id === a.id)!
+        return Math.min(
+          ...Object.values(entry.released)
+            .filter(Boolean)
+            .map((d) => new Date(d as string).getFullYear()),
+        )
+      })
+      expect(bay.firstYear, `gen ${bay.generation}`).toBe(Math.min(...years))
+    }
+  })
+
+  it('dates the stations in the order you walk past them', () => {
+    for (let i = 1; i < layout.bays.length; i += 1) {
+      expect(layout.bays[i].firstYear, `station ${i}`).toBeGreaterThanOrEqual(
+        layout.bays[i - 1].firstYear,
+      )
+    }
+  })
+
   it('stands every plinth on the floor at one height', () => {
     // A hall's plinths all rise from the same floor — that is most of what
     // separates it from the stacked wall this replaced, where a console's

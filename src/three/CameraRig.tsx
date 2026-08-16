@@ -4,7 +4,12 @@ import { OrbitControls } from '@react-three/drei'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import gsap from 'gsap'
 import { INTRO, aspectDolly, shotCameraPosition, shotsFor, type Shot } from './shots'
-import { approachShot as computeApproachShot, bayShots, roomDelta } from './museum/museum-shots'
+import {
+  approachShot as computeApproachShot,
+  bayShots,
+  hallOverviewShot,
+  roomDelta,
+} from './museum/museum-shots'
 import { NO_OFFSET, applyFrameOffset, frameOffsetFor } from '@/frame'
 import { MUSEUM_LAYOUT } from './museum/layout'
 import { generationNearestZ } from './museum/shelf-layout'
@@ -44,6 +49,14 @@ const REST_MAX_POLAR = Math.PI / 2.15
  */
 const MUSEUM_AZIMUTH = 0.62
 
+/**
+ * How long after the last travel event the camera settles onto a station.
+ *
+ * Long enough that a wheel burst or a hesitating drag reads as one gesture,
+ * short enough that the settle still feels like a consequence of letting go.
+ */
+const SETTLE_DELAY_MS = 220
+
 export function CameraRig() {
   const controls = useRef<OrbitControlsImpl>(null)
   const camera = useThree((s) => s.camera)
@@ -72,9 +85,11 @@ export function CameraRig() {
   const setScreen = useScene((s) => s.setScreen)
   const setFocusGeneration = useScene((s) => s.setFocusGeneration)
   const focusNavNonce = useScene((s) => s.focusNavNonce)
+  const hallView = useScene((s) => s.hallView)
 
   const shots = useMemo(() => shotsFor(entry, spec), [entry, spec])
   const museumShots = useMemo(() => bayShots(MUSEUM_LAYOUT), [])
+  const hallOverview = useMemo(() => hallOverviewShot(MUSEUM_LAYOUT), [])
   const dolly = aspectDolly(width / Math.max(1, height))
 
   const onShelf = screen === 'shelf'
@@ -86,10 +101,14 @@ export function CameraRig() {
    * destination — which, with a shared tween, would corrupt the flight.
    */
   const restingShot = useMemo((): Shot | null => {
-    if (onShelf) return museumShots.get(focusGeneration) ?? null
+    if (onShelf) {
+      return hallView === 'overview'
+        ? hallOverview
+        : (museumShots.get(focusGeneration) ?? null)
+    }
     const shotId = MODE_TO_SHOT[mode as keyof typeof MODE_TO_SHOT]
     return shotId ? shots[shotId] : null
-  }, [onShelf, museumShots, focusGeneration, mode, shots])
+  }, [onShelf, hallView, hallOverview, museumShots, focusGeneration, mode, shots])
 
   /** Every tween runs through here so only one can ever own the camera. */
   const active = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null)
@@ -391,10 +410,44 @@ export function CameraRig() {
       useScene.getState().syncFocusGeneration(generationNearestZ(MUSEUM_LAYOUT, c.target.z))
     }
 
+    /*
+      The detent. When a travel gesture ends, settle in front of whichever
+      station you stopped nearest.
+
+      This is what makes browsing feel like a sequence of ARRIVALS rather than
+      a free glide — the old shelf let you drift to a halt halfway between two
+      bays, looking at nothing in particular, with no sense of having got
+      anywhere. `setFocusGeneration` is deliberately how it settles rather than
+      a bespoke tween: it bumps the nav nonce, so the ordinary destination
+      effect animates there with the same easing as every other camera move,
+      and it flips `hallView` to 'station', which is also how travelling out of
+      the opening overview closes you in without a separate code path.
+
+      Debounced, because a wheel gesture is a burst of events with no end
+      event of its own — settling on the first notch would fight the rest of
+      the scroll.
+    */
+    let settleTimer = 0
+    const cancelSettle = () => {
+      if (settleTimer) window.clearTimeout(settleTimer)
+      settleTimer = 0
+    }
+    const scheduleSettle = () => {
+      cancelSettle()
+      settleTimer = window.setTimeout(() => {
+        const s = useScene.getState()
+        const c = controls.current
+        if (!c || s.screen !== 'shelf' || s.approach !== 'idle') return
+        s.setFocusGeneration(generationNearestZ(MUSEUM_LAYOUT, c.target.z))
+      }, SETTLE_DELAY_MS)
+    }
+
     const onDown = (e: PointerEvent) => {
       if (e.button !== 0) return
       dragging = true
       lastClientY = e.clientY
+      // A new gesture cancels a settle the previous one had queued.
+      cancelSettle()
     }
     const onMove = (e: PointerEvent) => {
       if (!dragging) return
@@ -410,12 +463,14 @@ export function CameraRig() {
       travelHall(dyPx)
     }
     const onUp = () => {
+      if (!dragging) return
       dragging = false
+      scheduleSettle()
     }
 
-    // Wheel = the same vertical pan. Non-passive so the pan can preventDefault
-    // (the page is overflow-hidden anyway; this keeps the gesture clean on
-    // trackpads with momentum). deltaMode normalises lines/pages to pixels.
+    // Wheel = the same travel. Non-passive so it can preventDefault (the page
+    // is overflow-hidden anyway; this keeps the gesture clean on trackpads
+    // with momentum). deltaMode normalises lines/pages to pixels.
     const onWheel = (e: WheelEvent) => {
       const s = useScene.getState()
       if (s.screen !== 'shelf' || s.approach !== 'idle') return
@@ -424,6 +479,7 @@ export function CameraRig() {
       if (e.deltaMode === 1) dyPx *= 16
       else if (e.deltaMode === 2) dyPx *= Math.max(1, el.clientHeight)
       travelHall(dyPx)
+      scheduleSettle()
     }
 
     el.addEventListener('pointerdown', onDown)
@@ -431,6 +487,7 @@ export function CameraRig() {
     el.addEventListener('wheel', onWheel, { passive: false })
     window.addEventListener('pointerup', onUp)
     return () => {
+      cancelSettle()
       el.removeEventListener('pointerdown', onDown)
       el.removeEventListener('pointermove', onMove)
       el.removeEventListener('wheel', onWheel)

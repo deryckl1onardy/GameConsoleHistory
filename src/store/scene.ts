@@ -18,6 +18,9 @@ export type ViewMode = 'console' | 'diorama' | 'library' | 'controller' | 'compa
  */
 export type Screen = 'shelf' | 'room'
 
+/** The museum's two viewing distances. See `hallView` on the store. */
+export type HallView = 'overview' | 'station'
+
 /**
  * The museum-to-room move, as a guarded machine — same posture as `playback`,
  * because a GSAP timeline keys off it and a desync would strand the camera
@@ -115,7 +118,19 @@ type SceneState = {
   /* ---- museum ---- */
   screen: Screen
   approach: Approach
-  /** Which generation's bay the museum camera rests on. */
+  /**
+   * How much of the hall the camera is taking in.
+   *
+   *   overview  the whole gallery from just inside the entrance — the
+   *             opening frame, and what says how much history there is
+   *   station   standing in front of one generation, close enough to read it
+   *
+   * Two distances rather than one free-floating camera: browsing a museum is
+   * a sequence of arrivals, not a continuous glide, and the shelf's old
+   * unbounded pan gave you no sense of ever having got anywhere.
+   */
+  hallView: HallView
+  /** Which generation's station the museum camera rests on. */
   focusGeneration: Generation
   /**
    * Bumped only when the user asks to GO to a generation (the rail), never
@@ -167,13 +182,15 @@ type SceneState = {
   /** Returns false and does nothing if the transition is not legal. */
   advanceApproach: (next: Approach) => boolean
   setScreen: (s: Screen) => void
-  /** Navigate TO a generation — moves the camera. */
+  /** Navigate TO a generation's station — moves the camera, and closes in. */
   setFocusGeneration: (g: Generation) => void
   /**
    * Record which generation the camera is already nearest, without moving it.
-   * What the accent light and the rail highlight should follow while panning.
+   * What the accent light and the rail highlight follow while you travel.
    */
   syncFocusGeneration: (g: Generation) => void
+  /** Pull back to take in the whole hall. */
+  showHallOverview: () => void
   setHovered: (id: string | null) => void
   setMuseumIntroDone: (v: boolean) => void
 }
@@ -213,6 +230,9 @@ export const useScene = create<SceneState>((set, get) => ({
     (oldest, c) => (c.generation < oldest ? c.generation : oldest),
     CONSOLES[0].generation,
   ),
+  // The gallery opens on the whole hall — you take in how much history there
+  // is before going to look at any of it.
+  hallView: 'overview',
   focusNavNonce: 0,
   hoveredId: null,
   museumIntroDone: false,
@@ -339,10 +359,19 @@ export const useScene = create<SceneState>((set, get) => ({
   },
 
   setScreen: (screen) => set({ screen }),
+  // Asking for a generation is asking to go and stand in front of it, so this
+  // closes in from the overview as well as aiming. Both changes bump the same
+  // nonce, which is the one signal CameraRig treats as "move".
   setFocusGeneration: (focusGeneration) =>
-    set((s) => ({ focusGeneration, focusNavNonce: s.focusNavNonce + 1 })),
+    set((s) => ({
+      focusGeneration,
+      hallView: 'station' as HallView,
+      focusNavNonce: s.focusNavNonce + 1,
+    })),
   syncFocusGeneration: (focusGeneration) =>
     set((s) => (s.focusGeneration === focusGeneration ? {} : { focusGeneration })),
+  showHallOverview: () =>
+    set((s) => ({ hallView: 'overview' as HallView, focusNavNonce: s.focusNavNonce + 1 })),
   setHovered: (hoveredId) => set({ hoveredId }),
   setMuseumIntroDone: (museumIntroDone) => set({ museumIntroDone }),
 }))
