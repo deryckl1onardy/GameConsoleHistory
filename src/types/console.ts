@@ -212,6 +212,28 @@ export type Game = {
   blurb: string
 }
 
+/**
+ * A leader-line callout on the hardware diagram image, positioned in
+ * FRACTIONS of the image box (0-1, origin top-left). Coordinates are coupled
+ * to a specific crop — regenerating the art silently misplaces every leader
+ * line, which is exactly why this type exists and why the diagram README says
+ * so. The art itself is a file dropped in under
+ * `public/diagrams/consoles/<id>.svg|.png`, mirroring the GLB convention —
+ * the app builds the slot, not the art.
+ */
+export type HardwareCallout = {
+  label: string
+  x: number
+  y: number
+  /** Which side the leader line springs from, so text never sits on the art. */
+  side: 'left' | 'right'
+}
+
+export type HardwareDiagram = {
+  image: string
+  callouts: HardwareCallout[]
+}
+
 export type PropInstance = {
   kit: string
   variant?: string
@@ -312,14 +334,63 @@ export type MediaIntake = {
  */
 export type ControlKind = 'slider' | 'round-button' | 'rect-button' | 'lever' | 'toggle' | 'touch' | 'jewel'
 
+/**
+ * Which face a control is mounted on. The SNES is the reason this exists: its
+ * POWER and RESET keys lie flat on the *top* of the low front deck, not on the
+ * vertical front face, and rendering them on the front put two purple plates
+ * where the reference photo has bare plastic. 'front' stays the default, so
+ * every existing control keeps its meaning.
+ */
+export type ControlFace = 'front' | 'top'
+
 export type ControlSpec = {
   /** Mesh name generated for this control — becomes an animatedParts target. */
   mesh: string
   kind: ControlKind
-  /** Position on the shell's top or front face, in mm from the shell's own centre. */
+  /**
+   * Interpretation depends on `face`, matching the convention the intake and
+   * vent specs already use:
+   *   front — [x from the shell's centre, y above the floor]
+   *   top   — [x from the shell's centre, z back from the front face]
+   * A top-mounted control's height is not authored at all: it is read off the
+   * shell profile at that depth, so a control cannot float above or sink into
+   * its own deck.
+   */
   position: [number, number]
+  face?: ControlFace
+  /** Length of the cap along X, in mm. */
   sizeMm: number
+  /**
+   * Cap width across its length, as a fraction of `sizeMm`. The SNES's power
+   * and reset are long, narrow stadium keys (~0.3); a squarer cap sits nearer
+   * 0.6. Defaults per kind when omitted.
+   */
+  aspect?: number
   color?: string
+}
+
+/**
+ * A rectangular block standing proud of the shell's front face.
+ *
+ * The SNES front is not one flat plane: two blocks carry the power and reset
+ * keys and the controller ports, and the narrower column between them — the
+ * one wearing the EJECT label — sits back from both. That relief is most of
+ * what makes the front read as an SNES rather than a grey box.
+ *
+ * Blocks are additive only. A recess is expressed by raising its neighbours,
+ * never by a negative protrusion: subtracting a volume needs a boolean library
+ * this project deliberately does not depend on, and a dark plate faking a hole
+ * is exactly the sort of painted-on detail the swept-profile approach exists
+ * to avoid.
+ */
+export type ReliefSpec = {
+  mesh?: string
+  /** Centre of the block on the front face — [x from centre, y above floor], mm. */
+  position: [number, number]
+  widthMm: number
+  heightMm: number
+  /** How far the block stands proud of the front face, in mm. Must be > 0. */
+  protrusionMm: number
 }
 
 export type PortSpec = {
@@ -364,6 +435,8 @@ export type ConsoleForm = {
   controls: ControlSpec[]
   ports: PortSpec[]
   vents: VentSpec[]
+  /** Front-face relief blocks. Optional: most shells are a plain swept face. */
+  reliefs?: ReliefSpec[]
 }
 
 export type ConsoleEntry = {
@@ -388,6 +461,11 @@ export type ConsoleEntry = {
   mediaArchetype: MediaArchetypeId
   /** Hero model path plus the named meshes the insert sequence animates. */
   model: string
+  /**
+   * Optional annotated hardware diagram. Missing is NOT an error state — the
+   * diagram slot falls back gracefully (see HardwareDiagram.tsx).
+   */
+  hardwareDiagram?: HardwareDiagram
   animatedParts: {
     slot?: string
     tray?: string

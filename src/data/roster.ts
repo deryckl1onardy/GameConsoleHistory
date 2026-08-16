@@ -249,6 +249,18 @@ export const GENERATION_LABELS: Record<Generation, string> = {
   9: 'Ninth generation',
 }
 
+/**
+ * The marketing bit-width descriptor, where the industry actually used one.
+ * Gen 6+ abandoned the descriptor ("128-bit" was a PS2 marketing number,
+ * not a spec), so the title block falls back to GENERATION_LABELS there.
+ */
+export const GENERATION_BITS: Partial<Record<Generation, string>> = {
+  2: '8-bit console',
+  3: '8-bit console',
+  4: '16-bit console',
+  5: '32/64-bit console',
+}
+
 /** The era caption shown under each generation heading in the picker. */
 export const GENERATION_ERAS: Partial<Record<Generation, string>> = {
   2: '1977 — cartridges arrive',

@@ -48,13 +48,20 @@ export const CONSOLE_FORMS: Record<string, ConsoleForm> = {
     },
     finish: 'matte',
     palette: {
-      // Corrected against Wikipedia's design section: the shell is a medium
-      // grey, not the near-white the first procedural pass used.
-      shell: '#b9b6ac',
-      // Purple sliding switches, dark grey eject lever — this was backwards
-      // in the original hand-built model.
-      accent: '#6d5b9e',
-      dark: '#4a4844',
+      // Read off three reference photographs of a clean NA unit rather than
+      // from a written description: the shell is a light warm grey, roughly
+      // two values above the medium grey a text source suggests. The earlier
+      // #b9b6ac read as a dirty unit under the diorama's warm key light.
+      // (A yellowed console is a real thing, but it belongs in the
+      // `yellowing` failure state, not in the shell's own albedo.)
+      shell: '#d2cfc8',
+      accent: '#6f61a8',
+      // The eject pad is a mid grey — clearly darker than the shell, nowhere
+      // near the near-black the previous value used. The old #4a4844 made the
+      // one grey control read as a hole in the front panel; a first correction
+      // to #a5a199 then over-shot the other way and read as a pale sticker
+      // under the diorama's warm key, so this sits between them.
+      dark: '#8e8a81',
     },
     intake: {
       kind: 'top-slot',
@@ -63,20 +70,54 @@ export const CONSOLE_FORMS: Record<string, ConsoleForm> = {
       widthMm: 140,
       heightMm: 24,
     },
+    // Left to right the front reads POWER, EJECT, RESET — and both outer keys
+    // are purple, not just the power switch. The reference photographs are
+    // unambiguous on all three points; the previous layout had reset as a
+    // small grey circle on the left and eject as a lever off to the right.
+    //
+    // Power and reset lie flat on TOP of the low front deck. Mounting them on
+    // the vertical front face (the kit's only option before `face`) put two
+    // purple plates on a panel that is bare plastic in every photograph.
     controls: [
-      // Power slider — purple, front-left. Was rendered grey; corrected.
-      { mesh: 'power_switch', kind: 'slider', position: [-58, 41], sizeMm: 26, color: 'accent' },
-      // Reset — small round button, grey (not purple, as the first pass had it).
-      { mesh: 'reset_button', kind: 'round-button', position: [-24, 40], sizeMm: 16, color: 'dark' },
-      // Eject — the larger lever on the right, dark grey.
-      { mesh: 'eject_lever', kind: 'lever', position: [30, 41], sizeMm: 42, color: 'dark' },
+      {
+        mesh: 'power_switch',
+        kind: 'slider',
+        face: 'top',
+        position: [-50, 14],
+        sizeMm: 46,
+        aspect: 0.3,
+        color: 'accent',
+      },
+      {
+        mesh: 'reset_button',
+        kind: 'rect-button',
+        face: 'top',
+        position: [50, 14],
+        sizeMm: 46,
+        aspect: 0.3,
+        color: 'accent',
+      },
+      // Eject stays on the front face — it is the one control you push
+      // horizontally — and sits in the centre column between the two blocks.
+      { mesh: 'eject_lever', kind: 'lever', position: [0, 20], sizeMm: 32, aspect: 0.72, color: 'dark' },
     ],
+    // Centred on the two front blocks, low, where a controller lead hangs
+    // straight down without fouling the eject column.
     ports: [
-      { mesh: 'controller_port_1', position: [-38, 29], widthMm: 26, heightMm: 13 },
-      { mesh: 'controller_port_2', position: [38, 29], widthMm: 26, heightMm: 13 },
+      { mesh: 'controller_port_1', position: [-58, 17], widthMm: 26, heightMm: 13 },
+      { mesh: 'controller_port_2', position: [58, 17], widthMm: 26, heightMm: 13 },
     ],
-    vents: [
-      { position: [0, 195], count: 7, slotWidthMm: 3, slotHeightMm: 60, gapMm: 6, direction: 'row' },
+    // No vent row. The previous spec cut a seven-slot grille across the top
+    // deck; no such grille exists on the hardware — the top carries the
+    // cartridge bay and its moulding seams and nothing else. It was the most
+    // visible invented feature on the model.
+    vents: [],
+    // The two blocks carrying the keys and the controller ports. The narrower
+    // EJECT column between them is the gap they leave, not a cut — see
+    // ReliefSpec on why relief is additive only.
+    reliefs: [
+      { mesh: 'front_block_left', position: [-58, 20], widthMm: 80, heightMm: 40, protrusionMm: 2.5 },
+      { mesh: 'front_block_right', position: [58, 20], widthMm: 80, heightMm: 40, protrusionMm: 2.5 },
     ],
   },
 }

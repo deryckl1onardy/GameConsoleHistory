@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { CONSOLE_FORMS, consoleForm } from './console-forms'
 import { CONTROLLER_FORMS, controllerForm } from './controller-forms'
 import { CONSOLES } from '@/data/consoles'
-import { sweepProfileAlongX, sweepPlanVertically } from '@/three/geometry/profiles'
+import {
+  profileHeightAtDepth,
+  sweepProfileAlongX,
+  sweepPlanVertically,
+} from '@/three/geometry/profiles'
 
 /**
  * These are the tests the plan's Phase 4b verification asks for: dimensional
@@ -82,6 +86,81 @@ describe('SNES console form', () => {
     const heights = form.shell.profile.map(([, h]) => h)
     const risingSection = heights.filter((h, i) => i > 0 && h > heights[i - 1])
     expect(risingSection.length).toBeGreaterThanOrEqual(4)
+  })
+})
+
+/**
+ * These lock in corrections made against three reference photographs of an NA
+ * SNES. Each one replaces a feature the model previously invented or got
+ * backwards, and each is cheap to regress by "tidying" the form spec later.
+ */
+describe('SNES console form, against the reference photographs', () => {
+  const entry = CONSOLES.find((c) => c.id === 'snes')!
+  const form = consoleForm('snes')!
+
+  it('cuts no vent grille into the top deck, because the hardware has none', () => {
+    expect(form.vents).toHaveLength(0)
+  })
+
+  it('makes both power and reset purple, and eject the only grey control', () => {
+    const byMesh = (m: string) => form.controls.find((c) => c.mesh === m)!
+    expect(byMesh('power_switch').color).toBe('accent')
+    expect(byMesh('reset_button').color).toBe('accent')
+    expect(byMesh('eject_lever').color).toBe('dark')
+    expect(form.controls.filter((c) => c.color === 'dark')).toHaveLength(1)
+  })
+
+  it('orders the front controls power, eject, reset from left to right', () => {
+    const x = (m: string) => form.controls.find((c) => c.mesh === m)!.position[0]
+    expect(x('power_switch')).toBeLessThan(x('eject_lever'))
+    expect(x('eject_lever')).toBeLessThan(x('reset_button'))
+    // Eject sits in the centre column, not off to one side.
+    expect(Math.abs(x('eject_lever'))).toBeLessThan(5)
+  })
+
+  it('mounts power and reset on the deck top, at the height the profile says', () => {
+    if (form.shell.kind !== 'swept') throw new Error('expected swept shell')
+    for (const mesh of ['power_switch', 'reset_button']) {
+      const control = form.controls.find((c) => c.mesh === mesh)!
+      expect(control.face, `${mesh} must be top-mounted`).toBe('top')
+      const [, depthFromFront] = control.position
+      // The low front deck, not the raised rear deck — a control that landed
+      // on the rear deck would be sitting on the cartridge bay.
+      const deckHeight = profileHeightAtDepth(form.shell.profile, depthFromFront)
+      expect(deckHeight).toBeGreaterThan(0)
+      expect(deckHeight).toBeLessThan(entry.dimensions.height)
+    }
+  })
+
+  it('leaves a centre column between the two front blocks', () => {
+    const reliefs = form.reliefs ?? []
+    expect(reliefs).toHaveLength(2)
+    const [left, right] = [...reliefs].sort((a, b) => a.position[0] - b.position[0])
+    const gap = right.position[0] - right.widthMm / 2 - (left.position[0] + left.widthMm / 2)
+    // Wide enough to carry the eject control and read as a column, not a seam.
+    expect(gap).toBeGreaterThan(20)
+  })
+
+  it('keeps every relief block inside the shell and standing proud of it', () => {
+    for (const r of form.reliefs ?? []) {
+      expect(r.protrusionMm, `${r.mesh} must be additive`).toBeGreaterThan(0)
+      expect(Math.abs(r.position[0]) + r.widthMm / 2).toBeLessThanOrEqual(entry.dimensions.width / 2)
+      expect(r.position[1] + r.heightMm / 2).toBeLessThanOrEqual(entry.dimensions.height)
+    }
+  })
+
+  it('sits both controller ports on a block, so neither renders inside one', () => {
+    // This is the failure the frontSurfaceZ lookup exists to prevent: a port
+    // authored against the nominal front face, then buried by a block added in
+    // front of it.
+    for (const port of form.ports) {
+      const onBlock = (form.reliefs ?? []).some(
+        (r) =>
+          Math.abs(port.position[0] - r.position[0]) + port.widthMm / 2 <= r.widthMm / 2 &&
+          Math.abs(port.position[1] - r.position[1]) + port.heightMm / 2 <= r.heightMm / 2,
+      )
+      expect(onBlock, `${port.mesh} is not fully on a relief block`).toBe(true)
+    }
   })
 })
 

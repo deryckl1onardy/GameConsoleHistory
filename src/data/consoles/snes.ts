@@ -70,6 +70,19 @@ export const snes: ConsoleEntry = {
   mediaKind: 'cartridge',
   mediaArchetype: 'cart-snes-na',
   model: '/models/consoles/snes.glb',
+  // The proving case for the diagram slot. Art is AI-generated and dropped in
+  // at public/diagrams/consoles/snes.svg when it exists; callout coordinates
+  // are fractions of that image box, coupled to its crop — see
+  // public/diagrams/README.md.
+  hardwareDiagram: {
+    image: '/diagrams/consoles/snes.svg',
+    callouts: [
+      { label: 'Power and reset keys — flat on the top deck, not the front face', x: 0.18, y: 0.3, side: 'left' },
+      { label: 'EJECT lever, on the narrower column between the two blocks', x: 0.5, y: 0.42, side: 'right' },
+      { label: 'Controller ports — 7-pin, same as the NES', x: 0.28, y: 0.62, side: 'left' },
+      { label: 'Cartridge slot — the Game Pak slides in from the top', x: 0.78, y: 0.22, side: 'right' },
+    ],
+  },
   animatedParts: {
     slot: 'cart_slot',
     powerSwitch: 'power_switch',
