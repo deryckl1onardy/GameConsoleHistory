@@ -24,29 +24,44 @@ const HOVER_DURATION = 0.35
  * styling choice — it is what makes the shelf-to-room transform a pure
  * translation. See museum-shots.ts.
  *
- * Hover motion is GSAP on an outer group's refs, never React state: there is
- * currently zero `useFrame` in this codebase, and driving a per-frame nudge
- * through re-renders would be the first. `artifact.position`/`.rotation` are
- * stable array references from the module-level MUSEUM_LAYOUT singleton, so
+ * Hover motion is GSAP on a ref, never React state: there is currently zero
+ * `useFrame` in this codebase, and driving a per-frame nudge through
+ * re-renders would be the first. `artifact.position`/`.rotation` are stable
+ * array references from the module-level MUSEUM_LAYOUT singleton, so
  * React-three-fiber only re-applies them when they actually change — which
- * means the tween's own mutation of `group.position.z`/`group.scale` is
- * never clobbered by an unrelated re-render (the same guarantee the GLB
- * hide-mesh pass already relies on, see GltfModel.tsx).
+ * means the tween's own mutation is never clobbered by an unrelated
+ * re-render (the same guarantee the GLB hide-mesh pass already relies on,
+ * see GltfModel.tsx).
+ *
+ * THREE nested groups, and the nesting is load-bearing:
+ *
+ *   pose    carries the artifact's real position. Static.
+ *   hover   the step-forward and scale. Starts at the ORIGIN, so its tween is
+ *           a relative offset — and because its parent is unrotated, its +Z
+ *           is the hall's +Z, which is what "steps toward the viewer" has to
+ *           mean whatever yaw the console itself carries.
+ *   yaw     the console's own room rotation. Innermost, so it cannot turn the
+ *           hover direction with it.
+ *
+ * This used to be one group carrying pose, rotation and tween together, with
+ * the tween writing `position.z` ABSOLUTELY — `z: hovered ? 0.045 : 0`. That
+ * was invisible while every station sat on the hall's centre line at z = 0,
+ * because resting at "0" was resting where it belonged. The moment stations
+ * receded down the hall, the resting tween slammed all twenty-two consoles
+ * back to z = 0, piling the entire collection at the entrance and leaving
+ * every plinth in the gallery empty.
  */
 export function ArtifactSlot({ artifact }: { artifact: ShelfArtifact }) {
   const entry = getConsole(artifact.id)
   const hovered = useScene((s) => s.hoveredId === artifact.id)
   const reducedMotion = useScene((s) => s.reducedMotion)
-  const groupRef = useRef<Group>(null)
+  const hoverRef = useRef<Group>(null)
 
   useEffect(() => {
-    const g = groupRef.current
+    const g = hoverRef.current
     if (!g) return
     const duration = reducedMotion ? 0 : HOVER_DURATION
-    // z here is the PARENT's frame (this group's own position, evaluated
-    // before its own rotation reaches children) — so it moves the console
-    // toward the museum's +Z / camera side regardless of the artifact's own
-    // yaw, which is what "steps forward" has to mean.
+    // Relative to the artifact's own resting pose, which its parent carries.
     gsap.to(g.position, { z: hovered ? HOVER_FORWARD : 0, duration, ease: 'power2.out' })
     gsap.to(g.scale, {
       x: hovered ? HOVER_SCALE : 1,
@@ -60,11 +75,12 @@ export function ArtifactSlot({ artifact }: { artifact: ShelfArtifact }) {
   if (!entry) return null
 
   return (
-    <group ref={groupRef} position={artifact.position} rotation={artifact.rotation}>
-      {/* Identity transform here — the outer group above already carries the
-          artifact's real pose; ConsoleModel gets the origin so the hover
-          tween composes with it rather than fighting it. */}
-      <ConsoleModel entry={entry} position={[0, 0, 0]} rotation={[0, 0, 0]} />
+    <group position={artifact.position}>
+      <group ref={hoverRef}>
+        <group rotation={artifact.rotation}>
+          <ConsoleModel entry={entry} position={[0, 0, 0]} rotation={[0, 0, 0]} />
+        </group>
+      </group>
     </group>
   )
 }

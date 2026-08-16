@@ -33,10 +33,20 @@ export function ArtifactLabel({ artifact, bay }: { artifact: ShelfArtifact; bay:
 
   return (
     <Html
-      // The board's own front edge, centred under the artifact — not floating
-      // over the model, where post-processing and the console's own geometry
-      // would fight it for the eye.
-      position={[artifact.position[0], bay.boardY, bay.boardDepth / 2]}
+      // The plinth's own front edge, centred under the artifact — not floating
+      // over the model, where the console's own geometry would fight it for
+      // the eye.
+      //
+      // The Z is the STATION'S front edge, not a bare half-depth. That was the
+      // same number back when every bay sat on the hall's centre line at
+      // z = 0; now that stations recede down the hall it has to be measured
+      // from the station the label belongs to, or every label in the gallery
+      // stacks up at the entrance.
+      position={[
+        artifact.position[0],
+        bay.boardY,
+        bay.boardCenter[2] + bay.boardDepth / 2,
+      ]}
       center
       pointerEvents="none"
       occlude={false}
