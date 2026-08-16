@@ -7,7 +7,10 @@ import { snes } from './snes'
 import { saturn } from './saturn'
 import { playstation } from './playstation'
 import { n64 } from './n64'
+import { dreamcast } from './dreamcast'
 import { ps2 } from './ps2'
+import { xbox } from './xbox'
+import { gamecube } from './gamecube'
 import { ps3 } from './ps3'
 import { ps4 } from './ps4'
 import { ps5 } from './ps5'
@@ -21,7 +24,7 @@ import { ps5 } from './ps5'
  *   gen 3  NES ✅, Master System ✅
  *   gen 4  Genesis ✅, SNES ✅
  *   gen 5  Saturn ✅, PlayStation ✅, Nintendo 64 ✅
- *   gen 6  Dreamcast, PlayStation 2 ✅, Xbox, GameCube
+ *   gen 6  Dreamcast ✅, PlayStation 2 ✅, Xbox ✅, GameCube ✅
  *   gen 7  Xbox 360, PlayStation 3 ✅, Wii
  *   gen 8  Wii U, PlayStation 4 ✅, Xbox One, Switch
  *   gen 9  PlayStation 5 ✅, Xbox Series X|S, Switch 2
@@ -35,7 +38,10 @@ export const CONSOLES: ConsoleEntry[] = [
   saturn,
   playstation,
   n64,
+  dreamcast,
   ps2,
+  xbox,
+  gamecube,
   ps3,
   ps4,
   ps5,
@@ -63,4 +69,20 @@ export function byGeneration(): Map<Generation, ConsoleEntry[]> {
   return out
 }
 
-export { atari2600, nes, masterSystem, genesis, snes, saturn, playstation, n64, ps2, ps3, ps4, ps5 }
+export {
+  atari2600,
+  nes,
+  masterSystem,
+  genesis,
+  snes,
+  saturn,
+  playstation,
+  n64,
+  dreamcast,
+  ps2,
+  xbox,
+  gamecube,
+  ps3,
+  ps4,
+  ps5,
+}

@@ -215,6 +215,103 @@ describe('SNES controller form', () => {
   })
 })
 
+/**
+ * Every swept shell in the kit, checked against the console's own published
+ * dimensions. Written as a loop rather than a describe-per-console on purpose:
+ * the point is that this holds for the WHOLE kit, so a console added later
+ * cannot quietly ship a profile that does not match its data — it is covered
+ * the moment its form lands, with no new test to remember to write.
+ */
+describe('every swept console form', () => {
+  const swept = Object.entries(CONSOLE_FORMS).filter(
+    ([, form]) => form.shell.kind === 'swept',
+  )
+
+  it('covers at least the consoles known to be form-built', () => {
+    expect(swept.length).toBeGreaterThanOrEqual(4)
+  })
+
+  for (const [id, form] of swept) {
+    describe(id, () => {
+      const entry = CONSOLES.find((c) => c.id === id)!
+
+      it('produces a shell whose bounding box matches the published dimensions', () => {
+        if (form.shell.kind !== 'swept') throw new Error('expected swept shell')
+        const geom = sweepProfileAlongX(form.shell.profile, entry.dimensions.width, {
+          bevelMm: form.shell.bevelMm,
+        })
+        geom.computeBoundingBox()
+        const box = geom.boundingBox!
+
+        // Within a couple mm — the bevel adds a small margin, which is expected.
+        expect(box.max.x - box.min.x).toBeCloseTo(entry.dimensions.width / 1000, 2)
+        expect(box.max.y - box.min.y).toBeCloseTo(entry.dimensions.height / 1000, 2)
+        expect(box.max.z - box.min.z).toBeCloseTo(entry.dimensions.depth / 1000, 2)
+      })
+
+      it('names every animated part the data expects', () => {
+        if (form.shell.kind !== 'swept') throw new Error('expected swept shell')
+        // Anything the entry declares as animated must exist as a generated
+        // mesh name, or the insert sequence will drive nothing at all.
+        const generated = new Set([
+          ...form.controls.map((c) => c.mesh),
+          ...form.ports.map((p) => p.mesh),
+          ...(form.reliefs ?? []).map((r) => r.mesh).filter(Boolean),
+          // ConsoleFromForm renders a power_led mesh for every console
+          // unconditionally, outside the form spec — so a form must NOT also
+          // declare one as a control, or the name resolves to two meshes.
+          'power_led',
+        ])
+        // The intake generates its own mesh under a kind-derived name, so slot,
+        // tray and lid targets are satisfied by the intake rather than by a
+        // control — check only the named controls here.
+        const intakeDriven = ['slot', 'tray', 'lid'] as const
+        for (const [role, mesh] of Object.entries(entry.animatedParts)) {
+          if (!mesh) continue
+          if (intakeDriven.includes(role as (typeof intakeDriven)[number])) continue
+          expect(generated.has(mesh), `${id}: no generated mesh named "${mesh}" for ${role}`).toBe(
+            true,
+          )
+        }
+      })
+
+      it('generates no duplicate mesh names', () => {
+        // Every mesh the form generates has to be uniquely addressable:
+        // animatedParts and failureStates both resolve their target by name,
+        // and a duplicate silently makes getObjectByName pick whichever came
+        // first. 'power_led' is included because ConsoleFromForm always
+        // renders one, so a form declaring its own would collide with it.
+        const names = [
+          ...form.controls.map((c) => c.mesh),
+          ...form.ports.map((p) => p.mesh),
+          ...(form.reliefs ?? []).map((r) => r.mesh).filter((m): m is string => Boolean(m)),
+          'power_led',
+        ]
+        const seen = new Set<string>()
+        for (const name of names) {
+          expect(seen.has(name), `${id}: duplicate mesh name "${name}"`).toBe(false)
+          seen.add(name)
+        }
+      })
+
+      it('keeps every control and port within the shell footprint', () => {
+        const halfWidth = entry.dimensions.width / 2
+        for (const c of form.controls) {
+          expect(Math.abs(c.position[0]), `${id}: control ${c.mesh} off the shell`).toBeLessThanOrEqual(
+            halfWidth,
+          )
+        }
+        for (const p of form.ports) {
+          expect(
+            Math.abs(p.position[0]) + p.widthMm / 2,
+            `${id}: port ${p.mesh} overhangs the shell`,
+          ).toBeLessThanOrEqual(halfWidth)
+        }
+      })
+    })
+  }
+})
+
 describe('form kit registries', () => {
   it('key every entry by a real console/controller id', () => {
     for (const id of Object.keys(CONSOLE_FORMS)) {

@@ -387,6 +387,114 @@ export const CONTROLLER_FORMS: Record<string, ControllerForm> = {
     bevelMm: 2,
     palette: { shell: '#e9e9ec', accent: '#1c1c1f', accent2: '#0070d1', dark: '#0a0a0c' },
   },
+
+  'dreamcast-pad': {
+    // A wide, shallow horseshoe: the far edge is nearly straight (the two
+    // analog triggers ride behind it), and the near edge drops into two short
+    // stubby grips with a deep, rounded notch between them — that notch is
+    // the VMU window, and it is the reason this outline is non-convex on the
+    // near edge where most pads of the era are not. Anchored to the published
+    // 175 x 115mm footprint.
+    plan: [
+      [-62, -57.5],
+      [62, -57.5],
+      [74, -53],
+      [83, -44],
+      [87.5, -30],
+      [87.5, -12],
+      [82, 6],
+      [70, 22],
+      [54, 33],
+      [38, 38],
+      [26, 36],
+      [18, 26],
+      [12, 12],
+      [0, 6],
+      [-12, 12],
+      [-18, 26],
+      [-26, 36],
+      [-38, 38],
+      [-54, 33],
+      [-70, 22],
+      [-82, 6],
+      [-87.5, -12],
+      [-87.5, -30],
+      [-83, -44],
+      [-74, -53],
+    ],
+    thicknessMm: 78,
+    domeMm: 6,
+    bevelMm: 2,
+    palette: { shell: '#e5e3dc', accent: '#c9c6bd', dark: '#8f8d87' },
+  },
+
+  'xbox-duke': {
+    // The launch pad, and the largest controller in this kit by some margin:
+    // a broad central body with two long grips swept well back, which is what
+    // the "Duke" nickname is about. Anchored to the ~185 x 105mm footprint,
+    // with the near-edge grip points running past ±52.5 the way the DualShock
+    // handles do.
+    plan: [
+      [-58, -52.5],
+      [58, -52.5],
+      [72, -48],
+      [84, -38],
+      [92, -22],
+      [92, -4],
+      [84, 14],
+      [70, 32],
+      [52, 46],
+      [32, 55],
+      [12, 58],
+      [-12, 58],
+      [-32, 55],
+      [-52, 46],
+      [-70, 32],
+      [-84, 14],
+      [-92, -4],
+      [-92, -22],
+      [-84, -38],
+      [-72, -48],
+    ],
+    thicknessMm: 65,
+    domeMm: 6,
+    bevelMm: 2.5,
+    palette: { shell: '#1d1d20', accent: '#8ac43f', dark: '#0e0e11' },
+  },
+
+  'gamecube-pad': {
+    // Smaller and rounder than its contemporaries, with three prongs rather
+    // than two — the centre of the near edge bulges down into a short middle
+    // lobe under the Z button rather than notching inward. Anchored to the
+    // ~152 x 106mm footprint.
+    plan: [
+      [-48, -53],
+      [48, -53],
+      [60, -48],
+      [70, -38],
+      [76, -24],
+      [76, -8],
+      [70, 10],
+      [58, 26],
+      [42, 38],
+      [26, 45],
+      [12, 47],
+      [0, 44],
+      [-12, 47],
+      [-26, 45],
+      [-42, 38],
+      [-58, 26],
+      [-70, 10],
+      [-76, -8],
+      [-76, -24],
+      [-70, -38],
+      [-60, -48],
+    ],
+    thicknessMm: 62,
+    domeMm: 7,
+    bevelMm: 2,
+    palette: { shell: '#585196', accent: '#57b89b', accent2: '#948dcb', dark: '#2e2b45' },
+  },
 }
 
 export function controllerForm(id: string): ControllerForm | undefined {
