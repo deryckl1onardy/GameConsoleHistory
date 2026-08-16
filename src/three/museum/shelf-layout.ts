@@ -30,10 +30,11 @@ import { mm } from '../lighting'
  *    Guarded by museum-shots.test.ts.
  *
  * 2. **Stations would hide behind each other.** Looking down a hall, a plinth
- *    on the centre line occludes every plinth behind it. So stations alternate
- *    to either side of the walkway — the arrangement a real gallery uses for
- *    exactly this reason — and the hall reads as a receding zigzag rather than
- *    a queue.
+ *    on the centre line occludes every plinth behind it. So stations recede
+ *    along a SHALLOW DIAGONAL, each a little further right than the one
+ *    before — a receding row never occludes itself (further objects project
+ *    higher), no two plinths share a screen column, and the run reads as one
+ *    continuous line of history rather than a queue or a zigzag.
  *
  * 3. **The artifacts are turned.** Each console keeps its room yaw (see 1), so
  *    its footprint along X is the rotated extent, not its width. An Atari at
@@ -55,9 +56,18 @@ const MAX_GAP = 0.28
 const DEPTH_PAD = 0.14
 
 /** Distance between one station and the next, down the hall. */
-const STATION_SPACING = 4.6
-/** How far each station sits to its side of the walkway. Alternates. */
-const STATION_STAGGER_X = 1.5
+const STATION_SPACING = 3.4
+/**
+ * How far each station steps to the right of the one before it, as a
+ * fraction of one station's own spacing. The stations form a SHALLOW
+ * DIAGONAL across the hall instead of the old hard zigzag — (index − 3.5)
+ * centres the run on the walkway, so the eight stations span −1.4 to +1.4.
+ * A receding diagonal never occludes itself the way one centre line would
+ * (further objects project higher), and it gives every station its own
+ * screen column — the stagger's whole job — while reading as one continuous
+ * line of history rather than two facing walls.
+ */
+const DIAGONAL_STEP = 0.4
 /** The first station's distance from the hall's entrance (z = 0). */
 const FIRST_STATION_Z = -2.2
 
@@ -188,9 +198,11 @@ export function layoutMuseum(consoles: ConsoleEntry[]): MuseumLayout {
     const boardDepth = Math.max(...sizes.map((s) => s.depth)) + DEPTH_PAD
     const tallest = Math.max(...sizes.map((s) => s.height))
 
-    // Alternate sides of the walkway so no station hides behind another.
-    const side: 'left' | 'right' = index % 2 === 0 ? 'left' : 'right'
-    const centerX = (side === 'left' ? -1 : 1) * STATION_STAGGER_X
+    // The diagonal: each station sits a little further right than the one
+    // before, centred on the walkway (8 stations -> indices 0..7, so the run
+    // spans (0−3.5)*0.4 = −1.4 to (7−3.5)*0.4 = +1.4).
+    const centerX = (index - 3.5) * DIAGONAL_STEP
+    const side: 'left' | 'right' = centerX < 0 ? 'left' : 'right'
     const centerZ = FIRST_STATION_Z - index * STATION_SPACING
 
     // Walk the row from its left edge, centred on the station's own X.
@@ -282,7 +294,7 @@ export const SHELF_CONSTANTS = {
   MIN_GAP,
   MAX_GAP,
   STATION_SPACING,
-  STATION_STAGGER_X,
+  DIAGONAL_STEP,
   FIRST_STATION_Z,
   HALL_WIDTH,
   HALL_HEIGHT,

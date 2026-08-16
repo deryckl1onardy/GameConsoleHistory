@@ -141,16 +141,22 @@ export function hallOverviewShot(layout: MuseumLayout): Shot {
     there. 0.54 lands it just inside the doorway, which is where someone
     taking in a gallery for the first time actually stands.
   */
-  const distance = hallLength * 0.54
+  const distance = hallLength * 0.5
 
   return {
     id: 'hall',
     label: 'The hall',
     // Aim at the middle of the run of stations, at standing eye height, so the
     // vanishing point sits just above centre frame.
-    target: [0, 1.35, hall.entranceZ - hallLength * 0.55],
-    // Straight down the hall, barely lifted — see above.
-    direction: normalise([0.03, 0.05, 1]),
+    target: [0, 1.35, hall.entranceZ - hallLength * 0.5],
+    /*
+      A three-quarter view, not a straight shot: the camera stands to the LEFT
+      of the walkway and looks down-right along it. The stations now recede
+      along a diagonal to the right, so the angled camera is what actually
+      reads the run — from the centre line, a receding diagonal would still
+      look like a queue hiding itself.
+    */
+    direction: normalise([-0.14, 0.06, 1]),
     distance,
     // The overview camera stands INSIDE a box, so a narrow viewport must not
     // dolly it back — that is exactly what pushed it through the far wall at

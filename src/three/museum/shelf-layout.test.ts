@@ -83,17 +83,31 @@ describe('museum layout', () => {
   })
 
   /*
-    The reason stations alternate sides at all: on one centre line, every
-    plinth would hide behind the one in front of it when you look down the
-    hall. This is the mitigation, so it is worth pinning rather than trusting.
+    The reason stations recede along a diagonal at all: on one centre line,
+    every plinth would hide behind the one in front of it when you look down
+    the hall. The diagonal is the mitigation — it guarantees each station its
+    own screen column — so it is worth pinning rather than trusting.
   */
-  it('alternates stations to either side of the walkway', () => {
+  it('recedes along a shallow diagonal with no shared screen column', () => {
+    // Each station sits further right than the one before it — a monotonic
+    // run across the hall, not a zigzag.
     for (let i = 1; i < layout.bays.length; i += 1) {
-      expect(layout.bays[i].side, `station ${i}`).not.toBe(layout.bays[i - 1].side)
+      expect(layout.bays[i].boardCenter[0], `station ${i}`).toBeGreaterThan(
+        layout.bays[i - 1].boardCenter[0],
+      )
     }
-    // And each really is off the centre line, not merely labelled.
+    // The run is shallow: the whole diagonal stays well inside the walls...
     for (const bay of layout.bays) {
-      expect(Math.abs(bay.boardCenter[0]), `gen ${bay.generation}`).toBeGreaterThan(0.5)
+      expect(Math.abs(bay.boardCenter[0]), `gen ${bay.generation} through a wall`).toBeLessThan(
+        layout.hall.width / 2 - bay.boardLength / 2,
+      )
+    }
+    // ...and crosses the centre line somewhere in the middle (it is a line
+    // of history, not a corridor hugging one wall).
+    expect(layout.bays[0].boardCenter[0]).toBeLessThan(0)
+    expect(layout.bays[layout.bays.length - 1].boardCenter[0]).toBeGreaterThan(0)
+    // `side` still describes which half of the hall a station sits in.
+    for (const bay of layout.bays) {
       const sign = bay.side === 'left' ? -1 : 1
       expect(Math.sign(bay.boardCenter[0]), `gen ${bay.generation} on the wrong side`).toBe(sign)
     }
