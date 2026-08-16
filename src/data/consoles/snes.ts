@@ -74,13 +74,44 @@ export const snes: ConsoleEntry = {
   // at public/diagrams/consoles/snes.svg when it exists; callout coordinates
   // are fractions of that image box, coupled to its crop — see
   // public/diagrams/README.md.
+  // Anchors are NOT eyeballed against a picture — they are computed straight
+  // from the same measured reference data that drives the SNES's own
+  // fallback shell (console-forms.ts's `snes` form: profile, control and
+  // intake positions, all sourced from real reference photographs). Each
+  // point is [x, y, z] in the console's own local metres, origin at the
+  // shell's floor-centre — the exact convention `Fact.anchor` already uses.
+  // Power and reset used to share one combined callout, which was a habit
+  // left over from the flat-image system (one text box could gesture at two
+  // nearby leader lines in a picture); anchored precisely in 3D, each gets
+  // its own point instead, since a single anchor can only ever point at one
+  // exact spot on the model.
   hardwareDiagram: {
-    image: '/diagrams/consoles/snes.svg',
     callouts: [
-      { label: 'Power and reset keys — flat on the top deck, not the front face', x: 0.18, y: 0.3, side: 'left' },
-      { label: 'EJECT lever, on the narrower column between the two blocks', x: 0.5, y: 0.42, side: 'right' },
-      { label: 'Controller ports — 7-pin, same as the NES', x: 0.28, y: 0.62, side: 'left' },
-      { label: 'Cartridge slot — the Game Pak slides in from the top', x: 0.78, y: 0.22, side: 'right' },
+      {
+        label: 'Power switch — flat on the top deck, not the front face',
+        anchor: [-0.05, 0.0412, 0.113],
+        labelOffset: [-0.03, 0.05, 0.015],
+      },
+      {
+        label: 'Reset button — flat on the top deck, not the front face',
+        anchor: [0.05, 0.0412, 0.113],
+        labelOffset: [0.03, 0.05, 0.015],
+      },
+      {
+        label: 'Eject lever — the narrower column between the two blocks',
+        anchor: [0, 0.02, 0.1282],
+        labelOffset: [0, 0.035, 0.05],
+      },
+      {
+        label: 'Controller ports (×2) — 7-pin, same as the NES',
+        anchor: [-0.058, 0.017, 0.1307],
+        labelOffset: [-0.02, 0.04, 0.035],
+      },
+      {
+        label: 'Cartridge slot — the Game Pak slides in from the top',
+        anchor: [0, 0.0692, -0.063],
+        labelOffset: [0, 0.045, 0],
+      },
     ],
   },
   animatedParts: {

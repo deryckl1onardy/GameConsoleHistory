@@ -213,24 +213,33 @@ export type Game = {
 }
 
 /**
- * A leader-line callout on the hardware diagram image, positioned in
- * FRACTIONS of the image box (0-1, origin top-left). Coordinates are coupled
- * to a specific crop — regenerating the art silently misplaces every leader
- * line, which is exactly why this type exists and why the diagram README says
- * so. The art itself is a file dropped in under
- * `public/diagrams/consoles/<id>.svg|.png`, mirroring the GLB convention —
- * the app builds the slot, not the art.
+ * A labelled hotspot on the console's OWN rendered 3D model — not a flat
+ * image. `anchor` and `labelOffset` are both in the console's local space,
+ * in metres: the exact same convention `Fact.anchor` already uses (origin at
+ * the shell's own floor-centre, matching `dimensions` at 1:1 scale). This
+ * used to be a leader-line coordinate pinned to a specific crop of a
+ * generated image — coupling the annotation to a picture that could drift
+ * out of sync with what the model actually looks like the moment either one
+ * changed. Anchoring straight into the model's own coordinate space instead
+ * means the callout points at the real part it names, live, in whichever
+ * pose the console happens to be rendered in.
+ *
+ *   anchor       the exact point ON the shell the leader line starts from —
+ *                where the part actually is.
+ *   labelOffset  a delta FROM anchor to where the line ends and the label
+ *                floats, so the pill never sits on top of the part it is
+ *                naming. Small and mostly upward/outward is usually right.
+ *
+ * Rendered by HardwareAnnotations.tsx, mounted alongside the hero console —
+ * see that file for how the two points become a marker, a line and a pill.
  */
 export type HardwareCallout = {
   label: string
-  x: number
-  y: number
-  /** Which side the leader line springs from, so text never sits on the art. */
-  side: 'left' | 'right'
+  anchor: [number, number, number]
+  labelOffset: [number, number, number]
 }
 
 export type HardwareDiagram = {
-  image: string
   callouts: HardwareCallout[]
 }
 

@@ -3,6 +3,7 @@ import type { Group } from 'three'
 import { useActiveConsole, useActiveDiorama, useScene } from '@/store/scene'
 import { ConsoleModel } from './models/registry'
 import { MUSEUM_LAYOUT } from './museum/layout'
+import { HardwareAnnotations } from './HardwareAnnotations'
 
 /**
  * The one and only instance of the currently active console.
@@ -96,6 +97,10 @@ export function HeroConsole() {
           idle-reset both write to one place, never to ConsoleModel's own
           internal group. */}
       <ConsoleModel entry={entry} position={[0, 0, 0]} rotation={[0, 0, 0]} />
+      {/* Local-space sibling of the model, on purpose — HardwareCallout
+          anchors are authored in exactly this group's own coordinate frame,
+          so mounting anywhere else would need to redo the transform here. */}
+      <HardwareAnnotations entry={entry} />
     </group>
   )
 }

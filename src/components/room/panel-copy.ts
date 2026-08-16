@@ -37,12 +37,11 @@ export const COPY = {
   controllerNone: 'No controller recorded.',
 
   diagramHeading: 'Annotated hardware',
-  diagramFallbackHeading: 'Where things are',
 
   funFact: 'Fun fact',
 
   footer:
-    'Sales and dates from Wikipedia. Cover art shown is placeholder. Hardware diagrams are generated art — see public/diagrams/README.md.',
+    'Sales and dates from Wikipedia. Cover art shown is placeholder. Hardware callouts point at the 3D model itself, not a picture of it.',
 
   legendRotate: 'Drag to rotate',
   legendPan: 'Right-drag to pan',
