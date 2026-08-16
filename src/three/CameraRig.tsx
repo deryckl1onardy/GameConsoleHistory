@@ -7,7 +7,7 @@ import { INTRO, aspectDolly, shotCameraPosition, shotsFor, type Shot } from './s
 import { approachShot as computeApproachShot, bayShots, roomDelta } from './museum/museum-shots'
 import { NO_OFFSET, applyFrameOffset, frameOffsetFor } from '@/frame'
 import { MUSEUM_LAYOUT } from './museum/layout'
-import { generationNearestY } from './museum/shelf-layout'
+import { generationNearestZ } from './museum/shelf-layout'
 import { APPROACH_TIMING } from './museum/approach'
 import { heroGroupRef } from './HeroConsole'
 import { useActiveConsole, useActiveDiorama, useScene } from '@/store/scene'
@@ -333,21 +333,25 @@ export function CameraRig() {
   }, [reframeNonce])
 
   /**
-   * The shelf's gesture set: left-drag AND the wheel both move the camera UP
-   * AND DOWN, never around the room and never in and out of it. The museum is
-   * a wall of generation bays stacked vertically, so the gestures that browse
-   * it are vertical pans, not an orbit and not a dolly — orbiting the wall
-   * swings the camera's z and shows the back of a plane, and zooming in a
-   * museum is meaningless. OrbitControls' rotate AND zoom are therefore OFF
-   * on the shelf (see the JSX below) and this handler owns both gestures.
+   * The hall's gesture set: left-drag AND the wheel both WALK THE CAMERA DOWN
+   * THE HALL, never around the room and never in and out of it. The museum is
+   * a gallery hall of generation stations receding along Z, so the gesture
+   * that browses it is travel — scrolling down carries you deeper into the
+   * hall and forward through time. OrbitControls' rotate AND zoom are
+   * therefore OFF on the shelf (see the JSX below) and this handler owns both
+   * gestures.
    *
-   * The pan is applied to BOTH the camera and the orbit target by the same
-   * world-Y delta, so the relative offset OrbitControls derives from is
-   * unchanged and its own update() loop stays idempotent with the pan.
-   * Horizontal drag movement is deliberately ignored — only the vertical
-   * component moves anything. The wheel pans by its pixel delta with the
-   * same per-pixel scale as the drag, so scrolling down pulls the next
-   * generation shelf into view exactly like dragging up would.
+   * Travel is applied to BOTH the camera and the orbit target by the same
+   * world-Z delta, so the relative offset OrbitControls derives from is
+   * unchanged and its own update() loop stays idempotent with it. Horizontal
+   * drag movement is deliberately ignored — only the vertical component
+   * drives travel, because "drag up to go forward" is the same muscle memory
+   * as scrolling a page. The wheel travels by its pixel delta with the same
+   * per-pixel scale as the drag.
+   *
+   * This used to pan along Y, back when the collection was a wall of shelves
+   * stacked vertically. In a hall that gesture would slide the camera up
+   * through the ceiling.
    */
   useEffect(() => {
     if (!onShelf) return
@@ -356,8 +360,9 @@ export function CameraRig() {
     let lastClientY = 0
 
     // Pixel delta -> world delta at the camera's current standoff: the world
-    // height visible through the lens divided by the canvas height.
-    const panVertical = (dyPx: number) => {
+    // height visible through the lens divided by the canvas height. Travel
+    // reads at the same rate as the scene moves under the cursor.
+    const travelHall = (dyPx: number) => {
       const c = controls.current
       if (!c || dyPx === 0) return
       const dist = camera.position.distanceTo(c.target)
@@ -366,25 +371,24 @@ export function CameraRig() {
       const fov = 'fov' in camera ? camera.fov : 50
       const worldHeight = 2 * dist * Math.tan(((fov * Math.PI) / 180) / 2)
       const worldPerPx = worldHeight / Math.max(1, el.clientHeight)
-      // Dragging up (negative dyPx) moves the camera up; the target follows
-      // so the view translates without swinging.
+      // Scrolling down / dragging up (positive dyPx) carries you DEEPER into
+      // the hall, which is −Z. The target moves with the camera so the view
+      // translates down the hall without swinging.
       const delta = -dyPx * worldPerPx
-      camera.position.y += delta
-      c.target.y += delta
+      camera.position.z += delta
+      c.target.z += delta
       c.update()
 
       /*
-        Tell the rest of the app which bay we are now in front of. Without
-        this the pan was silent: the generation rail kept highlighting the bay
-        you started from, and the accent spotlight — the one light
-        MuseumLights calls "what says you are here" — stayed parked over it,
-        leaving the bay actually on screen lit by ambient and key alone, which
-        is why panning read as dim and directionless.
+        Tell the rest of the app which station we are now in front of. Without
+        this the travel was silent: the generation rail kept highlighting the
+        station you started from, and the accent light — the one thing
+        MuseumLights calls "what says you are here" — stayed parked over it.
 
         A passive sync, never `setFocusGeneration`: this must not feed back
         into the destination effect and re-aim the camera mid-drag.
       */
-      useScene.getState().syncFocusGeneration(generationNearestY(MUSEUM_LAYOUT, c.target.y))
+      useScene.getState().syncFocusGeneration(generationNearestZ(MUSEUM_LAYOUT, c.target.z))
     }
 
     const onDown = (e: PointerEvent) => {
@@ -403,7 +407,7 @@ export function CameraRig() {
       }
       const dyPx = e.clientY - lastClientY
       lastClientY = e.clientY
-      panVertical(dyPx)
+      travelHall(dyPx)
     }
     const onUp = () => {
       dragging = false
@@ -419,7 +423,7 @@ export function CameraRig() {
       let dyPx = e.deltaY
       if (e.deltaMode === 1) dyPx *= 16
       else if (e.deltaMode === 2) dyPx *= Math.max(1, el.clientHeight)
-      panVertical(dyPx)
+      travelHall(dyPx)
     }
 
     el.addEventListener('pointerdown', onDown)

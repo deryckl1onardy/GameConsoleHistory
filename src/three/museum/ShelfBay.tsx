@@ -6,44 +6,52 @@ import { ArtifactSlot } from './ArtifactSlot'
 import { SHELF_CONSTANTS, artifactAtX, type ShelfBay as Bay } from './shelf-layout'
 
 /**
- * One generation's board and the artifacts on it.
+ * One generation's station: a plinth standing on the hall floor, carrying that
+ * generation's consoles.
  *
- * The board is only as long as its contents need (shelf-layout.ts), so a
- * generation with one built console reads as a plinth given to a significant
- * object rather than a mostly-empty rack. Five of eight bays are in that
- * position today.
+ * The plinth is only as long as its contents need (shelf-layout.ts), so a
+ * generation with one console reads as a pedestal given to a significant
+ * object rather than a mostly-empty rack.
  *
- * The board's own front edge is chamfered rather than square. A plain box
- * catches the key light as one flat band across the front; the chamfer splits
- * that into a bright lip and a darker face, which is what actually reads as a
- * machined shelf rather than a rectangle.
+ * Its silhouette is the point. A plain box would be a box; this has a
+ * chamfered top edge that catches the ceiling light as a bright lip, a body
+ * that tapers very slightly toward the floor, and a recessed shadow gap at the
+ * base so it reads as *standing on* the floor rather than pasted onto it.
+ * Those three cuts are what make it read as a made object.
  */
 
-const { BOARD_THICKNESS } = SHELF_CONSTANTS
-/** How far the lip stands proud of the board face. */
-const LIP = 0.012
-/** Width of the current-console marker inlaid in the lip — see CurrentMarker. */
+const { PLINTH_TOP } = SHELF_CONSTANTS
+/** Height of the chamfered lip around the plinth's top edge. */
+const CHAMFER = 0.02
+/** How far the body is inset under the top, per side — the taper. */
+const TAPER = 0.03
+/** Height of the recessed reveal at the floor. */
+const REVEAL = 0.035
+/** How far the reveal is inset, per side. */
+const REVEAL_INSET = 0.045
+/** Width of the current-console marker inlaid in the top lip — see CurrentMarker. */
 const MARKER_WIDTH = 0.044
+
+/** Gallery plinth white — a chosen warm-neutral plaster, not a UI-kit grey. */
+const PLINTH_TOP_COLOR = '#f2efe9'
+const PLINTH_BODY_COLOR = '#e8e4dc'
+const PLINTH_REVEAL_COLOR = '#b9b3a8'
 
 /**
  * The hit surface for hover, as a sibling of the models rather than an
  * ancestor. R3F only raycasts objects that carry handlers and their
- * descendants — putting the handler on one plane per bay means the museum
- * raycasts 2 triangles per bay under the pointer, not 180k triangles of
+ * descendants — putting the handler on one plane per station means the museum
+ * raycasts 2 triangles per station under the pointer, not 180k triangles of
  * console geometry, and console meshes never need their own listeners.
  *
- * VERTICAL, facing the camera — not lying flat on the board. A flat plane at
- * the board's own height is a hair-thin Z-band in world space, and at this
- * museum's fairly shallow camera angle (bayShot's direction is mostly +Z with
- * only a mild vertical component) a ray can cross straight through a
+ * VERTICAL, facing the camera — not lying flat on the plinth. A flat plane at
+ * the plinth's own height is a hair-thin Z-band in world space, and at this
+ * museum's fairly shallow camera angle a ray can cross straight through a
  * console's visible silhouette without ever crossing that exact Y at all,
  * missing the plane while looking, on screen, like it is dead centre on the
- * console. Verified by hand: casting a real ray at a console's on-screen
- * centre landed at board height 0.07-0.1m outside the flat plane's Z extent.
- * A plane standing in the XY frame (its default orientation — no rotation
- * needed) and spanning the artifact's real screen-space height/width catches
- * the ray anywhere across the visible object instead of one exact slice
- * through it.
+ * console. A plane standing in the XY frame spanning the artifact's real
+ * screen-space height/width catches the ray anywhere across the visible object
+ * instead of one exact slice through it.
  *
  * Invisible via a fully transparent material rather than `visible={false}` —
  * three.js's own Raycaster does not check `Object3D.visible`, so either would
@@ -86,13 +94,17 @@ function BayHitPlane({ bay }: { bay: Bay }) {
     if (id) selectArtifact(id)
   }
 
-  const height = bay.tallest + SHELF_CONSTANTS.HEADROOM
+  const height = bay.tallest + 0.22
 
   return (
     <mesh
-      // Front-of-board, roughly mid-console height — where the eye and the
-      // pointer both actually land on a shelved object.
-      position={[0, bay.boardY + height / 2 - SHELF_CONSTANTS.BOARD_THICKNESS / 2, bay.boardDepth / 2]}
+      // Front of the plinth, roughly mid-console height — where the eye and
+      // the pointer both actually land on a displayed object.
+      position={[
+        bay.boardCenter[0],
+        bay.boardY + height / 2,
+        bay.boardCenter[2] + bay.boardDepth / 2,
+      ]}
       onPointerMove={resolve}
       onPointerLeave={clear}
       onClick={click}
@@ -107,61 +119,88 @@ function BayHitPlane({ bay }: { bay: Bay }) {
  * The "you are here" marker — grand plan §13.
  *
  * The active console is not missing from its slot (HeroConsole draws it in
- * exactly the same place), so the shelf needs something else to say which
+ * exactly the same place), so the hall needs something else to say which
  * artifact you are currently looking at, and which one you just came back
  * from after a retreat.
  *
  * A museum marks its current exhibit with an engraved plate set into the
- * shelf, so that is what this is: a slim brass inlay in the board's own front
- * lip, directly under the artifact. Deliberately NOT a glow, a ring, a pulse
- * or a floating pip — it is a physical object lit by the room's own key light,
- * which means it dims and brightens with the hall through the whole approach
- * choreography for free, with no opacity handling of its own.
+ * plinth, so that is what this is: a slim brass inlay in the plinth's own top
+ * lip, directly in front of the artifact. Deliberately NOT a glow, a ring, a
+ * pulse or a floating pip — it is a physical object lit by the hall's own
+ * light, which means it dims and brightens with the room through the whole
+ * approach choreography for free, with no opacity handling of its own.
  *
- * Sized off the lip rather than a fixed number so it stays proportional to the
- * shelf, and set a hair proud of the lip's own face so the two never z-fight.
+ * Brass against a white plinth rather than against dark wood now, so it reads
+ * as an inlaid plate rather than a bright mark — the one warm metal note in
+ * an otherwise cool, bright hall.
  */
 function CurrentMarker({ bay, x }: { bay: Bay; x: number }) {
-  const halfDepth = bay.boardDepth / 2
   return (
     <mesh
       position={[
         x,
-        bay.boardY - BOARD_THICKNESS - LIP / 2,
-        halfDepth - LIP / 2 + LIP * 0.14,
+        bay.boardY + 0.0012,
+        bay.boardCenter[2] + bay.boardDepth / 2 - CHAMFER * 1.6,
       ]}
+      rotation={[-Math.PI / 2, 0, 0]}
     >
-      <boxGeometry args={[MARKER_WIDTH, LIP * 1.15, LIP]} />
-      {/* Aged brass: warm, slightly metallic, low roughness so the key light
-          picks out a highlight along it without it ever reading as emissive. */}
+      <planeGeometry args={[MARKER_WIDTH, CHAMFER * 0.9]} />
       <meshStandardMaterial color="#b08a4a" roughness={0.34} metalness={0.62} />
     </mesh>
   )
 }
 
 export function ShelfBay({ bay }: { bay: Bay }) {
-  const halfDepth = bay.boardDepth / 2
   // The active console is drawn by HeroConsole, not here — see its own file
   // header for why exactly one component may ever render a given console's
   // GLB. Its LABEL still renders normally below; only the model is skipped,
   // so the slot reads identically whether the model happens to be drawn by
-  // this bay or by the hero sitting in the same spot.
+  // this station or by the hero sitting in the same spot.
   const consoleId = useScene((s) => s.consoleId)
-  // Undefined on every bay except the one holding the active console.
+  // Undefined on every station except the one holding the active console.
   const current = bay.artifacts.find((a) => a.id === consoleId)
+
+  const [cx, , cz] = bay.boardCenter
+  const bodyHeight = PLINTH_TOP - CHAMFER - REVEAL
 
   return (
     <group>
-      {/* Board. Its TOP surface is boardY — artifacts rest exactly on it. */}
-      <mesh position={[0, bay.boardY - BOARD_THICKNESS / 2, 0]} receiveShadow castShadow>
-        <boxGeometry args={[bay.boardLength, BOARD_THICKNESS, bay.boardDepth]} />
-        <meshStandardMaterial color="#332a22" roughness={0.78} metalness={0.04} />
+      {/*
+        Top slab. Its TOP surface is boardY — artifacts rest exactly on it —
+        and its chamfered edge is what catches the ceiling light as a bright
+        lip, the detail that separates a plinth from a crate.
+      */}
+      <mesh position={[cx, bay.boardY - CHAMFER / 2, cz]} receiveShadow castShadow>
+        <boxGeometry args={[bay.boardLength, CHAMFER, bay.boardDepth]} />
+        <meshStandardMaterial color={PLINTH_TOP_COLOR} roughness={0.62} metalness={0} />
       </mesh>
 
-      {/* Front lip: a thin brighter edge that catches the key light. */}
-      <mesh position={[0, bay.boardY - BOARD_THICKNESS - LIP / 2, halfDepth - LIP / 2]}>
-        <boxGeometry args={[bay.boardLength, LIP, LIP]} />
-        <meshStandardMaterial color="#5c4c3d" roughness={0.5} metalness={0.14} />
+      {/* Body, inset under the top so the slab reads as overhanging it. */}
+      <mesh
+        position={[cx, REVEAL + bodyHeight / 2, cz]}
+        receiveShadow
+        castShadow
+      >
+        <boxGeometry
+          args={[bay.boardLength - TAPER * 2, bodyHeight, bay.boardDepth - TAPER * 2]}
+        />
+        <meshStandardMaterial color={PLINTH_BODY_COLOR} roughness={0.7} metalness={0} />
+      </mesh>
+
+      {/*
+        The reveal: a darker, further-inset block at the floor. Reads as a
+        shadow gap, which is what makes the plinth sit ON the floor instead of
+        being pasted to it — the same trick a skirting detail plays.
+      */}
+      <mesh position={[cx, REVEAL / 2, cz]} receiveShadow>
+        <boxGeometry
+          args={[
+            bay.boardLength - REVEAL_INSET * 2,
+            REVEAL,
+            bay.boardDepth - REVEAL_INSET * 2,
+          ]}
+        />
+        <meshStandardMaterial color={PLINTH_REVEAL_COLOR} roughness={0.9} metalness={0} />
       </mesh>
 
       <BayHitPlane bay={bay} />
@@ -169,8 +208,8 @@ export function ShelfBay({ bay }: { bay: Bay }) {
       {/*
         Per-artifact Suspense. ConsoleModel already wraps its own loader
         (GltfModel.tsx), so a console can never reach this boundary — it exists
-        so any future non-GLB suspender can only ever blank one bay, never the
-        whole museum.
+        so any future non-GLB suspender can only ever blank one station, never
+        the whole museum.
       */}
       {bay.artifacts
         .filter((a) => a.id !== consoleId)
@@ -184,7 +223,7 @@ export function ShelfBay({ bay }: { bay: Bay }) {
         <ArtifactLabel key={a.id} artifact={a} bay={bay} />
       ))}
 
-      {/* Only the bay actually holding the active console draws one. */}
+      {/* Only the station actually holding the active console draws one. */}
       {current ? <CurrentMarker bay={bay} x={current.position[0]} /> : null}
     </group>
   )

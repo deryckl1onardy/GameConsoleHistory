@@ -3,7 +3,7 @@ import { CONSOLES } from '@/data/consoles'
 import {
   SHELF_CONSTANTS,
   artifactAtX,
-  generationNearestY,
+  generationNearestZ,
   layoutMuseum,
   rotatedFootprintX,
 } from './shelf-layout'
@@ -47,50 +47,94 @@ describe('museum layout', () => {
     for (const bay of layout.bays) {
       for (const a of bay.artifacts) {
         expect(
-          Math.abs(a.position[0]) + markerHalf,
-          `${a.id} marker overhangs its board`,
+          Math.abs(a.position[0] - bay.boardCenter[0]) + markerHalf,
+          `${a.id} marker overhangs its plinth`,
         ).toBeLessThanOrEqual(bay.boardLength / 2)
       }
     }
   })
 
   /*
-    `generationNearestY` is what finally lets a pan tell the rest of the app
-    where it ended up — the fix for a rail and an accent light that both kept
-    pointing at the bay you had already left. It has to agree with the camera:
-    it measures to the same point `bayShot` targets, so "nearest" means one
-    thing to both.
+    `generationNearestZ` is what lets travelling the hall tell the rest of the
+    app where it ended up — the fix for a rail and an accent light that both
+    kept pointing at the station you had already left. It has to agree with the
+    camera: it measures to the same point `bayShot` targets, so "nearest" means
+    one thing to both.
   */
-  describe('generationNearestY', () => {
-    it('returns each bay when asked at that bay’s own focus height', () => {
+  describe('generationNearestZ', () => {
+    it('returns each station when asked at that station’s own depth', () => {
       for (const bay of layout.bays) {
-        const focusY = bay.boardY + bay.tallest / 2
-        expect(generationNearestY(layout, focusY), `gen ${bay.generation}`).toBe(bay.generation)
+        expect(generationNearestZ(layout, bay.boardCenter[2]), `gen ${bay.generation}`).toBe(
+          bay.generation,
+        )
       }
     })
 
-    it('clamps to the end bays beyond the ends of the collection', () => {
+    it('clamps to the end stations beyond either end of the hall', () => {
       const first = layout.bays[0]
       const last = layout.bays[layout.bays.length - 1]
-      // Bays read oldest-first downward, so the FIRST bay is the highest.
-      expect(generationNearestY(layout, first.boardY + 100)).toBe(first.generation)
-      expect(generationNearestY(layout, last.boardY - 100)).toBe(last.generation)
+      // Stations recede along −Z, so the FIRST is nearest the entrance.
+      expect(generationNearestZ(layout, first.boardCenter[2] + 100)).toBe(first.generation)
+      expect(generationNearestZ(layout, last.boardCenter[2] - 100)).toBe(last.generation)
     })
 
-    it('never answers with a generation that has no bay', () => {
+    it('never answers with a generation that has no station', () => {
       const known = new Set(layout.bays.map((b) => b.generation))
-      for (let y = -2; y <= 6; y += 0.05) {
-        expect(known.has(generationNearestY(layout, y)), `y=${y.toFixed(2)}`).toBe(true)
+      for (let z = 5; z >= layout.hall.farZ - 5; z -= 0.25) {
+        expect(known.has(generationNearestZ(layout, z)), `z=${z.toFixed(2)}`).toBe(true)
       }
     })
   })
 
-  it('orders bays oldest generation first, reading downward through time', () => {
+  it('orders stations oldest first, receding into the hall through time', () => {
     const gens = layout.bays.map((b) => b.generation)
     expect(gens).toEqual([...gens].sort((a, b) => a - b))
-    // Oldest at the top means each successive bay sits lower.
+    // Walking deeper into the hall is walking forward through time, so each
+    // successive station sits further along −Z than the one before it.
     for (let i = 1; i < layout.bays.length; i += 1) {
-      expect(layout.bays[i].boardY, `bay ${i}`).toBeLessThan(layout.bays[i - 1].boardY)
+      expect(layout.bays[i].boardCenter[2], `station ${i}`).toBeLessThan(
+        layout.bays[i - 1].boardCenter[2],
+      )
+    }
+  })
+
+  /*
+    The reason stations alternate sides at all: on one centre line, every
+    plinth would hide behind the one in front of it when you look down the
+    hall. This is the mitigation, so it is worth pinning rather than trusting.
+  */
+  it('alternates stations to either side of the walkway', () => {
+    for (let i = 1; i < layout.bays.length; i += 1) {
+      expect(layout.bays[i].side, `station ${i}`).not.toBe(layout.bays[i - 1].side)
+    }
+    // And each really is off the centre line, not merely labelled.
+    for (const bay of layout.bays) {
+      expect(Math.abs(bay.boardCenter[0]), `gen ${bay.generation}`).toBeGreaterThan(0.5)
+      const sign = bay.side === 'left' ? -1 : 1
+      expect(Math.sign(bay.boardCenter[0]), `gen ${bay.generation} on the wrong side`).toBe(sign)
+    }
+  })
+
+  it('keeps every station and its consoles inside the hall', () => {
+    const halfWidth = layout.hall.width / 2
+    for (const bay of layout.bays) {
+      expect(bay.boardCenter[0] - bay.boardLength / 2, `gen ${bay.generation} through the left wall`)
+        .toBeGreaterThan(-halfWidth)
+      expect(bay.boardCenter[0] + bay.boardLength / 2, `gen ${bay.generation} through the right wall`)
+        .toBeLessThan(halfWidth)
+      expect(bay.boardY + bay.tallest, `gen ${bay.generation} through the ceiling`)
+        .toBeLessThan(layout.hall.height)
+      expect(bay.boardCenter[2], `gen ${bay.generation} past the far wall`)
+        .toBeGreaterThan(layout.hall.farZ)
+    }
+  })
+
+  it('stands every plinth on the floor at one height', () => {
+    // A hall's plinths all rise from the same floor — that is most of what
+    // separates it from the stacked wall this replaced, where a console's
+    // height depended on which generation it belonged to.
+    for (const bay of layout.bays) {
+      expect(bay.boardY, `gen ${bay.generation}`).toBe(SHELF_CONSTANTS.PLINTH_TOP)
     }
   })
 
@@ -108,34 +152,39 @@ describe('museum layout', () => {
 
   it('keeps every artifact on its own board, clear of the ends', () => {
     for (const bay of layout.bays) {
-      const half = bay.boardLength / 2
+      const left = bay.boardCenter[0] - bay.boardLength / 2
+      const right = bay.boardCenter[0] + bay.boardLength / 2
       for (const a of bay.artifacts) {
         expect(a.position[0] - a.footprintX / 2, `${a.id} off the left end`)
-          .toBeGreaterThanOrEqual(-half)
+          .toBeGreaterThanOrEqual(left)
         expect(a.position[0] + a.footprintX / 2, `${a.id} off the right end`)
-          .toBeLessThanOrEqual(half)
-        expect(a.position[1], `${a.id} not resting on its board`).toBeCloseTo(bay.boardY, 9)
+          .toBeLessThanOrEqual(right)
+        expect(a.position[1], `${a.id} not resting on its plinth`).toBeCloseTo(bay.boardY, 9)
+        expect(a.position[2], `${a.id} not on its station's line`)
+          .toBeCloseTo(bay.boardCenter[2], 9)
       }
     }
   })
 
-  it('never lets an artifact reach the board above it', () => {
-    // The PS5 case: 390mm standing next to bays of ~90mm consoles.
+  it('never lets one station reach the next one down the hall', () => {
+    // Replaces the old vertical version of this check. Stations no longer
+    // stack, so what has to clear is DEPTH: a plinth's footprint plus the
+    // console overhang must not run into the station behind it.
     for (let i = 1; i < layout.bays.length; i += 1) {
-      const upper = layout.bays[i - 1]
-      const lower = layout.bays[i]
-      const topOfTallest = lower.boardY + lower.tallest
-      const underside = upper.boardY - SHELF_CONSTANTS.BOARD_THICKNESS
-      expect(topOfTallest, `gen ${lower.generation} hits gen ${upper.generation}`)
-        .toBeLessThanOrEqual(underside + 1e-9)
+      const nearer = layout.bays[i - 1]
+      const further = layout.bays[i]
+      const nearerBack = nearer.boardCenter[2] - nearer.boardDepth / 2
+      const furtherFront = further.boardCenter[2] + further.boardDepth / 2
+      expect(furtherFront, `gen ${further.generation} runs into gen ${nearer.generation}`)
+        .toBeLessThan(nearerBack)
     }
   })
 
-  it('gives the PS5 more headroom than the PS4, with no special case', () => {
+  it('reads the PS5 as much taller than the PS4, with no special case', () => {
     const ps5Bay = layout.bays.find((b) => b.artifacts.some((a) => a.id === 'ps5'))!
     const ps4Bay = layout.bays.find((b) => b.artifacts.some((a) => a.id === 'ps4'))!
-    // Both bays hold exactly one console, so the only thing separating their
-    // pitch is the measured height the layout reads off the data.
+    // The standing PS5 is what makes its station's framing pull back, and that
+    // comes only from the measured height the layout reads off the data.
     expect(ps5Bay.tallest).toBeGreaterThan(ps4Bay.tallest * 3)
   })
 
@@ -144,9 +193,9 @@ describe('museum layout', () => {
     const lonely = layout.bays.find((b) => b.artifacts.length === 1)!
     expect(crowded.boardLength).toBeGreaterThan(lonely.boardLength)
     // ...but a single artifact still gets a plinth, not a sliver.
-    expect(lonely.boardLength).toBeGreaterThanOrEqual(SHELF_CONSTANTS.MIN_BOARD)
+    expect(lonely.boardLength).toBeGreaterThanOrEqual(SHELF_CONSTANTS.MIN_PLINTH)
     for (const bay of layout.bays) {
-      expect(bay.boardLength, `gen ${bay.generation}`).toBeLessThanOrEqual(SHELF_CONSTANTS.MAX_BOARD)
+      expect(bay.boardLength, `gen ${bay.generation}`).toBeLessThanOrEqual(SHELF_CONSTANTS.MAX_PLINTH)
     }
   })
 
@@ -197,8 +246,8 @@ describe('artifactAtX', () => {
 
   it('returns null past the end of the row', () => {
     const bay = layout.bays[0]
-    expect(artifactAtX(bay, -bay.boardLength)).toBeNull()
-    expect(artifactAtX(bay, bay.boardLength)).toBeNull()
+    expect(artifactAtX(bay, bay.boardCenter[0] - bay.boardLength)).toBeNull()
+    expect(artifactAtX(bay, bay.boardCenter[0] + bay.boardLength)).toBeNull()
   })
 
   it('returns null in the gap between two neighbours', () => {

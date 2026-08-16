@@ -4,7 +4,7 @@ import { CONSOLES } from '@/data/consoles'
 import { applyFrameOffset, frameOffsetFor } from '@/frame'
 import { MAX_DOLLY, shotCameraPosition, shotsFor } from '../shots'
 import { layoutMuseum } from './shelf-layout'
-import { approachShot, bayShot, roomDelta, translate } from './museum-shots'
+import { approachShot, bayShot, hallOverviewShot, roomDelta, translate } from './museum-shots'
 
 const layout = layoutMuseum(CONSOLES)
 
@@ -131,6 +131,39 @@ describe('the handoff invariant', () => {
       }
     }
   })
+})
+
+/*
+  Every museum shot has to leave the camera INSIDE the hall. That is not
+  automatic and it is not visible from a shot's declaration: a shot is
+  `target + direction * distance`, so in a 34m hall any vertical component of
+  the direction is multiplied by a very large number. The overview's first
+  version used a 0.14 lift and put the camera at y = 4.78 with a 4.6m ceiling,
+  and a 0.72 length factor that put it 5.6m outside the entrance — framing the
+  gallery from beyond a wall that does not exist. Both are pinned here rather
+  than left to be noticed in a screenshot.
+*/
+describe('every museum shot stays inside the hall', () => {
+  const shots = [
+    ...layout.bays.map((b) => ({ what: `gen ${b.generation}`, shot: bayShot(b) })),
+    { what: 'the overview', shot: hallOverviewShot(layout) },
+  ]
+
+  for (const { what, shot } of shots) {
+    it(`keeps ${what}'s camera within the walls, floor and ceiling`, () => {
+      // Checked at every dolly: a narrow viewport pushes the camera further
+      // back, which is exactly when it would punch through a wall.
+      for (const dolly of DOLLIES) {
+        const [x, y, z] = shotCameraPosition(shot, dolly)
+        expect(y, `${what} through the floor @ ${dolly}`).toBeGreaterThan(0)
+        expect(y, `${what} through the ceiling @ ${dolly}`).toBeLessThan(layout.hall.height)
+        expect(Math.abs(x), `${what} through a side wall @ ${dolly}`).toBeLessThan(
+          layout.hall.width / 2,
+        )
+        expect(z, `${what} past the far wall @ ${dolly}`).toBeGreaterThan(layout.hall.farZ)
+      }
+    })
+  }
 })
 
 describe('bay shots', () => {

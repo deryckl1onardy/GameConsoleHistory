@@ -255,11 +255,18 @@ function Background() {
 }
 
 /**
- * The archive's own ground. A warm near-black continuous with the app's ink —
- * not the slate-indigo that dark scenes default to. The room's backdrop is
- * warmer still, so the approach reads as moving from a cold hall into a home.
+ * The hall's own ground — a bright gallery white, sitting just under the
+ * plaster of the walls so the architecture still reads against it.
+ *
+ * A *chosen* white, not the cool grey every UI kit ships as its neutral: it
+ * carries a little warmth, which keeps it a plastered room rather than a
+ * wireframe. Because `Background` tweens this into the era room's own
+ * backdrop across the handoff, the approach now reads as walking out of a
+ * bright public gallery into a dim private living room — a far bigger change
+ * than the old near-black hall could ever have delivered, and the whole
+ * reason the room's warmth lands.
  */
-const MUSEUM_BACKDROP = '#0d0b09'
+const MUSEUM_BACKDROP = '#e9e6df'
 
 export function Scene() {
   const entry = useActiveConsole()

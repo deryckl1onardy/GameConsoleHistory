@@ -6,57 +6,56 @@ import { useScene } from '@/store/scene'
 import { MuseumLights } from './MuseumLights'
 import { ShelfBay } from './ShelfBay'
 import { MUSEUM_LAYOUT } from './layout'
-import { SHELF_CONSTANTS } from './shelf-layout'
 import { APPROACH_TIMING } from './approach'
 
 /**
- * The Shelf of History: the collection as a wall of generation shelves in a
- * dark archive.
+ * The Shelf of History: the collection as a gallery hall you walk down.
  *
- * Oldest at the top, reading downward through time. Everything about where
- * things sit comes from `shelf-layout.ts`, which derives it from each
- * console's real measured dimensions — so this component places nothing and
- * decides nothing, it only draws.
+ * Oldest station nearest the entrance, receding into the hall through time.
+ * Everything about where things sit comes from `shelf-layout.ts`, which
+ * derives it from each console's real measured dimensions — so this component
+ * places nothing and decides nothing, it only draws.
+ *
+ * What it draws that it did not before is a ROOM. The previous version was one
+ * dark plane behind the shelves and one below them, which gave the collection
+ * nothing to sit in: no floor receding, no walls, no ceiling, no far end. That
+ * absence is most of why the screen never felt like a museum, however the
+ * shelves themselves were lit.
  */
 
-/** Wall behind the shelving. Sized off the layout so it can never come up short. */
-const WALL_PAD_X = 2.4
-const WALL_PAD_Y = 1.6
+/** Gallery surfaces. A chosen warm-neutral plaster, never the UI-kit grey. */
+const WALL_COLOR = '#eceae4'
+const FLOOR_COLOR = '#dedbd4'
+const CEILING_COLOR = '#f4f2ee'
 
 /**
- * The back wall. Matte and very dark, but not black: it has to take the
- * key light so a lit bay reads as being IN a room rather than floating in
- * a void, while the unlit bays fall away into it.
+ * The far wall closing the hall.
  *
- * It is also the one thing that can HIDE the hero console during the
- * approach. At the handoff the hero teleports to the room position
- * (z ≈ -1.0), which is BEHIND this plane (z ≈ -0.26) — and the museum stays
- * mounted through the whole arrival so its lights can dim while the room's
- * ramp in. If the wall stayed opaque, the console would be invisible from
- * the handoff until the museum unmounts at idle: the "disappears, then
- * appears" the transition was supposed to have eliminated. So the wall
- * fades OUT over the arrival (in step with the museum going dark and the
- * room lighting up — the hero is progressively revealed as it is
+ * It is also the one thing that can HIDE the hero console during the approach.
+ * At the handoff the hero teleports to the room position, which may sit beyond
+ * this plane — and the museum stays mounted through the whole arrival so its
+ * lights can dim while the room's ramp in. If the wall stayed opaque, the
+ * console could be invisible from the handoff until the museum unmounts at
+ * idle: the "disappears, then appears" the transition was built to eliminate.
+ * So the wall fades OUT over the arrival (in step with the hall going dark and
+ * the room lighting up — the hero is progressively revealed as it is
  * progressively lit) and fades back in as the retreat remounts the hall.
  */
-function MuseumWall({
-  wallWidth,
-  wallHeight,
-  wallCenterY,
-  wallZ,
+function FarWall({
+  width,
+  height,
+  centerY,
+  z,
 }: {
-  wallWidth: number
-  wallHeight: number
-  wallCenterY: number
-  wallZ: number
+  width: number
+  height: number
+  centerY: number
+  z: number
 }) {
   const approach = useScene((s) => s.approach)
   const reducedMotion = useScene((s) => s.reducedMotion)
   const matRef = useRef<THREE.MeshStandardMaterial>(null)
 
-  // Forward: fade the wall away over the arrival so the room-positioned hero
-  // shows through it. Reverse: bring it back as the museum remounts — same
-  // clock as the museum lights' own remount ramp (MuseumLights uses 0.45s).
   useEffect(() => {
     const m = matRef.current
     if (!m) return
@@ -70,12 +69,12 @@ function MuseumWall({
   }, [approach, reducedMotion])
 
   /*
-    A remount after the retreat must come back FROM transparent: the wall
-    was at opacity 0 when the museum unmounted at idle, so the first painted
-    frame of the remount must not snap it to opaque. Read once at mount (the
-    Diorama trick) — a fresh shelf load (?screen=shelf) has approach ===
-    'idle' and wants the wall there, full opacity, immediately. LAYOUT effect
-    so the zero lands before the first paint.
+    A remount after the retreat must come back FROM transparent: the wall was
+    at opacity 0 when the museum unmounted at idle, so the first painted frame
+    of the remount must not snap it to opaque. Read once at mount (the Diorama
+    trick) — a fresh shelf load has approach === 'idle' and wants the wall
+    there, full opacity, immediately. LAYOUT effect so the zero lands before
+    the first paint.
   */
   useLayoutEffect(() => {
     const cameFromApproach = useScene.getState().approach !== 'idle'
@@ -86,47 +85,98 @@ function MuseumWall({
   }, [])
 
   return (
-    <mesh position={[0, wallCenterY, wallZ]} receiveShadow>
-      <planeGeometry args={[wallWidth, wallHeight]} />
-      <meshStandardMaterial ref={matRef} color="#171310" roughness={0.95} metalness={0} transparent />
+    <mesh position={[0, centerY, z]} receiveShadow>
+      <planeGeometry args={[width, height]} />
+      <meshStandardMaterial
+        ref={matRef}
+        color={WALL_COLOR}
+        roughness={0.94}
+        metalness={0}
+        transparent
+      />
     </mesh>
   )
 }
 
 export function MuseumScene() {
-  const { bays, extent } = MUSEUM_LAYOUT
+  const { bays, hall } = MUSEUM_LAYOUT
   const hovered = useScene((s) => s.hoveredId !== null)
   useCursor(hovered)
 
-  const wallWidth = (extent.maxX - extent.minX) + WALL_PAD_X * 2
-  const wallHeight = (extent.maxY - extent.minY) + WALL_PAD_Y * 2
-  const wallCenterY = (extent.maxY + extent.minY) / 2
-  const wallZ = -Math.max(...bays.map((b) => b.boardDepth)) / 2 - 0.06
+  const hallLength = Math.abs(hall.farZ - hall.entranceZ)
+  // Run the shell a little past the entrance too, so the camera can stand at
+  // z = 0 and still be inside a room rather than at its edge.
+  const shellLength = hallLength + 8
+  const shellCenterZ = hall.entranceZ + 4 - shellLength / 2
+  const halfWidth = hall.width / 2
 
   return (
     <group>
       <MuseumLights />
 
-      <MuseumWall
-        wallWidth={wallWidth}
-        wallHeight={wallHeight}
-        wallCenterY={wallCenterY}
-        wallZ={wallZ}
+      {/* Floor. The surface the whole hall reads its depth against. */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, hall.floorY, shellCenterZ]}
+        receiveShadow
+      >
+        <planeGeometry args={[hall.width, shellLength]} />
+        <meshStandardMaterial color={FLOOR_COLOR} roughness={0.55} metalness={0} />
+      </mesh>
+
+      {/* Ceiling, which is what actually tells you this is an interior. */}
+      <mesh
+        rotation={[Math.PI / 2, 0, 0]}
+        position={[0, hall.height, shellCenterZ]}
+      >
+        <meshStandardMaterial color={CEILING_COLOR} roughness={0.96} metalness={0} />
+        <planeGeometry args={[hall.width, shellLength]} />
+      </mesh>
+
+      {/* Side walls. Rotated to face inward down the length of the hall. */}
+      <mesh
+        rotation={[0, Math.PI / 2, 0]}
+        position={[-halfWidth, hall.height / 2, shellCenterZ]}
+        receiveShadow
+      >
+        <planeGeometry args={[shellLength, hall.height]} />
+        <meshStandardMaterial color={WALL_COLOR} roughness={0.94} metalness={0} />
+      </mesh>
+      <mesh
+        rotation={[0, -Math.PI / 2, 0]}
+        position={[halfWidth, hall.height / 2, shellCenterZ]}
+        receiveShadow
+      >
+        <planeGeometry args={[shellLength, hall.height]} />
+        <meshStandardMaterial color={WALL_COLOR} roughness={0.94} metalness={0} />
+      </mesh>
+
+      <FarWall
+        width={hall.width}
+        height={hall.height}
+        centerY={hall.height / 2}
+        z={hall.farZ}
       />
 
       {/*
-        Floor, well below the lowest board. Catches nothing but the falloff of
-        the key light, which stops the bottom of the frame from being a hard
-        black edge under the newest bay.
+        Ceiling light slots — two continuous recessed strips running the length
+        of the hall. These are the single strongest "modern gallery" cue there
+        is, and they do real work beyond looking right: they give the ceiling a
+        direction, they put a highlight along every plinth's chamfered lip, and
+        they converge toward the vanishing point, which is what makes the hall
+        read as long. Unlit and emissive rather than actual lights — eight
+        real area lights would cost far more than they show.
       */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, SHELF_CONSTANTS.BOTTOM_BOARD_Y - 0.46, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[wallWidth, 6]} />
-        <meshStandardMaterial color="#14100e" roughness={0.98} metalness={0} />
-      </mesh>
+      {[-1, 1].map((sideSign) => (
+        <mesh
+          key={sideSign}
+          rotation={[Math.PI / 2, 0, 0]}
+          position={[sideSign * hall.width * 0.24, hall.height - 0.02, shellCenterZ]}
+        >
+          <planeGeometry args={[0.26, shellLength - 1.2]} />
+          <meshBasicMaterial color="#fffdf7" toneMapped={false} />
+        </mesh>
+      ))}
 
       {bays.map((bay) => (
         <ShelfBay key={bay.generation} bay={bay} />

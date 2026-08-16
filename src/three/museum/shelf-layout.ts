@@ -5,41 +5,70 @@ import { mm } from '../lighting'
 /**
  * The museum's floor plan, as pure data.
  *
+ * The collection is laid out as a GALLERY HALL you walk down, not a wall you
+ * scroll up. Each generation is a *station*: a plinth carrying that
+ * generation's consoles in a row. Stations recede along −Z in release order,
+ * so walking deeper into the hall is moving forward through time, and the
+ * length of the hall is the length of the history.
+ *
+ * It was a vertical wall of stacked shelves before. That gave the collection
+ * no architecture to sit in and no depth to read against — one bay filled the
+ * frame and the rest were somewhere off-screen above and below, which is why
+ * it never felt like a museum. A hall has a floor, a far end, and a middle
+ * distance, so the generations you are not looking at are still *there*.
+ *
  * Nothing here is authored per console: every position falls out of the real
  * `entry.dimensions` and the console's own room yaw, the same way shots.ts
  * derives every camera move from DioramaSpec anchors. Change a console's
  * measured width and its neighbours move.
  *
- * Two problems this has to solve that a naive grid does not:
+ * Three problems this has to solve that a naive row of plinths does not:
  *
- * 1. **The collection is lopsided.** Five of the eight generations hold exactly
- *    one built console. A fixed-width board with one artifact adrift on it
- *    reads as broken; a board sized to its contents reads as a plinth, which
- *    is what a museum actually gives a single significant object. So boards are
- *    only as long as they need to be, floored at MIN_BOARD.
+ * 1. **THE INVARIANT.** Each console keeps its ROOM yaw here — see
+ *    `museum-shots.ts`. That is what makes shelf→room a pure translation and
+ *    the transition seamless. Positions may move anywhere; ROTATIONS MAY NOT.
+ *    Guarded by museum-shots.test.ts.
  *
- * 2. **The artifacts are turned.** Each console keeps its room yaw here (see
- *    `museum-shots.ts` for why that matters), so its footprint along X is the
- *    rotated extent, not its width. An Atari at -16 degrees occupies 397mm of
- *    board, not 346mm. Spacing off the raw width would overlap them.
+ * 2. **Stations would hide behind each other.** Looking down a hall, a plinth
+ *    on the centre line occludes every plinth behind it. So stations alternate
+ *    to either side of the walkway — the arrangement a real gallery uses for
+ *    exactly this reason — and the hall reads as a receding zigzag rather than
+ *    a queue.
+ *
+ * 3. **The artifacts are turned.** Each console keeps its room yaw (see 1), so
+ *    its footprint along X is the rotated extent, not its width. An Atari at
+ *    -16 degrees occupies 397mm of plinth, not 346mm. Spacing off the raw
+ *    width would overlap them.
  */
 
-/** Board surface the artifacts rest on. */
-const BOARD_THICKNESS = 0.04
-/** Clear space above the tallest artifact in a bay, before the next board. */
-const HEADROOM = 0.22
-/** Board length beyond the outermost artifact, each side. */
+/** Top surface of a plinth — a real museum pedestal height, so consoles sit near eye line. */
+const PLINTH_TOP = 0.92
+/** Plinth length beyond the outermost artifact, each side. */
 const END_PAD = 0.16
-const MIN_BOARD = 0.9
-const MAX_BOARD = 3.2
+const MIN_PLINTH = 0.9
+const MAX_PLINTH = 3.2
 /** Gap between neighbours, as a fraction of their mean footprint. */
 const GAP_RATIO = 0.55
 const MIN_GAP = 0.1
 const MAX_GAP = 0.28
-/** Board depth beyond the deepest artifact. */
-const DEPTH_PAD = 0.1
-/** Height of the lowest (newest) board. Everything stacks up from here. */
-const BOTTOM_BOARD_Y = 0.45
+/** Plinth depth beyond the deepest artifact. */
+const DEPTH_PAD = 0.14
+
+/** Distance between one station and the next, down the hall. */
+const STATION_SPACING = 4.6
+/** How far each station sits to its side of the walkway. Alternates. */
+const STATION_STAGGER_X = 1.5
+/** The first station's distance from the hall's entrance (z = 0). */
+const FIRST_STATION_Z = -2.2
+
+/** Clear width of the hall between its side walls. */
+const HALL_WIDTH = 7.4
+/** Floor to ceiling. */
+const HALL_HEIGHT = 4.6
+/** Hall floor. Everything stands on this. */
+const FLOOR_Y = 0
+/** Run of hall beyond the last station, so the far end never feels cut off. */
+const HALL_RUN_OUT = 6
 
 export type ShelfArtifact = {
   id: string
@@ -57,12 +86,14 @@ export type ShelfBay = {
   generation: Generation
   label: string
   era: string | null
-  /** Top surface of the board: the Y artifacts rest on. */
+  /** Top surface of the plinth: the Y artifacts rest on. Constant across the hall. */
   boardY: number
   boardLength: number
   boardDepth: number
-  /** Centre of the board's top surface. */
+  /** Centre of the plinth's top surface — now carries a real X and Z. */
   boardCenter: [number, number, number]
+  /** Which side of the walkway this station stands on. */
+  side: 'left' | 'right'
   /** Tallest artifact in this bay, in metres. */
   tallest: number
   artifacts: ShelfArtifact[]
@@ -71,13 +102,29 @@ export type ShelfBay = {
 export type MuseumLayout = {
   bays: ShelfBay[]
   byId: Record<string, ShelfArtifact>
-  extent: { minX: number; maxX: number; minY: number; maxY: number }
+  extent: {
+    minX: number
+    maxX: number
+    minY: number
+    maxY: number
+    /** Deepest point of the hall (most negative Z) and its entrance. */
+    minZ: number
+    maxZ: number
+  }
+  hall: {
+    width: number
+    height: number
+    floorY: number
+    /** Where the walkway starts and ends, for the camera to travel between. */
+    entranceZ: number
+    farZ: number
+  }
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
 
 /**
- * How much board a console eats along X once turned by its own yaw. The
+ * How much plinth a console eats along X once turned by its own yaw. The
  * rotated axis-aligned extent of a w x d rectangle.
  */
 export function rotatedFootprintX(widthM: number, depthM: number, yaw: number): number {
@@ -85,12 +132,10 @@ export function rotatedFootprintX(widthM: number, depthM: number, yaw: number): 
 }
 
 /**
- * Lay the built consoles out as a wall of generation shelves.
+ * Lay the built consoles out as a hall of generation stations.
  *
- * Oldest generation on top, reading downward through time — matching the
- * concept's mock. Bays are built newest-first from BOTTOM_BOARD_Y upward so
- * the bottom of the unit sits at a fixed height regardless of how tall the
- * collection grows.
+ * Oldest nearest the entrance, receding into the hall in release order — so
+ * the walk from the door to the far wall is 1977 to now.
  */
 export function layoutMuseum(consoles: ConsoleEntry[]): MuseumLayout {
   const byGen = new Map<Generation, ConsoleEntry[]>()
@@ -100,18 +145,15 @@ export function layoutMuseum(consoles: ConsoleEntry[]): MuseumLayout {
     byGen.set(c.generation, list)
   }
 
-  // Oldest first. Within a bay, oldest first too, so the eye reads left-to-right
-  // through the generation the same way it reads top-to-bottom through history.
+  // Oldest first, and within a station oldest first too, so the eye reads
+  // left-to-right through a generation the way it reads front-to-back through
+  // the hall.
   const generations = [...byGen.keys()].sort((a, b) => a - b)
   for (const g of generations) {
     byGen.get(g)!.sort((a, b) => earliestYear(a) - earliestYear(b))
   }
 
-  // Place bays bottom-up (newest first), then reverse, so BOTTOM_BOARD_Y holds.
-  const placed: ShelfBay[] = []
-  let cursorY = BOTTOM_BOARD_Y
-
-  for (const generation of [...generations].reverse()) {
+  const bays: ShelfBay[] = generations.map((generation, index) => {
     const entries = byGen.get(generation)!
 
     const sizes = entries.map((e) => ({
@@ -129,23 +171,26 @@ export function layoutMuseum(consoles: ConsoleEntry[]): MuseumLayout {
       gaps.push(clamp(GAP_RATIO * ((footprints[i] + footprints[i + 1]) / 2), MIN_GAP, MAX_GAP))
     }
 
-    const contentLength =
-      footprints.reduce((n, f) => n + f, 0) + gaps.reduce((n, g) => n + g, 0)
-    const boardLength = clamp(contentLength + 2 * END_PAD, MIN_BOARD, MAX_BOARD)
+    const contentLength = footprints.reduce((n, f) => n + f, 0) + gaps.reduce((n, g) => n + g, 0)
+    const boardLength = clamp(contentLength + 2 * END_PAD, MIN_PLINTH, MAX_PLINTH)
     const boardDepth = Math.max(...sizes.map((s) => s.depth)) + DEPTH_PAD
     const tallest = Math.max(...sizes.map((s) => s.height))
 
-    const boardY = cursorY
+    // Alternate sides of the walkway so no station hides behind another.
+    const side: 'left' | 'right' = index % 2 === 0 ? 'left' : 'right'
+    const centerX = (side === 'left' ? -1 : 1) * STATION_STAGGER_X
+    const centerZ = FIRST_STATION_Z - index * STATION_SPACING
 
-    // Walk the row from its left edge, centred on x = 0.
+    // Walk the row from its left edge, centred on the station's own X.
     const artifacts: ShelfArtifact[] = []
-    let x = -contentLength / 2
+    let x = centerX - contentLength / 2
     entries.forEach((entry, i) => {
       const half = footprints[i] / 2
       artifacts.push({
         id: entry.id,
         generation,
-        position: [x + half, boardY, 0],
+        position: [x + half, PLINTH_TOP, centerZ],
+        // THE INVARIANT: the console's ROOM yaw, unchanged. See the file header.
         rotation: [0, yaws[i], 0],
         size: sizes[i],
         footprintX: footprints[i],
@@ -153,56 +198,65 @@ export function layoutMuseum(consoles: ConsoleEntry[]): MuseumLayout {
       x += footprints[i] + (gaps[i] ?? 0)
     })
 
-    placed.push({
+    return {
       generation,
       label: GENERATION_LABELS[generation],
       era: GENERATION_ERAS[generation] ?? null,
-      boardY,
+      boardY: PLINTH_TOP,
       boardLength,
       boardDepth,
-      boardCenter: [0, boardY, 0],
+      boardCenter: [centerX, PLINTH_TOP, centerZ],
+      side,
       tallest,
       artifacts,
-    })
-
-    cursorY = boardY + tallest + HEADROOM + BOARD_THICKNESS
-  }
-
-  const bays = placed.reverse()
+    }
+  })
 
   const byId: Record<string, ShelfArtifact> = {}
   for (const bay of bays) for (const a of bay.artifacts) byId[a.id] = a
 
-  const halfLengths = bays.map((b) => b.boardLength / 2)
+  const halfLengths = bays.map((b) => b.boardLength / 2 + Math.abs(b.boardCenter[0]))
+  const farZ = bays[bays.length - 1].boardCenter[2] - HALL_RUN_OUT
+
   return {
     bays,
     byId,
     extent: {
       minX: -Math.max(...halfLengths),
       maxX: Math.max(...halfLengths),
-      minY: BOTTOM_BOARD_Y - BOARD_THICKNESS,
-      maxY: Math.max(...bays.map((b) => b.boardY + b.tallest)),
+      minY: FLOOR_Y,
+      maxY: PLINTH_TOP + Math.max(...bays.map((b) => b.tallest)),
+      minZ: farZ,
+      maxZ: 0,
+    },
+    hall: {
+      width: HALL_WIDTH,
+      height: HALL_HEIGHT,
+      floorY: FLOOR_Y,
+      entranceZ: 0,
+      farZ,
     },
   }
 }
 
 /**
- * Which generation the camera is currently nearest, given the height it is
- * looking at.
+ * Which generation the camera is currently nearest, given how far down the
+ * hall it is looking.
  *
- * Measured against each bay's own FOCUS height — the middle of its artifacts,
- * the same point `bayShot` targets — rather than its board, so "nearest" means
- * the same thing to this function as it does to the camera that framed it.
+ * Measured against each station's own Z — the same point `bayShot` targets —
+ * so "nearest" means the same thing to this function as it does to the camera
+ * that framed it.
  *
- * Exists because panning used to move the camera without telling anything
- * about it: the generation rail and the accent light both kept pointing at
- * the bay you had left. See `syncFocusGeneration` in the scene store.
+ * Exists because travelling the hall used to move the camera without telling
+ * anything about it: the generation rail and the accent light both kept
+ * pointing at the station you had left. See `syncFocusGeneration` in the
+ * scene store.
  */
-export function generationNearestY(layout: MuseumLayout, y: number): Generation {
+export function generationNearestZ(layout: MuseumLayout, z: number): Generation {
   let best = layout.bays[0]
   let bestDistance = Infinity
   for (const bay of layout.bays) {
-    const distance = Math.abs(bay.boardY + bay.tallest / 2 - y)
+    const distance = Math.abs(bay.boardCenter[2] - z)
     if (distance < bestDistance) {
       bestDistance = distance
       best = bay
@@ -212,9 +266,9 @@ export function generationNearestY(layout: MuseumLayout, y: number): Generation 
 }
 
 /**
- * Which artifact sits under a given X on a bay's board, or null for a gap.
- * The shelf hit-tests with one plane per bay and resolves the artifact here,
- * rather than raycasting 180k triangles of console geometry.
+ * Which artifact sits under a given X on a station's plinth, or null for a gap.
+ * The shelf hit-tests with one plane per station and resolves the artifact
+ * here, rather than raycasting 180k triangles of console geometry.
  */
 export function artifactAtX(bay: ShelfBay, x: number): ShelfArtifact | null {
   for (const a of bay.artifacts) {
@@ -231,12 +285,16 @@ function earliestYear(entry: ConsoleEntry): number {
 }
 
 export const SHELF_CONSTANTS = {
-  BOARD_THICKNESS,
-  HEADROOM,
+  PLINTH_TOP,
   END_PAD,
-  MIN_BOARD,
-  MAX_BOARD,
+  MIN_PLINTH,
+  MAX_PLINTH,
   MIN_GAP,
   MAX_GAP,
-  BOTTOM_BOARD_Y,
+  STATION_SPACING,
+  STATION_STAGGER_X,
+  FIRST_STATION_Z,
+  HALL_WIDTH,
+  HALL_HEIGHT,
+  FLOOR_Y,
 } as const
