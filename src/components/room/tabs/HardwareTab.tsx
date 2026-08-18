@@ -30,8 +30,8 @@ export function HardwareTab() {
             Media: entry.specs.media,
           }).map(([k, v]) => (
             <div key={k} className="flex gap-3 text-[12px]">
-              <dt className="w-20 shrink-0 text-parchment/40">{k}</dt>
-              <dd className="text-parchment/80">{v}</dd>
+              <dt className="w-20 shrink-0 text-ink/40">{k}</dt>
+              <dd className="text-ink/80">{v}</dd>
             </div>
           ))}
         </dl>
@@ -42,8 +42,8 @@ export function HardwareTab() {
           <h4 className="mb-2 text-[10px] uppercase tracking-[0.18em] text-amber/70">
             {COPY.sectionController}
           </h4>
-          <p className="text-sm text-parchment">{pad.name}</p>
-          <p className="mt-0.5 text-[11px] tabular-nums text-parchment/40">
+          <p className="text-sm text-ink">{pad.name}</p>
+          <p className="mt-0.5 text-[11px] tabular-nums text-ink/40">
             {pad.dimensions.width} × {pad.dimensions.height} × {pad.dimensions.depth} mm
           </p>
 
@@ -52,7 +52,7 @@ export function HardwareTab() {
           </h5>
           <ul className="space-y-2">
             {pad.innovations.map((i) => (
-              <li key={i} className="text-[13px] leading-snug text-parchment/75">
+              <li key={i} className="text-[13px] leading-snug text-ink/75">
                 {i}
               </li>
             ))}
@@ -66,10 +66,10 @@ export function HardwareTab() {
               .filter((b) => !b.id.startsWith('dpad-') || b.id === 'dpad-up')
               .map((b) => (
                 <li key={b.id} className="flex gap-3 text-[12px]">
-                  <span className="w-16 shrink-0 text-parchment/80">
+                  <span className="w-16 shrink-0 text-ink/80">
                     {b.id.startsWith('dpad') ? 'D-pad' : b.label}
                   </span>
-                  <span className="text-parchment/50">{b.note ?? '—'}</span>
+                  <span className="text-ink/50">{b.note ?? '—'}</span>
                 </li>
               ))}
           </ul>

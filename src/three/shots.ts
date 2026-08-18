@@ -1,15 +1,18 @@
 import type { ConsoleEntry, DioramaSpec } from '@/types/console'
 import { MM } from '@/data/kits/media-archetypes'
 import { archetype } from '@/data/kits/media-archetypes'
-import { layoutShelf, shelfExtent } from './geometry/gameBox'
+import { LIFT_M, layoutSpread, mediaAnchor, MEDIA_SPREAD_RANKS, spreadExtent } from './geometry/gameBox'
 
 /**
  * Named camera shots.
  *
  * Every shot is *derived* from anchors that already exist in DioramaSpec —
- * consolePosition, tvPosition, shelfPosition, controllerPosition. Nothing here
- * is authored per console, so all 22 inherit the whole choreography for free.
- * Move a shelf in the data and the library shot follows it.
+ * consolePosition, tvPosition, controllerPosition — or, for the library shot,
+ * from `mediaAnchor`, which is itself derived from consolePosition. Nothing
+ * here is authored per console, so all 22 inherit the whole choreography for
+ * free. Move the console in the data and the library shot follows it.
+ * `spec.shelfPosition` still exists on DioramaSpec but is unused here — see
+ * MediaSpread.tsx and geometry/gameBox.ts's `mediaAnchor`.
  *
  * Distances are quoted at BASE_ASPECT (16:9); CameraRig dollies them out on
  * narrower viewports.
@@ -26,8 +29,12 @@ export type RoomShotId = 'console' | 'diorama' | 'library' | 'controller' | 'tv'
  *
  * `stage` frames the point every focused console presents on; `hall` is the
  * wide opening view of the whole gallery from its entrance.
+ *
+ * `artifact` is the same precedent, for a different reason: it depends on a
+ * SELECTED RANK that `shotsFor(entry, spec)` does not receive, so it is built
+ * by `artifactShotFor` and joins the union without entering the record.
  */
-export type ShotId = RoomShotId | 'stage' | 'hall'
+export type ShotId = RoomShotId | 'stage' | 'hall' | 'artifact'
 
 export type Shot = {
   id: ShotId
@@ -50,6 +57,14 @@ export type Shot = {
   maxDistance: number
 }
 
+/**
+ * The scene's vertical field of view, in degrees. Lives here — not just in
+ * Scene.tsx's CAMERA constant — because the library shot's distance is
+ * derived from it: the same discipline frame.ts already enforces between the
+ * panel and the camera. Scene.tsx imports this rather than re-stating 24.
+ */
+export const CAMERA_FOV_DEG = 24
+
 function normalise([x, y, z]: [number, number, number]): [number, number, number] {
   const len = Math.hypot(x, y, z) || 1
   return [x / len, y / len, z / len]
@@ -68,15 +83,25 @@ export function shotCameraPosition(shot: Shot, dolly = 1): [number, number, numb
 export function shotsFor(entry: ConsoleEntry, spec: DioramaSpec): Record<RoomShotId, Shot> {
   const consoleHeight = entry.dimensions.height * MM
 
-  // Height of the stacked game boxes, so the library shot centres on the
-  // collection rather than on the bottom board.
+  // The spread's own footprint, so the library shot both centres on the
+  // games (not the floor they stand on) and frames wide enough to hold every
+  // one of them — a hardcoded distance would over- or under-frame depending
+  // on whether the archetype is a narrow cartridge or a wide DVD keepcase.
   const media = archetype(entry.mediaArchetype)
-  const slots = layoutShelf({
-    archetype: media,
-    count: entry.games.length,
-    shelfWidthMm: 760,
-  })
-  const stackHeight = shelfExtent(slots, media).height
+  const slots = layoutSpread({ archetype: media, count: entry.games.length, ranks: MEDIA_SPREAD_RANKS })
+  const extent = spreadExtent(slots, media)
+  const anchor = mediaAnchor(entry, spec)
+
+  // Horizontal half-angle of the lens at the tuned 16:9 aspect, so the
+  // derived distance actually fits `extent.width` in frame at that aspect —
+  // aspectDolly() handles narrower viewports separately, at render time.
+  const vHalf = (CAMERA_FOV_DEG * Math.PI) / 180 / 2
+  const hHalf = Math.atan(Math.tan(vHalf) * BASE_ASPECT)
+  const libraryPadding = 1.18
+  // Floored a hair above the shot's own minDistance (0.4) below, not equal to
+  // it — an orbit clamp that starts exactly at the resting distance leaves no
+  // room to zoom in at all.
+  const libraryDistance = Math.max(0.45, (extent.width / 2 / Math.tan(hHalf)) * libraryPadding)
 
   const tvScreenY = spec.tvPosition[1] + (spec.tv.dimensions.height * MM) / 2
 
@@ -112,19 +137,24 @@ export function shotsFor(entry: ConsoleEntry, spec: DioramaSpec): Record<RoomSho
       maxDistance: 26,
     },
 
-    /** Square onto the shelf, close enough to read cover art. */
+    /**
+     * Square onto the spread, close enough to read cover art. Target and
+     * distance both derive from the spread's own anchor and footprint
+     * (mediaAnchor / spreadExtent), never from spec.shelfPosition — that
+     * field still exists on DioramaSpec but names a wall the room no longer
+     * has.
+     */
     library: {
       id: 'library',
       label: 'Games',
-      target: [
-        spec.shelfPosition[0],
-        spec.shelfPosition[1] + stackHeight / 2,
-        spec.shelfPosition[2],
-      ],
-      direction: normalise([0.34, 0.22, 1]),
-      distance: 1.35,
+      target: [anchor[0], anchor[1] + extent.height / 2, anchor[2] + extent.depth / 2],
+      // More elevation, less grazing than the old shelf-tuned angle: a
+      // near-square four-rank cluster (MEDIA_SPREAD_RANKS) reads better from
+      // a clearer 3/4-down view than the old wide, flat two-rank row did.
+      direction: normalise([0.24, 0.36, 1]),
+      distance: libraryDistance,
       minDistance: 0.4,
-      maxDistance: 4,
+      maxDistance: Math.max(4, libraryDistance * 3),
     },
 
     /** Almost overhead — a controller is read from above, not from the side. */
@@ -152,6 +182,63 @@ export function shotsFor(entry: ConsoleEntry, spec: DioramaSpec): Record<RoomSho
       minDistance: 0.6,
       maxDistance: 5,
     },
+  }
+}
+
+/**
+ * The Game Artifact shot: one selected box, framed close enough to read as an
+ * object.
+ *
+ * Deliberately derived from the SAME layoutSpread + mediaAnchor the box
+ * renders with, so the camera and the contents cannot disagree about where
+ * the subject is — the same discipline the library shot already follows. The
+ * box's world position is the spread anchor plus its slot offset, PLUS the
+ * selection lift (LIFT_M): the box is raised off the floor when selected, so
+ * aiming at its un-lifted slot would leave it visibly low of dead centre.
+ *
+ * The target is the box's MIDDLE, not its base — the same convention the
+ * console shot uses (consolePosition + height/2). Aiming at the base pins
+ * the look-at point at the floor, which reads fine from the authored
+ * distance but puts the whole box high in frame once the user zooms in; the
+ * centre keeps the box centred under the orbit pivot at every distance.
+ * The distance comes from the box's own real height through the same lens
+ * math the library shot uses, so a short cartridge frames tighter than a
+ * tall DVD keepcase.
+ */
+export function artifactShotFor(entry: ConsoleEntry, spec: DioramaSpec, rank: number): Shot {
+  const media = archetype(entry.mediaArchetype)
+  const halfHeight = (media.dimensions.height * MM) / 2
+  const slots = layoutSpread({ archetype: media, count: entry.games.length, ranks: MEDIA_SPREAD_RANKS })
+  const gameIdx = entry.games.findIndex((g) => g.rank === rank)
+  const slot = gameIdx === -1 ? null : slots[gameIdx]
+  const anchor = mediaAnchor(entry, spec)
+
+  // A missing slot means the rank is not in the spread (stale selection);
+  // fall back to framing the spread's own anchor so the camera still lands
+  // somewhere sane instead of NaN-ing.
+  const target: [number, number, number] = slot
+    ? [
+        anchor[0] + slot.position[0],
+        anchor[1] + slot.position[1] + LIFT_M + halfHeight,
+        anchor[2] + slot.position[2],
+      ]
+    : [anchor[0], anchor[1] + LIFT_M + halfHeight, anchor[2]]
+
+  const vHalf = (CAMERA_FOV_DEG * Math.PI) / 180 / 2
+  // Padding over the box's height — closer than the library shot's 1.18
+  // because a single box is all that needs to fit.
+  const artifactPadding = 1.4
+  const distance = Math.max(0.35, (media.dimensions.height * MM / 2 / Math.tan(vHalf)) * artifactPadding)
+
+  return {
+    id: 'artifact',
+    label: 'Artifact',
+    target,
+    // The same clear 3/4-down read the library shot uses, pulled in tight.
+    direction: normalise([0.22, 0.32, 1]),
+    distance,
+    minDistance: 0.22,
+    maxDistance: Math.max(2, distance * 3),
   }
 }
 

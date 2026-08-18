@@ -78,6 +78,36 @@ export const masterSystem: ConsoleEntry = {
   mediaKind: 'cartridge',
   mediaArchetype: 'cart-sms',
   model: '/models/consoles/master-system.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. The render (354 x 72 x 169mm) matches the real
+  // console closely (~3.6% per gltf-transforms.ts). The model names its
+  // cartridge lid mesh (`sms_lid`), which sits on the top-right toward the
+  // back — that anchor is measured from the mesh, not guessed.
+  hardwareDiagram: {
+    renderBox: { x: [-0.177, 0.177], y: [0, 0.0716], z: [-0.0845, 0.0845] },
+    callouts: [
+      {
+        label: 'Card slot — the deep recess on the front',
+        anchor: [0.1, 0.04, 0.083],
+        labelOffset: [0.035, 0.045, 0.005],
+      },
+      {
+        label: 'Controller ports (×2) — front left',
+        anchor: [-0.1, 0.025, 0.075],
+        labelOffset: [-0.035, 0.04, 0.005],
+      },
+      {
+        label: 'Cartridge slot — on the top, right side',
+        anchor: [0.06, 0.069, -0.042],
+        labelOffset: [0.03, 0.03, -0.01],
+      },
+      {
+        label: 'Power switch — right side',
+        anchor: [0.15, 0.05, 0.03],
+        labelOffset: [0.03, 0.035, 0.01],
+      },
+    ],
+  },
   // Aspirational mesh targets for a future authored model -- see the
   // Atari 2600 / NES entries for why the current dropped-in GLB can't be
   // targeted by name yet.

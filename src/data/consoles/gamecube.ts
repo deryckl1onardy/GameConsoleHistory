@@ -71,6 +71,39 @@ export const gamecube: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'dvd-keepcase',
   model: '/models/consoles/gamecube.glb',
+  // Anchors measured against the rendered GLB (see snes.ts's hardwareDiagram
+  // comment). Front face (ports + memory slots) is the +z face; the disc lid
+  // is the whole top. Renders 150 x 101 x 182mm against a 150 x 110 x 161
+  // spec — within the bounds test's slack.
+  hardwareDiagram: {
+    callouts: [
+      {
+        label: 'Power button — top-left of the front panel',
+        anchor: [-0.062, 0.075, 0.0911],
+        labelOffset: [-0.02, 0.04, 0],
+      },
+      {
+        label: 'Reset button — beneath the power',
+        anchor: [-0.062, 0.048, 0.0911],
+        labelOffset: [-0.02, 0.04, 0],
+      },
+      {
+        label: 'Controller ports (×4) — the row across the middle',
+        anchor: [0, 0.06, 0.0911],
+        labelOffset: [0.02, 0.04, 0],
+      },
+      {
+        label: 'Memory card slots A and B — the right end',
+        anchor: [0.055, 0.06, 0.0911],
+        labelOffset: [0.025, 0.035, 0],
+      },
+      {
+        label: 'Disc lid — the whole top pops open',
+        anchor: [0.02, 0.1013, 0],
+        labelOffset: [0, 0.035, 0],
+      },
+    ],
+  },
   // Aspirational mesh targets — these name the parts the insert sequence and
   // failure states will drive once an authored model exists. Until then the
   // shell comes from the console form (see console-forms.ts), which generates

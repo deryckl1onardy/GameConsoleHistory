@@ -71,6 +71,34 @@ export const ps3: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'bluray-case',
   model: '/models/consoles/ps3.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. Best fit of the batch (~2% per gltf-transforms.ts);
+  // anchors track the render box recorded below.
+  hardwareDiagram: {
+    renderBox: { x: [-0.139, 0.139], y: [0, 0.096], z: [-0.1635, 0.1635] },
+    callouts: [
+      {
+        label: 'Disc slot — front, right of centre',
+        anchor: [0.03, 0.055, 0.162],
+        labelOffset: [0.035, 0.04, 0.005],
+      },
+      {
+        label: 'USB + memory card slots — front left',
+        anchor: [-0.09, 0.03, 0.162],
+        labelOffset: [-0.035, 0.04, 0.005],
+      },
+      {
+        label: 'Touch power button — front right',
+        anchor: [0.12, 0.078, 0.162],
+        labelOffset: [0.03, 0.035, 0.005],
+      },
+      {
+        label: 'Eject — below the power button',
+        anchor: [0.12, 0.05, 0.162],
+        labelOffset: [0.03, 0.04, 0.005],
+      },
+    ],
+  },
   // Aspirational mesh targets for a future authored model -- see the
   // Atari 2600 / NES entries for why the current dropped-in GLB can't be
   // targeted by name yet.

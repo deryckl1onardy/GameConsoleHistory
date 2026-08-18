@@ -72,6 +72,36 @@ export const nes: ConsoleEntry = {
   mediaKind: 'cartridge',
   mediaArchetype: 'cart-nes',
   model: '/models/consoles/nes.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. The bundled controller is fused into the body
+  // mesh and extends toward +z, so the console's own front face sits at
+  // z ≈ -0.019, near the middle of the total box (gltf-transforms.ts's NES
+  // notes). Anchors on the front use that face, not the spec's depth.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1254, 0.1254], y: [0, 0.0874], z: [-0.2304, 0.2304] },
+    callouts: [
+      {
+        label: 'Power switch — front left',
+        anchor: [-0.06, 0.035, -0.017],
+        labelOffset: [-0.035, 0.045, 0.01],
+      },
+      {
+        label: 'Reset switch — front right',
+        anchor: [0.06, 0.035, -0.017],
+        labelOffset: [0.035, 0.045, 0.01],
+      },
+      {
+        label: 'Cartridge door — the whole top flips open',
+        anchor: [0, 0.086, -0.13],
+        labelOffset: [0, 0.035, -0.01],
+      },
+      {
+        label: 'Controller ports (×2) — front right',
+        anchor: [0.1, 0.028, -0.016],
+        labelOffset: [0.03, 0.04, 0.01],
+      },
+    ],
+  },
   // Same as Atari 2600: dropped-in mesh names (Object_4, Object_5...) carry
   // no semantic meaning -- these are aspirational targets for a future
   // authored model, matching the convention snes.ts already established.

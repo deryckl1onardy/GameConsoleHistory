@@ -73,6 +73,41 @@ export const n64: ConsoleEntry = {
   mediaKind: 'cartridge',
   mediaArchetype: 'cart-n64',
   model: '/models/consoles/n64.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. This model renders 215 x 101 x 158mm against the
+  // real 260 x 73 x 190 — visibly taller than the spec (gltf-transforms.ts),
+  // so anchors track the render box below, and the top-surface anchors sit
+  // higher than the published height would allow.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1074, 0.1074], y: [0, 0.101], z: [-0.0789, 0.0789] },
+    callouts: [
+      {
+        label: 'Controller ports (×4) — the front trident',
+        anchor: [0, 0.029, 0.077],
+        labelOffset: [0, 0.045, 0.01],
+      },
+      {
+        label: 'Power switch — front right',
+        anchor: [0.075, 0.055, 0.07],
+        labelOffset: [0.035, 0.04, 0.005],
+      },
+      {
+        label: 'Reset button — below the power switch',
+        anchor: [0.075, 0.032, 0.07],
+        labelOffset: [0.035, 0.045, 0.005],
+      },
+      {
+        label: 'Cartridge slot — top, centre',
+        anchor: [0, 0.098, 0.005],
+        labelOffset: [0, 0.03, 0.015],
+      },
+      {
+        label: 'Expansion Pak door — top, toward the back',
+        anchor: [0, 0.098, -0.043],
+        labelOffset: [0, 0.035, -0.01],
+      },
+    ],
+  },
   // Aspirational mesh targets for a future authored model -- see the
   // Atari 2600 / NES entries for why the current dropped-in GLB can't be
   // targeted by name yet.

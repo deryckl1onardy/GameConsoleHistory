@@ -70,6 +70,32 @@ export const ps2: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'dvd-keepcase',
   model: '/models/consoles/ps2.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. This model's long axis runs along Z (192 wide x
+  // 311 deep against the real 302 x 183), so the console's FRONT face — the
+  // one carrying the buttons, USB ports and SONY logo, all confirmed by the
+  // model's own named meshes — is the -X face, not the +Z face every other
+  // flat console uses. Anchors below are on that face.
+  hardwareDiagram: {
+    renderBox: { x: [-0.0961, 0.0961], y: [0, 0.0723], z: [-0.1556, 0.1556] },
+    callouts: [
+      {
+        label: 'Power + eject buttons — the front edge',
+        anchor: [-0.094, 0.052, 0.137],
+        labelOffset: [-0.04, 0.035, 0.01],
+      },
+      {
+        label: 'USB ports (×2) — front, toward the back',
+        anchor: [-0.073, 0.012, -0.128],
+        labelOffset: [-0.035, 0.03, 0.01],
+      },
+      {
+        label: 'Disc tray — the slot on the front',
+        anchor: [-0.092, 0.045, -0.02],
+        labelOffset: [-0.045, 0.03, 0.01],
+      },
+    ],
+  },
   // Aspirational mesh targets for a future authored model -- see the
   // Atari 2600 / NES entries for why the current dropped-in GLB can't be
   // targeted by name yet.

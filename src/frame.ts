@@ -7,17 +7,18 @@ import type { OrthographicCamera, PerspectiveCamera } from 'three'
  * sits ON TOP of the console without moving it, so the console has to be
  * framed clear of it. The left title column is top-aligned — it occupies the
  * upper-left corner, not a band the console sits under — so the console stays
- * HORIZONTALLY CENTRED and only needs the vertical lift. This file is the one
- * place that fact lives, imported by both sides: `CameraRig.tsx` reads it to
- * push the camera's view rectangle, and the room chrome components read the
- * SAME fractions to size themselves. Neither can drift from the other because
- * there is only one set of numbers.
+ * HORIZONTALLY CENTRED and only needs the vertical lift. The top strip is
+ * now TWO rows (the 56px ConsoleNav bar plus the SectionSwitch row beneath
+ * it), and `topH` covers both. This file is the one place that fact lives,
+ * imported by both sides: `CameraRig.tsx` reads it to push the camera's view
+ * rectangle, and the room chrome components read the SAME fractions to size
+ * themselves. Neither can drift from the other because there is only one set
+ * of numbers.
  *
  * The mechanism is `PerspectiveCamera.setViewOffset` in RATIO form — see
  * `applyFrameOffset` for why that specific form matters. It shifts which
  * portion of the projection is rendered, not the camera's position or the
- * shot's target — `shots.ts` and the shelf<->room handoff (see
- * `museum-shots.ts`'s roomDelta) stay untouched. The sign convention is the
+ * shot's target — `shots.ts` stays untouched. The sign convention is the
  * one already established and documented in `src/review.ts:60-70`: positive
  * `dy` shifts the SUBJECT up on screen; positive `dx` shifts it left. To
  * clear the bottom panel we want `dy > 0`; horizontally the subject stays
@@ -29,19 +30,30 @@ export type Layout = 'wide' | 'compact'
 /**
  * Fractions of the viewport the room chrome occupies. `panelH`/`topH` are
  * vertical (bottom panel, top brand/header strip); `titleW` is the left
- * title column's width. These are the actual numbers `DetailPanel` and
- * `ConsoleTitle` size themselves to — changing one without the other is
- * exactly the drift this file exists to prevent.
+ * title column's width — kept as the historical width of the sidebar that
+ * replaced the title column, so the number that once framed the room's left
+ * edge stays recorded even though nothing consumes it today (the sidebar is
+ * real layout now, sized in App.tsx, and the console stays centred).
  */
 export const ROOM_CHROME = {
   panelH: 0.32,
-  topH: 0.1,
+  /**
+   * Top strip fraction: the 56px ConsoleNav bar PLUS the ~60px SectionSwitch
+   * row that now sits directly under it (top-14 + pt-5 + a 28px Sentient
+   * line). 116px against a 900px viewport is ~13%; 0.15 is held with margin
+   * so the camera never frames the console under the switcher on a shorter
+   * screen. Both numbers were re-derived against a real viewport rather than
+   * extrapolated — the frame.test.ts coverage test pins this floor.
+   */
+  topH: 0.15,
   titleW: 0.34,
   /** Height when the panel is collapsed to just its chevron bar. */
   collapsedPanelH: 0.08,
   compact: {
     panelH: 0.45,
-    topH: 0.16,
+    // Same 116px of chrome, but a compact viewport can be much shorter —
+    // 116px against a 700px phone is ~17%, and 0.21 holds the same margin.
+    topH: 0.21,
     titleW: 0,
     collapsedPanelH: 0.08,
   },
@@ -49,29 +61,6 @@ export const ROOM_CHROME = {
 
 export type FrameOffset = { dx: number; dy: number }
 export const NO_OFFSET: FrameOffset = { dx: 0, dy: 0 }
-
-/**
- * The shelf's own bottom chrome — the timeline strip. Much shorter than the
- * room's detail panel (a strip of year marks, not a thirds-of-the-screen
- * panel) but real: with the strip in place the shelf camera has to lift the
- * subject clear of it just like the room does. Fraction of the viewport the
- * strip occupies.
- */
-const SHELF_CHROME_PANEL_H = 0.09
-
-/**
- * The offset that clears the shelf's timeline strip — the shelf half of the
- * frame-offset contract. Same shape as `frameOffsetFor` (a vertical lift, no
- * horizontal dodge) with the shelf's own chrome fractions; see the file
- * header for why the mechanism is identical.
- */
-export function shelfFrameOffsetFor(width: number, height: number): FrameOffset {
-  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
-    return NO_OFFSET
-  }
-  const dy = clamp(SHELF_CHROME_PANEL_H / 2, 0, MAX_DY)
-  return { dx: 0, dy }
-}
 
 /** How far the subject may be lifted, as a safety rail on the arithmetic below. */
 const MAX_DY = 0.2

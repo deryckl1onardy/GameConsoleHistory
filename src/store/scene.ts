@@ -1,52 +1,44 @@
 import { create } from 'zustand'
-import type { ConsoleEntry, DioramaSpec, Game, Generation, RegionVariant } from '@/types/console'
+import type { ConsoleEntry, DioramaSpec, Game, RegionVariant } from '@/types/console'
 import { CONSOLES, getConsole } from '@/data/consoles'
 import type { FrameOffset, Layout } from '@/frame'
-import { firstOfGeneration } from '@/three/museum/hall-glide'
-import { MUSEUM_LAYOUT } from '@/three/museum/layout'
 
 /**
  * One store, shared by the 2D shell and the 3D scene. The playback field is a
  * strict state machine — the insert/eject GSAP timelines key off it, so nothing
  * else is allowed to mutate it ad hoc.
- */
-
-export type ViewMode = 'console' | 'diorama' | 'library' | 'controller' | 'compare'
-
-/**
- * Which of the two worlds we are in. Deliberately NOT a ViewMode: a ViewMode is
- * contractually a shot derivable from a DioramaSpec (that is what shots.test.ts
- * defends), and the museum has no DioramaSpec and its own coordinate space.
- */
-export type Screen = 'shelf' | 'room'
-
-/** The museum's two viewing distances. See `hallView` on the store. */
-export type HallView = 'overview' | 'station'
-
-/**
- * The museum-to-room move, as a guarded machine — same posture as `playback`,
- * because a GSAP timeline keys off it and a desync would strand the camera
- * between two coordinate spaces.
  *
- *   idle        the current `screen` is authoritative, camera is the user's
- *   focusing    an artifact is chosen; neighbours dim; camera still
- *   approaching camera flying at the artifact, museum going dark
- *   arriving    room mounted under an unmoved console, lights ramping up
- *   retreating  quick pull-back, room -> shelf
+ * The app is a SINGLE screen now — the console detail room. The museum shelf
+ * is gone, so `screen` and `approach` are constants rather than state: they
+ * survive only so the few legacy "is a transition in flight" checks
+ * (`approach !== 'idle'`) and the "which world are we in" branches read the
+ * no-transition value without being deleted from every consumer. They can be
+ * removed together with those checks when the room is fully self-contained.
  */
-export type Approach = 'idle' | 'focusing' | 'approaching' | 'arriving' | 'retreating'
 
-const APPROACH_TRANSITIONS: Record<Approach, Approach[]> = {
-  // 'focusing' -> 'idle' is the user changing their mind before the flight.
-  idle: ['focusing', 'retreating'],
-  focusing: ['approaching', 'idle'],
-  approaching: ['arriving'],
-  arriving: ['idle'],
-  retreating: ['idle'],
-}
+export type ViewMode =
+  | 'console'
+  | 'diorama'
+  | 'library'
+  | 'controller'
+  | 'compare'
+  | 'artifact'
 
-/** Sections of the room's detail panel. */
-export type PanelTab = 'overview' | 'games' | 'hardware' | 'history'
+/** The one world: the console's era room. Kept as a type so old checks compile. */
+export type Screen = 'room'
+
+/** The one value: idle, always. See the file header. */
+export type Approach = 'idle'
+
+/**
+ * The two top-level sections beside the sidebar: the console's own room, and
+ * its games. Games is not a tab of the console any more — it is a peer
+ * section with its own panel content and camera behaviour (see SectionSwitch).
+ */
+export type Section = 'console' | 'games'
+
+/** The console section's panel tabs. 'games' left to become a Section. */
+export type ConsoleTab = 'overview' | 'hardware' | 'history'
 
 export type Playback =
   | 'browsing' // idle, room view
@@ -66,27 +58,14 @@ const TRANSITIONS: Record<Playback, Playback[]> = {
   ejecting: ['browsing'],
 }
 
-/**
- * Which panel tab a given camera mode belongs with, when the two are linked.
- *
- * Empty for now: Diorama.tsx no longer draws a game shelf or a placed
- * controller, so the 'library'/'controller' shots it used to link to would
- * move the camera to stare at empty space. The Games/Hardware PANEL tabs
- * are unaffected — they're plain text lists (the room's detail panel), never
- * 3D — this only cuts the camera-follow side of that link. `ViewMode`/
- * `PanelTab` keep every value either map could use; restoring an entry here
- * is the whole fix once the room set comes back.
- */
-const TAB_FOR_MODE: Partial<Record<ViewMode, PanelTab>> = {}
-
-const MODE_FOR_TAB: Partial<Record<PanelTab, ViewMode>> = {}
-
 type SceneState = {
   consoleId: string
   /** null = base regional model; otherwise a variant id such as 'sfc'. */
   variantId: string | null
+  /** The top-level section: the console's room, or its games. */
+  section: Section
   mode: ViewMode
-  panelTab: PanelTab
+  panelTab: ConsoleTab
   /** Whether the opening pull-back has played for the current console. */
   introDone: boolean
   playback: Playback
@@ -109,90 +88,30 @@ type SceneState = {
    */
   panelOpen: boolean
   /**
+   * Whether the sidebar's console list is open as a drawer. Only meaningful
+   * in the compact layout, where the rail is hidden behind the hamburger
+   * button; in the wide layout the sidebar is always visible and this is
+   * ignored.
+   */
+  sidebarOpen: boolean
+  /**
    * The frame offset currently applied to the camera. CameraRig owns the
    * tween; this mirror lets the post-processing focus band track the subject
-   * as it lifts (see Scene.tsx). NO_OFFSET on the shelf and at both handoffs.
+   * as it lifts (see Scene.tsx).
    */
   frameOffset: FrameOffset
   /** Bumped to ask CameraRig to snap the camera back to the resting shot. */
   reframeNonce: number
 
-  /* ---- museum ---- */
+  /* ---- constants, see the file header ---- */
   screen: Screen
   approach: Approach
-  /**
-   * How much of the hall the camera is taking in.
-   *
-   *   overview  the whole gallery from just inside the entrance — the
-   *             opening frame, and what says how much history there is
-   *   station   standing in front of one generation, close enough to read it
-   *
-   * Two distances rather than one free-floating camera: browsing a museum is
-   * a sequence of arrivals, not a continuous glide, and the shelf's old
-   * unbounded pan gave you no sense of ever having got anywhere.
-   */
-  hallView: HallView
-  /**
-   * The console currently focused on the shelf — the one the chrome (timeline
-   * strip, search, keyboard) points at, and from Phase 4 the one the hall
-   * glides onto the stage. The museum's camera generation follows it.
-   */
-  focusedId: string
-  /**
-   * Whether the hall group is mid-glide toward a newly focused console.
-   * `selectArtifact` refuses to fire while gliding, so the approach can never
-   * read a half-moved hall (see the three guards in the navigation plan).
-   * Phase 3 adds the field; Phase 4 animates it.
-   */
-  hallMotion: 'settled' | 'gliding'
-  /**
-   * Which generation's station the museum camera rests on. Derived from
-   * `focusedId` by every setter that moves focus, so the two can never
-   * disagree.
-   */
-  focusGeneration: Generation
-  /**
-   * Bumped whenever the camera's POSE should change — overview <-> station.
-   * The camera has exactly two poses now (the hall overview, and the stage),
-   * so this is the only signal CameraRig's destination effect listens for on
-   * the shelf. Focus changes do NOT bump it: the camera is bolted down while
-   * browsing, and the HALL glides instead.
-   */
-  poseNonce: number
-  /**
-   * Bumped whenever the GLIDE target changes — every focus change, and every
-   * return to the overview (which glides the hall back to rest). Drives the
-   * hall group's 2-D tween in CameraRig, independent of the camera pose.
-   */
-  glideNonce: number
-  /** Artifact under the pointer on the shelf, or null. */
-  hoveredId: string | null
-  /** Whether the museum's opening move has played this session. */
-  museumIntroDone: boolean
-  /**
-   * Bumped by every `selectArtifact`/`retreatToShelf` call, including a
-   * re-selection of the SAME console. CameraRig's approach choreography keys
-   * its scheduling effect on this rather than on `approach` itself: `approach`
-   * changes several more times over the course of the sequence (via this
-   * effect's own timers calling `advanceApproach`), and a dependency that
-   * fires on every one of those would have React tear down and reschedule
-   * itself mid-flight. This changes exactly once per genuine new request.
-   */
-  approachNonce: number
-
-  /**
-   * Whether the hall group is mid-glide. `selectArtifact` refuses while
-   * gliding, so the approach can never read a half-moved hall — the first of
-   * the three guards against mid-flight corruption (the approach shot is
-   * computed at FOCUS_HOLD and consumed at the handoff; an animated offset
-   * between those two reads would move the console by the difference).
-   */
-  setHallMotion: (m: 'settled' | 'gliding') => void
 
   setConsole: (id: string) => void
   setVariant: (id: string | null) => void
+  setSection: (section: Section) => void
   setMode: (mode: ViewMode) => void
-  setPanelTab: (tab: PanelTab) => void
+  setPanelTab: (tab: ConsoleTab) => void
   setIntroDone: (v: boolean) => void
   setCompare: (id: string | null) => void
   selectGame: (rank: number | null) => void
@@ -202,37 +121,16 @@ type SceneState = {
   setReducedMotion: (v: boolean) => void
   setLayout: (layout: Layout) => void
   setPanelOpen: (v: boolean) => void
+  setSidebarOpen: (v: boolean) => void
   setFrameOffset: (offset: FrameOffset) => void
   bumpReframe: () => void
-
-  /** Pick an artifact off the shelf. Starts the approach; see `selectArtifact`. */
-  selectArtifact: (id: string) => void
-  /** Leave the room, back to the shelf. No-op outside `idle`. */
-  retreatToShelf: () => void
-  /** Returns false and does nothing if the transition is not legal. */
-  advanceApproach: (next: Approach) => boolean
-  setScreen: (s: Screen) => void
-  /** Focus a console — moves the camera to its station, and closes in. */
-  setFocusedConsole: (id: string) => void
-  /** Navigate TO a generation's station — focuses its first console. */
-  setFocusGeneration: (g: Generation) => void
-  /** Pull back to take in the whole hall. */
-  showHallOverview: () => void
-  setHovered: (id: string | null) => void
-  setMuseumIntroDone: (v: boolean) => void
-}
-
-function initialScreen(): Screen {
-  if (typeof window === 'undefined') return 'shelf'
-  // ?screen=room is the escape hatch now — useful for room-only dev work
-  // (or a future direct deep link) without the museum in front of it.
-  return new URLSearchParams(window.location.search).get('screen') === 'room' ? 'room' : 'shelf'
 }
 
 export const useScene = create<SceneState>((set, get) => ({
   consoleId: CONSOLES[0].id,
   variantId: null,
   // The console is the subject of the atlas, so it is where the camera rests.
+  section: 'console',
   mode: 'console',
   panelTab: 'overview',
   introDone: false,
@@ -243,61 +141,71 @@ export const useScene = create<SceneState>((set, get) => ({
   quality: 'high',
   layout: 'wide',
   panelOpen: true,
+  sidebarOpen: false,
   frameOffset: { dx: 0, dy: 0 },
   reframeNonce: 0,
 
-  // Stays 'room' until the museum is wired end to end; reachable before then
-  // with ?screen=shelf so the shelf can be built and judged without disturbing
-  // the existing app. Read here rather than in an effect so the museum never
-  // flashes the room first. Same category of dev switch as Scene.tsx's ?fx.
-  screen: initialScreen(),
+  // Constants — the app opens straight into the console detail room.
+  screen: 'room',
   approach: 'idle',
-  // The oldest bay: the museum reads downward through time from here. The
-  // first console is focused by default, so the chrome has something to point
-  // at before the user ever touches it.
-  focusedId: CONSOLES[0].id,
-  hallMotion: 'settled',
-  // Derived from focusedId above (see the field comment): the oldest bay.
-  focusGeneration: CONSOLES.reduce<Generation>(
-    (oldest, c) => (c.generation < oldest ? c.generation : oldest),
-    CONSOLES[0].generation,
-  ),
-  // The gallery opens on the whole hall — you take in how much history there
-  // is before going to look at any of it.
-  hallView: 'overview',
-  poseNonce: 0,
-  glideNonce: 0,
-  hoveredId: null,
-  museumIntroDone: false,
-  approachNonce: 0,
 
   setConsole: (id) =>
     set({
       consoleId: id,
       variantId: null,
+      section: 'console',
       mode: 'console',
       panelTab: 'overview',
-      // Replay the opening move for the newly chosen console.
-      introDone: false,
+      // The intro already played once; a switch glides quickly instead of
+      // replaying the opening move (CameraRig's intro effect reads this).
+      introDone: true,
       playback: 'browsing',
       selectedGameRank: null,
     }),
 
   setVariant: (id) => set({ variantId: id }),
 
-  /** The single entry point that moves the camera. */
-  setMode: (mode) =>
-    set((s) => ({
-      mode,
-      // Keep the panel showing whatever the camera is looking at.
-      panelTab: TAB_FOR_MODE[mode] ?? s.panelTab,
-    })),
+  /**
+   * The single entry point for the top-level section switch.
+   *
+   * The camera follows the section: console rests on the console shot, games
+   * rests on the selected game's artifact. The games section auto-selects the
+   * first game when nothing is picked, so entering Games never shows an
+   * empty stage — the floating list is the navigation and the panel is the
+   * artifact, so there is no "list view" to land on.
+   */
+  setSection: (section) =>
+    set((s) => {
+      if (section === 'console') {
+        // The selected game no longer means anything here — drop it and the
+        // lifted-box state with it.
+        return { section, mode: 'console', panelOpen: true, selectedGameRank: null, playback: 'browsing' }
+      }
+      const first = getConsole(s.consoleId)?.games[0]?.rank ?? null
+      const selectedGameRank = s.selectedGameRank ?? first
+      return {
+        section: 'games',
+        panelOpen: true,
+        selectedGameRank,
+        mode: selectedGameRank !== null ? 'artifact' : 'library',
+        playback:
+          selectedGameRank !== null && (s.playback === 'browsing' || s.playback === 'selected')
+            ? 'selected'
+            : s.playback,
+      }
+    }),
+
+  /** Kept for callers that drive the camera directly (compare mode). */
+  setMode: (mode) => set({ mode }),
 
   setPanelTab: (tab) =>
-    set((s) => ({
+    set(() => ({
+      // All three console tabs face the console itself; none of them needs
+      // to move the camera anywhere else. 'games' is no longer a tab — it is
+      // a Section, switched by SectionSwitch, not by this map.
       panelTab: tab,
-      // Asking to see the games takes you to them.
-      mode: MODE_FOR_TAB[tab] ?? s.mode,
+      section: 'console',
+      mode: 'console',
       panelOpen: true,
     })),
 
@@ -307,15 +215,27 @@ export const useScene = create<SceneState>((set, get) => ({
   selectGame: (rank) =>
     set((s) => {
       if (rank === null) {
-        return { selectedGameRank: null, playback: s.playback === 'selected' ? 'browsing' : s.playback }
+        // Back to the list (the artifact view's back button, or toggling a
+        // row off). The section stays Games; the camera returns to the spread.
+        return {
+          selectedGameRank: null,
+          section: 'games',
+          mode: 'library',
+          playback: s.playback === 'selected' ? 'browsing' : s.playback,
+        }
       }
       // Picking a different game while one is lifted stays in 'selected'.
       return {
         selectedGameRank: rank,
-        // Selecting a cartridge in 3D surfaces it in the panel, and vice versa —
-        // the list and the shelf are two views of one selection.
-        panelTab: 'games',
+        // Selecting a game surfaces it as an artifact: the section is Games,
+        // the camera flies to that one cartridge. This sets `section` and
+        // `mode` directly rather than routing through setSection, because
+        // the two are deliberately different moves — a section switch rests
+        // on the spread, a selection rests on the box. (Keeping them in sync
+        // by hand is the known gotcha this store's header warns about.)
+        section: 'games',
         panelOpen: true,
+        mode: 'artifact',
         playback: s.playback === 'browsing' || s.playback === 'selected' ? 'selected' : s.playback,
       }
     }),
@@ -337,114 +257,9 @@ export const useScene = create<SceneState>((set, get) => ({
   setReducedMotion: (reducedMotion) => set({ reducedMotion }),
   setLayout: (layout) => set({ layout }),
   setPanelOpen: (panelOpen) => set({ panelOpen }),
+  setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
   setFrameOffset: (frameOffset) => set({ frameOffset }),
   bumpReframe: () => set((s) => ({ reframeNonce: s.reframeNonce + 1 })),
-
-  /**
-   * Taking an artifact off the shelf. A sibling of `setConsole`, deliberately
-   * NOT a caller of it: `setConsole` sets `introDone: false` to replay the
-   * room's opening pull-back, which would fight the approach for the camera
-   * and undo the handoff. The approach IS this console's opening move, so it
-   * marks the intro already done.
-   */
-  selectArtifact: (id) => {
-    // Guard 1 of three against mid-flight corruption: the approach reads the
-    // console's pose at FOCUS_HOLD and consumes it at the handoff, so the
-    // hall must be standing still — exactly at its target — when the user
-    // commits. Refusing while gliding is the cheap, honest answer; the UI
-    // (keyboard Enter, the click-to-enter in Phase 7) can retry once settled.
-    if (get().hallMotion !== 'settled') {
-      if (import.meta.env.DEV) {
-        console.warn(`[scene] selectArtifact(${id}) ignored — hall is gliding`)
-      }
-      return
-    }
-    set((s) => ({
-      consoleId: id,
-      variantId: null,
-      mode: 'console',
-      panelTab: 'overview',
-      introDone: true,
-      playback: 'browsing',
-      selectedGameRank: null,
-      hoveredId: null,
-      // Mirror the focus so the chrome points at the console being entered —
-      // a plain write, deliberately not setFocusedConsole (that would bump the
-      // glide/pose nonces mid-transition).
-      focusedId: id,
-      focusGeneration: MUSEUM_LAYOUT.byId[id]?.generation ?? s.focusGeneration,
-      approach: 'focusing',
-      approachNonce: s.approachNonce + 1,
-    }))
-  },
-
-  /**
-   * Bypasses `advanceApproach`'s guard by design, exactly like `setConsole`
-   * already bypasses `transition()` for playback: the UI is what enforces
-   * "only from idle" (ShelfBay's click handler checks `approach === 'idle'`
-   * before ever calling this), so the guard here is a second, defensive line
-   * rather than the only one.
-   */
-  retreatToShelf: () => {
-    if (get().approach !== 'idle') {
-      if (import.meta.env.DEV) {
-        console.warn(`[scene] retreatToShelf ignored — approach is ${get().approach}, not idle`)
-      }
-      return
-    }
-    set((s) => ({ approach: 'retreating', approachNonce: s.approachNonce + 1 }))
-  },
-
-  advanceApproach: (next) => {
-    const current = get().approach
-    if (current === next) return true
-    if (!APPROACH_TRANSITIONS[current].includes(next)) {
-      if (import.meta.env.DEV) {
-        console.warn(`[scene] illegal approach transition: ${current} -> ${next}`)
-      }
-      return false
-    }
-    set({ approach: next })
-    return true
-  },
-
-  setScreen: (screen) => set({ screen }),
-  // Focusing a console changes the GLIDE target (the hall brings it to the
-  // stage) and, when it pulls the camera in from the overview, the POSE. The
-  // two are deliberately separate nonces: the pose is one of two fixed
-  // cameras, the glide is a 2-D tween of the whole hall — independent
-  // animations that must not share a signal. The generation is derived from
-  // the id, never accepted separately.
-  setFocusedConsole: (focusedId) =>
-    set((s) => {
-      const artifact = MUSEUM_LAYOUT.byId[focusedId]
-      if (!artifact) return {}
-      const closingIn = s.hallView !== 'station'
-      return {
-        focusedId,
-        focusGeneration: artifact.generation,
-        hallView: 'station' as HallView,
-        glideNonce: s.glideNonce + 1,
-        poseNonce: s.poseNonce + (closingIn ? 1 : 0),
-      }
-    }),
-  // A generation jump is shorthand for focusing its first console.
-  setFocusGeneration: (focusGeneration) => {
-    const id = firstOfGeneration(MUSEUM_LAYOUT, focusGeneration)
-    if (!id) return
-    useScene.getState().setFocusedConsole(id)
-  },
-  showHallOverview: () =>
-    set((s) => ({
-      // Back out to the whole hall: the camera flies to the overview AND the
-      // hall glides back to rest (its natural, un-glided position).
-      hallView: 'overview' as HallView,
-      glideNonce: s.glideNonce + 1,
-      poseNonce: s.poseNonce + 1,
-    })),
-  setHallMotion: (hallMotion) => set({ hallMotion }),
-  setHovered: (hoveredId) => set({ hoveredId }),
-  setMuseumIntroDone: (museumIntroDone) => set({ museumIntroDone }),
 }))
 
 /* ---------- derived selectors ---------- */
@@ -490,23 +305,4 @@ export function useActiveArchetypeId() {
   return variant?.mediaArchetype ?? entry.mediaArchetype
 }
 
-/**
- * Which scenes are mounted right now.
- *
- * The museum outlives `screen` for the whole approach so it can be lit down
- * rather than yanked, and so disposing eleven GLB subtrees never lands on the
- * frame the camera is moving. The room does NOT mount early: apart from the
- * console — which the hero layer owns throughout — a room is entirely
- * procedural boxes, so it costs nothing to build at the handoff and cannot
- * stall on the network.
- */
-export function useSceneMounts(): { museum: boolean; room: boolean } {
-  const screen = useScene((s) => s.screen)
-  const approach = useScene((s) => s.approach)
-  return {
-    museum: screen === 'shelf' || approach !== 'idle',
-    room: screen === 'room',
-  }
-}
-
-export { TRANSITIONS, APPROACH_TRANSITIONS }
+export { TRANSITIONS }

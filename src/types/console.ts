@@ -67,6 +67,14 @@ export type CartridgeLabel = {
   heightMm: number
   /** Offset from the centre of the front face, in mm. Positive Y is up. */
   offsetYMm: number
+  /**
+   * Offset from the centre of the front face, in mm. Positive X is right.
+   * Defaults to 0 (horizontally centred) when omitted — true for most
+   * cartridges, but not for the NES: its shell has a moulded ridge down the
+   * left edge (the connector-release grip), so the real label sits right of
+   * dead centre, not centred on the whole face.
+   */
+  offsetXMm?: number
   precision: 'exact' | 'approximate'
 }
 
@@ -197,6 +205,17 @@ export type GameClip = {
   durationMs: number
 }
 
+/**
+ * A per-game researched fact. Mirrors `Fact`'s title/body shape so the games
+ * artifact view renders its fact exactly like the console's FunFactCard does.
+ */
+export type GameFact = {
+  title: string
+  body: string
+  /** Where this came from. Never write a fact without one. */
+  source: string
+}
+
 export type Game = {
   rank: number
   title: string
@@ -210,6 +229,23 @@ export type Game = {
   /** Opens the compliant 2D embed for anyone wanting the real thing. */
   youtubeId?: string
   blurb: string
+  /**
+   * Researched fact, merged on at runtime from src/data/game-facts.ts.
+   * Absent is a normal, designed state — the artifact view renders the
+   * block only when present.
+   */
+  fact?: GameFact
+  /**
+   * Researched editorial — the game's "why it matters" paragraph, merged on
+   * at runtime from the same file as `fact`. Absent is a normal, designed
+   * state: the block only renders when a sourced write-up exists.
+   */
+  editorial?: { body: string; source: string }
+  /** US launch MSRP. Absent whenever no credible source was found. */
+  msrpUsd?: number
+  /** Inflation-adjusted to 2025 dollars, matching the console data's convention. */
+  msrpUsdAdjusted?: number
+  msrpSource?: string
 }
 
 /**
@@ -241,6 +277,22 @@ export type HardwareCallout = {
 
 export type HardwareDiagram = {
   callouts: HardwareCallout[]
+  /**
+   * The actual rendered extents of the console's GLB, in hero-local metres.
+   *
+   * Optional, and only for dropped-in models whose proportions disagree with
+   * the published `dimensions` (the PS5 renders 2.2x wider than its spec;
+   * the N64 renders 101mm tall against a 73mm spec; the PS2's long axis runs
+   * along z). Anchors are measured against the RENDER, not the spec — see
+   * the SNES's hardwareDiagram comment — so hardware-callouts.test.ts
+   * validates against this box when present, and against `dimensions`
+   * otherwise.
+   */
+  renderBox?: {
+    x: [number, number]
+    y: [number, number]
+    z: [number, number]
+  }
 }
 
 export type PropInstance = {

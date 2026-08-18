@@ -83,6 +83,42 @@ export function byGeneration(): Map<Generation, ConsoleEntry[]> {
   return out
 }
 
+/**
+ * Whether a console matches a sidebar search query. Searches the display
+ * name, the full name and the manufacturer, the same fields the old top-bar
+ * search covered.
+ */
+export function matchesConsole(c: ConsoleEntry, query: string): boolean {
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  return (
+    c.shortName.toLowerCase().includes(q) ||
+    c.name.toLowerCase().includes(q) ||
+    c.manufacturer.toLowerCase().includes(q)
+  )
+}
+
+/**
+ * The sidebar's list: CONSOLES (already in release order) filtered by the
+ * search query, grouped by generation with each group in release order.
+ * CONSOLES is chronological and generations are contiguous in it, so a
+ * single pass over the filtered roster yields ordered groups.
+ */
+export function sidebarGroups(query: string): { generation: Generation; consoles: ConsoleEntry[] }[] {
+  const groups: { generation: Generation; consoles: ConsoleEntry[] }[] = []
+  for (const c of CONSOLES) {
+    if (!matchesConsole(c, query)) continue
+    const last = groups[groups.length - 1]
+    const group = last && last.generation === c.generation ? last : null
+    if (group) {
+      group.consoles.push(c)
+    } else {
+      groups.push({ generation: c.generation, consoles: [c] })
+    }
+  }
+  return groups
+}
+
 export {
   atari2600,
   nes,

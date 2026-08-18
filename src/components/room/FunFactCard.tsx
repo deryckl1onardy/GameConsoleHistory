@@ -51,8 +51,8 @@ export function FunFactCard() {
         {COPY.funFact}
       </p>
       <div className="mt-2 transition-opacity duration-300" style={{ opacity }}>
-        <h4 className="font-display text-lg leading-snug text-parchment">{fact.title}</h4>
-        <p className="mt-2 text-[13px] leading-relaxed text-parchment/70">{fact.body}</p>
+        <h4 className="font-display text-lg leading-snug text-ink">{fact.title}</h4>
+        <p className="mt-2 text-[13px] leading-relaxed text-ink/70">{fact.body}</p>
       </div>
     </div>
   )

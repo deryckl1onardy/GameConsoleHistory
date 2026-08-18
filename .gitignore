@@ -33,6 +33,8 @@ dist-ssr
 .img2threejs/*
 !.img2threejs/object-sculpt-spec.json
 !.img2threejs/assessment.json
+!.img2threejs/cart/object-sculpt-spec.json
+!.img2threejs/cart/assessment.json
 
 # Copied here only so the Vite dev server can serve them as texture URLs for
 # the review harness — the real copies live in .img2threejs/material-evidence/.
@@ -40,3 +42,12 @@ public/material-evidence/
 
 # Local preview/session state from the editor's dev-server integration.
 .freebuff/
+
+# Real cover art fetched from SteamGridDB by scripts/fetch-covers.mjs. Kept
+# out of git history by default — the community-uploaded art it pulls in is
+# not something to ship without a deliberate choice. See src/data/covers.ts.
+public/covers/
+
+# API keys for local scripts (e.g. STEAMGRIDDB_KEY for scripts/fetch-covers.mjs).
+.env
+.env.local

@@ -76,6 +76,42 @@ export const ps5: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'bluray-case',
   model: '/models/consoles/ps5.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. This model stands upright and renders 225 x 356 x
+  // 156mm against the real 104 x 390 x 260 — over twice the published
+  // thickness (gltf-transforms.ts), so the anchors here MUST be validated
+  // against renderBox, not the spec. The model's own meshes confirm the disc
+  // drive on the +X face (lower half) with the disc slot above it.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1128, 0.1128], y: [0, 0.3563], z: [-0.0778, 0.0778] },
+    callouts: [
+      {
+        label: "The white fins — the console's silhouette",
+        anchor: [0.105, 0.28, 0.03],
+        labelOffset: [0.03, 0.03, 0.01],
+      },
+      {
+        label: 'Disc drive — the bulge on the right side',
+        anchor: [0.105, 0.09, -0.024],
+        labelOffset: [0.03, 0.03, 0.01],
+      },
+      {
+        label: 'Disc slot + eject — right side, mid-height',
+        anchor: [0.103, 0.17, 0.011],
+        labelOffset: [0.03, 0.03, 0.01],
+      },
+      {
+        label: 'Front ports — USB-C and USB-A, top',
+        anchor: [0, 0.34, 0.05],
+        labelOffset: [0, 0.03, 0.005],
+      },
+      {
+        label: 'Power button — front, below the ports',
+        anchor: [0, 0.3, 0.05],
+        labelOffset: [0, 0.035, 0.005],
+      },
+    ],
+  },
   // Aspirational mesh targets for a future authored model -- see the
   // Atari 2600 / NES entries for why the current dropped-in GLB can't be
   // targeted by name yet.

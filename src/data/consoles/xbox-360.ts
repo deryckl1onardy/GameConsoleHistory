@@ -71,6 +71,38 @@ export const xbox360: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'dvd-keepcase',
   model: '/models/consoles/xbox-360.glb',
+  // Anchors measured against the rendered GLB (see snes.ts's hardwareDiagram
+  // comment). The console stands on end; its front face (power ring, disc
+  // tray, ports) is the -z face — the hero yaw carries the half-turn that
+  // shows it to the room. Renders 258 x 311 x 97mm against a 258 x 309 x 83
+  // spec — within the bounds test's slack.
+  hardwareDiagram: {
+    // The console stands on end: the render's height (311mm) is the data's
+    // width (309mm) axis, so the bounds test validates against renderBox.
+    renderBox: { x: [-0.129, 0.129], y: [0, 0.311], z: [-0.048, 0.048] },
+    callouts: [
+      {
+        label: 'Power button — the ring of light',
+        anchor: [0.01, 0.03, -0.047],
+        labelOffset: [0.02, 0.04, 0],
+      },
+      {
+        label: 'Disc tray — the upper third of the front',
+        anchor: [0, 0.22, -0.047],
+        labelOffset: [0.02, 0.03, 0],
+      },
+      {
+        label: 'USB ports and sync button — the recessed panel at the left edge',
+        anchor: [-0.1, 0.1, -0.037],
+        labelOffset: [-0.03, 0.03, 0],
+      },
+      {
+        label: 'Vents — the front exhales top and bottom',
+        anchor: [0, 0.28, -0.047],
+        labelOffset: [0.02, 0.03, 0],
+      },
+    ],
+  },
   // Aspirational mesh targets — these name the parts the insert sequence and
   // failure states will drive once an authored model exists. Until then the
   // shell comes from the console form (see console-forms.ts), which generates
@@ -194,7 +226,10 @@ export const xbox360: ConsoleEntry = {
     tvPosition: [-0.3, 0.62, -1.2],
     tvRotation: [0, 0.1, 0],
     consolePosition: [0.48, 0.5, -1.05],
-    consoleRotation: [0, -0.3, 0],
+    // The GLB exports the console front-back (power ring + disc tray on its
+    // -z face), so the yaw carries an extra half-turn to face the room like
+    // the other consoles do.
+    consoleRotation: [0, Math.PI - 0.3, 0],
     controllerPosition: [-0.18, 0.014, 0.45],
     controllerRotation: [0, 0.5, 0],
     shelfPosition: [-1.4, 0.55, -1.58],

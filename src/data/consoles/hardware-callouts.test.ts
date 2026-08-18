@@ -19,27 +19,43 @@ describe('hardware callouts', () => {
   for (const entry of consolesWithCallouts) {
     describe(entry.id, () => {
       const callouts = entry.hardwareDiagram!.callouts
-      // Half-extents in metres, from the console's own PUBLISHED dimensions —
-      // the same box every other piece of geometry in the scene is measured
-      // against. A flat mm-scale slack covers ordinary surface slop (the
-      // bevel, a relief block's protrusion); it does NOT cover a console
-      // that renders from a dropped-in GLB whose height/depth axes are
-      // known to disagree with the published spec — see gltf-transforms.ts's
-      // notes on exactly this (the SNES's own file reads 88mm tall and
-      // 163mm deep against a real 68mm/254mm, because a bundled controller
-      // and cord are fused into the same mesh and only the width axis was
-      // calibrated). Anchors for a console in that state are measured
-      // against its ACTUAL rendered geometry, not the spec, so the bound
-      // here has to tolerate the same gap rather than fail a correct
-      // anchor for disagreeing with a number the render itself disagrees
-      // with. Proportional, not a fixed retry-until-it-passes number: it
-      // scales with the console's own size and still catches a genuinely
-      // wrong anchor (double the model, or on the wrong side entirely).
+      /*
+        Half-extents in metres, from the console's own PUBLISHED dimensions —
+        the same box every other piece of geometry in the scene is measured
+        against. A flat mm-scale slack covers ordinary surface slop (the
+        bevel, a relief block's protrusion); it does NOT cover a console
+        that renders from a dropped-in GLB whose height/depth axes are
+        known to disagree with the published spec — see gltf-transforms.ts's
+        notes on exactly this (the SNES's own file reads 88mm tall and
+        163mm deep against a real 68mm/254mm, because a bundled controller
+        and cord are fused into the same mesh and only the width axis was
+        calibrated). Anchors for a console in that state are measured
+        against its ACTUAL rendered geometry, not the spec, so the bound
+        here has to tolerate the same gap rather than fail a correct
+        anchor for disagreeing with a number the render itself disagrees
+        with. Proportional, not a fixed retry-until-it-passes number: it
+        scales with the console's own size and still catches a genuinely
+        wrong anchor (double the model, or on the wrong side entirely).
+
+        Where the render disagrees with the spec by MORE than that slack can
+        absorb — the PS5 renders 2.2x wider than its published thickness, the
+        N64 renders 101mm tall against a 73mm spec, the PS2's long axis runs
+        along z — the data itself records the measured rendered box
+        (`hardwareDiagram.renderBox`), and the anchors are validated against
+        THAT box instead: the true extent the anchors were measured against.
+      */
       const slackM = 0.01
       const proportionalSlack = (mm: number) => Math.max(slackM, (mm / 1000) * 0.35)
-      const halfX = entry.dimensions.width / 2000 + slackM
-      const halfZ = entry.dimensions.depth / 2000 + proportionalSlack(entry.dimensions.depth)
-      const maxY = entry.dimensions.height / 1000 + proportionalSlack(entry.dimensions.height)
+      const renderBox = entry.hardwareDiagram!.renderBox
+      const halfX = renderBox
+        ? (renderBox.x[1] - renderBox.x[0]) / 2 + slackM
+        : entry.dimensions.width / 2000 + slackM
+      const halfZ = renderBox
+        ? (renderBox.z[1] - renderBox.z[0]) / 2 + slackM
+        : entry.dimensions.depth / 2000 + proportionalSlack(entry.dimensions.depth)
+      const maxY = renderBox
+        ? renderBox.y[1] + slackM
+        : entry.dimensions.height / 1000 + proportionalSlack(entry.dimensions.height)
 
       it('gives every callout a non-empty, distinct label', () => {
         const labels = callouts.map((c) => c.label)

@@ -70,6 +70,34 @@ export const xboxSeries: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'bluray-case',
   model: '/models/consoles/xbox-series.glb',
+  // Anchors measured against the rendered GLB (see snes.ts's hardwareDiagram
+  // comment). Front face is +z; the console stands, so height runs along y.
+  // Renders ~150 x 295 x 153mm against a 151 x 301 x 151 spec — within the
+  // bounds test's slack.
+  hardwareDiagram: {
+    callouts: [
+      {
+        label: 'Power button — the Xbox logo, top-left',
+        anchor: [-0.045, 0.26, 0.076],
+        labelOffset: [-0.02, 0.035, 0],
+      },
+      {
+        label: 'Disc slot — bottom-left, pairing button beside it',
+        anchor: [-0.045, 0.05, 0.076],
+        labelOffset: [-0.03, 0.03, 0],
+      },
+      {
+        label: 'USB port — bottom-right of the front',
+        anchor: [0.045, 0.035, 0.076],
+        labelOffset: [0.03, 0.025, 0],
+      },
+      {
+        label: 'Top fan vent — the chimney',
+        anchor: [0.01, 0.293, 0.01],
+        labelOffset: [0, 0.03, 0],
+      },
+    ],
+  },
   // Aspirational mesh targets — these name the parts the insert sequence and
   // failure states will drive once an authored model exists. Until then the
   // shell comes from the console form (see console-forms.ts), which generates

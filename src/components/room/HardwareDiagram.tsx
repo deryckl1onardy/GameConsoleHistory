@@ -34,7 +34,7 @@ export function HardwareDiagram({ entry }: { entry: ConsoleEntry }) {
         {callouts.map((c, i) => (
           <li key={i} className="flex gap-3 text-[12px]">
             <span className="w-3.5 shrink-0 tabular-nums text-amber/60">{i + 1}</span>
-            <span className="text-parchment/75">{c.label}</span>
+            <span className="text-ink/75">{c.label}</span>
           </li>
         ))}
       </ol>

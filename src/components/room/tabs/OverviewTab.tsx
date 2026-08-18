@@ -24,11 +24,11 @@ export function OverviewTab() {
       <div className={layout === 'wide' ? 'grid grid-cols-2 gap-x-6 gap-y-5' : 'space-y-4'}>
         {entry.relatableSpecs.map((s) => (
           <div key={s.label} className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.14em] text-parchment/40">{s.label}</p>
-            <p className="mt-0.5 font-display text-xl leading-tight tabular-nums text-parchment">
+            <p className="text-[10px] uppercase tracking-[0.14em] text-ink/40">{s.label}</p>
+            <p className="mt-0.5 font-display text-xl leading-tight tabular-nums text-ink">
               {s.value}
             </p>
-            <p className="mt-1.5 text-[12px] leading-relaxed text-parchment/65">{s.comparison}</p>
+            <p className="mt-1.5 text-[12px] leading-relaxed text-ink/65">{s.comparison}</p>
           </div>
         ))}
       </div>

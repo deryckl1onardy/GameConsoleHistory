@@ -38,11 +38,11 @@ export const MEDIA_ARCHETYPES: Record<MediaArchetypeId, MediaArchetype> = {
     label: 'NES Game Pak',
     dimensions: { width: 120, height: 134, depth: 20 },
     cornerRadiusMm: 4,
-    cartridgeLabel: { widthMm: 55, heightMm: 97, offsetYMm: 6, precision: 'exact' },
+    cartridgeLabel: { widthMm: 55, heightMm: 97, offsetYMm: 6, offsetXMm: 9, precision: 'exact' },
     hasBackArt: false,
     precision: 'approximate',
     source:
-      'Shell dimensions are collector consensus; NESdev wiki still lists them as TODO. Label size (55x97mm) is from NESdev.',
+      'Shell dimensions are collector consensus; NESdev wiki still lists them as TODO. Label size (55x97mm) is from NESdev. offsetXMm shifts the label right of dead-centre to clear the moulded connector-release ridge that runs down the shell\'s left edge — approximate, eyeballed against reference photos rather than a published spec.',
   },
 
   'cart-sms': {
@@ -76,11 +76,18 @@ export const MEDIA_ARCHETYPES: Record<MediaArchetypeId, MediaArchetype> = {
     label: 'SNES Game Pak (NTSC)',
     dimensions: { width: 136, height: 88, depth: 20 },
     cornerRadiusMm: 4,
-    cartridgeLabel: { widthMm: 96, heightMm: 56, offsetYMm: 6, precision: 'approximate' },
+    // 84 x 36mm — measured live off the actual rendered `label` decal mesh
+    // (THREE.Box3 world-space size) added by
+    // .img2threejs/cart/split-snes-label.mjs, which sits on the sourced
+    // snes_cartridge.glb's own flat recessed panel. Must stay in sync with
+    // that decal's real size: this field drives coverAspect() (the runtime
+    // cover-fit crop for the 3D box) and MediaFigure's panel icon, neither
+    // of which reads the GLB directly.
+    cartridgeLabel: { widthMm: 84, heightMm: 36, offsetYMm: 6, precision: 'approximate' },
     hasBackArt: false,
     precision: 'exact',
     source:
-      'Wikipedia, SNES Game Pak: 5.35in (136mm) W x 3.45in (88mm) H x 0.78in (20mm) D.',
+      'Wikipedia, SNES Game Pak: 5.35in (136mm) W x 3.45in (88mm) H x 0.78in (20mm) D. Label rect measured from reference photos.',
   },
 
   'cart-snes-jp': {
@@ -177,3 +184,21 @@ export function archetypeSizeMetres(
   const { width, height, depth } = archetype(id).dimensions
   return [width * MM, height * MM, depth * MM]
 }
+
+/**
+ * The tallest archetype in the table, in mm. Derived rather than hardcoded so
+ * it can never silently drift from the table it describes — used to give the
+ * panel's per-row figures a single shared mm-per-pixel scale (see
+ * MediaFigure.tsx), so a Genesis cart and a Blu-ray case read at their true
+ * size relative to each other, not each cropped to fill its own row.
+ */
+export const TALLEST_ARCHETYPE_HEIGHT_MM = Math.max(
+  ...Object.values(MEDIA_ARCHETYPES).map((a) => a.dimensions.height),
+)
+
+/** The widest archetype in the table, in mm — same reasoning as above, used
+ * to size MediaFigure's fixed slot width so every row shares one box and the
+ * object inside it can be centred rather than left hugging one edge. */
+export const WIDEST_ARCHETYPE_WIDTH_MM = Math.max(
+  ...Object.values(MEDIA_ARCHETYPES).map((a) => a.dimensions.width),
+)

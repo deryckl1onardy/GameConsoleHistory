@@ -27,8 +27,8 @@ export function ViewportControls() {
           { icon: PanIcon, label: COPY.legendPan },
           { icon: ZoomIcon, label: COPY.legendZoom },
         ].map(({ icon: Icon, label }) => (
-          <li key={label} className="flex items-center gap-2.5 text-parchment/45">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-parchment/12 bg-ink/40">
+          <li key={label} className="flex items-center gap-2.5 text-ink/45">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/12 bg-paper/70">
               <Icon size={15} />
             </span>
             <span className="text-[11px] tracking-wide">{label}</span>
@@ -38,7 +38,7 @@ export function ViewportControls() {
       <button
         type="button"
         onClick={bumpReframe}
-        className="pointer-events-auto rounded-full border border-parchment/12 bg-ink/50 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.18em] text-parchment/55 transition hover:border-parchment/30 hover:text-parchment"
+        className="pointer-events-auto rounded-full border border-ink/12 bg-paper/80 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.18em] text-ink/55 transition hover:border-ink/30 hover:text-ink"
       >
         {COPY.resetView}
       </button>

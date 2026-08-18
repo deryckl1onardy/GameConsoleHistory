@@ -71,6 +71,35 @@ export const genesis: ConsoleEntry = {
   mediaKind: 'cartridge',
   mediaArchetype: 'cart-genesis',
   model: '/models/consoles/genesis.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. The render (272 x 60 x 207mm) matches the real
+  // Model 1 closely (~5% per gltf-transforms.ts), so anchors track the render
+  // box recorded below.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1362, 0.1362], y: [0, 0.0604], z: [-0.1037, 0.1037] },
+    callouts: [
+      {
+        label: 'Power switch — front left',
+        anchor: [-0.1, 0.045, 0.07],
+        labelOffset: [-0.035, 0.045, 0.005],
+      },
+      {
+        label: 'Reset button — front right',
+        anchor: [0.1, 0.045, 0.07],
+        labelOffset: [0.035, 0.045, 0.005],
+      },
+      {
+        label: 'Cartridge slot — top, toward the back',
+        anchor: [0, 0.058, -0.05],
+        labelOffset: [0, 0.03, -0.01],
+      },
+      {
+        label: 'Controller ports (×3) — across the front bottom',
+        anchor: [0, 0.013, 0.102],
+        labelOffset: [0, 0.03, 0.01],
+      },
+    ],
+  },
   // Aspirational mesh targets for a future authored model -- see the
   // Atari 2600 / NES entries for why the current dropped-in GLB can't be
   // targeted by name yet.

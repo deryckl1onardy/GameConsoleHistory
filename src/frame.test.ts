@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { PerspectiveCamera, Vector3 } from 'three'
-import { NO_OFFSET, applyFrameOffset, frameOffsetFor, shelfFrameOffsetFor } from './frame'
+import { NO_OFFSET, ROOM_CHROME, applyFrameOffset, frameOffsetFor } from './frame'
 
 describe('frameOffsetFor', () => {
   it('lifts the subject up (positive dy) and keeps it horizontally centred (dx 0) on a wide layout', () => {
@@ -33,6 +33,16 @@ describe('frameOffsetFor', () => {
     expect(collapsed.dy).toBeLessThan(wide.dy)
   })
 
+  it('topH covers the header bar plus the section switch row, in both layouts', () => {
+    // The top strip is the 56px ConsoleNav bar plus the ~60px SectionSwitch
+    // row beneath it (top-14 + pt-5 + a 28px line): 116px total. topH is a
+    // fraction of the viewport, so pin it against the shortest realistic
+    // viewport of each layout — 900px tall for wide, 700px for a phone.
+    const HEADER_AND_SWITCH_PX = 56 + 60
+    expect(ROOM_CHROME.topH).toBeGreaterThanOrEqual(HEADER_AND_SWITCH_PX / 900)
+    expect(ROOM_CHROME.compact.topH).toBeGreaterThanOrEqual(HEADER_AND_SWITCH_PX / 700)
+  })
+
   it('clamps dy well inside the safety rail regardless of how tall the chrome fractions get', () => {
     // ROOM_CHROME.panelH/topH are already both < 1, but the clamp is what
     // actually protects the frustum from a degenerate offset if someone
@@ -52,26 +62,6 @@ describe('frameOffsetFor', () => {
 
   it('is deterministic', () => {
     expect(frameOffsetFor(1440, 900, 'wide')).toEqual(frameOffsetFor(1440, 900, 'wide'))
-  })
-})
-
-describe('shelfFrameOffsetFor', () => {
-  it('lifts the subject clear of the timeline strip, horizontally centred', () => {
-    const { dx, dy } = shelfFrameOffsetFor(1440, 900)
-    expect(dy).toBeGreaterThan(0)
-    expect(dx).toBe(0)
-  })
-
-  it('lifts less than the room does — a strip is not a panel', () => {
-    const shelf = shelfFrameOffsetFor(1440, 900)
-    const room = frameOffsetFor(1440, 900, 'wide')
-    expect(shelf.dy).toBeLessThan(room.dy)
-  })
-
-  it('returns NO_OFFSET for a degenerate viewport', () => {
-    expect(shelfFrameOffsetFor(0, 900)).toEqual(NO_OFFSET)
-    expect(shelfFrameOffsetFor(NaN, 900)).toEqual(NO_OFFSET)
-    expect(shelfFrameOffsetFor(1440, Infinity)).toEqual(NO_OFFSET)
   })
 })
 

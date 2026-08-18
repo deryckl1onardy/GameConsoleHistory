@@ -71,6 +71,35 @@ export const ps4: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'bluray-case',
   model: '/models/consoles/ps4.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. The model's own meshes locate the power button
+  // (+X front-top), eject (-X front-top) and USB ports (front centre) exactly;
+  // the anchors below are measured from those meshes.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1556, 0.1556], y: [0, 0.0497], z: [-0.1438, 0.1438] },
+    callouts: [
+      {
+        label: 'Touch power button — front right',
+        anchor: [0.128, 0.04, 0.121],
+        labelOffset: [0.03, 0.035, 0.005],
+      },
+      {
+        label: 'Eject button — front left',
+        anchor: [-0.122, 0.04, 0.121],
+        labelOffset: [-0.03, 0.035, 0.005],
+      },
+      {
+        label: 'USB ports (×2) — front centre',
+        anchor: [0.007, 0.025, 0.119],
+        labelOffset: [0.025, 0.035, 0.005],
+      },
+      {
+        label: 'Disc slot — front left',
+        anchor: [-0.06, 0.028, 0.142],
+        labelOffset: [-0.03, 0.035, 0.005],
+      },
+    ],
+  },
   // Aspirational mesh targets for a future authored model -- see the
   // Atari 2600 / NES entries for why the current dropped-in GLB can't be
   // targeted by name yet.

@@ -71,6 +71,34 @@ export const saturn: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'jewel-cd',
   model: '/models/consoles/saturn.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. The model names its disc-lid cover mesh
+  // (`cover_07`), confirming the top-loading lid and giving its exact extent.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1461, 0.1461], y: [0, 0.0771], z: [-0.1102, 0.1102] },
+    callouts: [
+      {
+        label: 'Disc lid — the whole top lifts open',
+        anchor: [0, 0.075, 0.01],
+        labelOffset: [0, 0.03, 0.015],
+      },
+      {
+        label: 'Power button — front left',
+        anchor: [-0.1, 0.045, 0.108],
+        labelOffset: [-0.035, 0.045, 0.005],
+      },
+      {
+        label: 'Open button — front, beside power',
+        anchor: [-0.01, 0.045, 0.108],
+        labelOffset: [-0.03, 0.05, 0.005],
+      },
+      {
+        label: 'Controller ports (×2) — front right',
+        anchor: [0.09, 0.025, 0.108],
+        labelOffset: [0.035, 0.04, 0.005],
+      },
+    ],
+  },
   // Aspirational mesh targets for a future authored model -- see the
   // Atari 2600 / NES entries for why the current dropped-in GLB can't be
   // targeted by name yet.

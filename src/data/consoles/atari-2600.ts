@@ -76,6 +76,30 @@ export const atari2600: ConsoleEntry = {
   mediaKind: 'cartridge',
   mediaArchetype: 'cart-atari-2600',
   model: '/models/consoles/atari-2600.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. This model renders 284 x 100 x 251mm against the
+  // real 346 x 89 x 232 (a squarer footprint, documented in gltf-transforms.ts),
+  // so the anchors below track the render, not the spec.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1418, 0.1418], y: [0, 0.1], z: [-0.1257, 0.1257] },
+    callouts: [
+      {
+        label: 'The toggle switches — power, select, difficulty and reset, in a row',
+        anchor: [0, 0.084, -0.04],
+        labelOffset: [0, 0.045, -0.015],
+      },
+      {
+        label: 'Cartridge slot — the bay on top',
+        anchor: [0, 0.098, 0.03],
+        labelOffset: [0, 0.03, 0.02],
+      },
+      {
+        label: 'Controller ports (×2) — DB9 sockets on the right side',
+        anchor: [0.14, 0.05, -0.03],
+        labelOffset: [0.035, 0.04, 0.01],
+      },
+    ],
+  },
   // The dropped-in model's meshes carry generic Blender export names
   // (Cube_Material_0, etc.), not semantic ones, so none of these mesh names
   // exist in the current GLB — they're aspirational targets for a future

@@ -70,6 +70,39 @@ export const xbox: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'dvd-keepcase',
   model: '/models/consoles/xbox.glb',
+  // Anchors measured against the rendered GLB (see snes.ts's hardwareDiagram
+  // comment). Front face (jewel, logo, tray, ports) is the +z face. Renders
+  // 320 x 117 x 259mm against a 320 x 100 x 260 spec — within the bounds
+  // test's slack.
+  hardwareDiagram: {
+    callouts: [
+      {
+        label: 'The jewel — power button, the glowing green X',
+        anchor: [0, 0.03, 0.128],
+        labelOffset: [0, 0.035, 0.01],
+      },
+      {
+        label: 'XBOX logo — embossed at the top-left',
+        anchor: [-0.09, 0.088, 0.123],
+        labelOffset: [-0.025, 0.03, 0.01],
+      },
+      {
+        label: 'Disc tray — the left half of the front',
+        anchor: [-0.07, 0.055, 0.1295],
+        labelOffset: [-0.03, 0.03, 0],
+      },
+      {
+        label: 'Controller ports (×4) — along the bottom',
+        anchor: [0.02, 0.015, 0.1295],
+        labelOffset: [0.02, 0.04, 0],
+      },
+      {
+        label: 'Top vent — the deck exhales here',
+        anchor: [0, 0.104, -0.003],
+        labelOffset: [0, 0.035, 0],
+      },
+    ],
+  },
   // Aspirational mesh targets — these name the parts the insert sequence and
   // failure states will drive once an authored model exists. Until then the
   // shell comes from the console form (see console-forms.ts), which generates

@@ -1,6 +1,8 @@
 import { GENERATION_BITS, GENERATION_LABELS } from '@/data/roster'
 import { ROOM_CHROME } from '@/frame'
 import { useActiveConsole, useScene } from '@/store/scene'
+import { CompanyLogo } from './CompanyLogo'
+import { ProductLogo } from './ProductLogo'
 
 /**
  * The room's display title block — the museum-label identity of the console
@@ -25,15 +27,15 @@ export function ConsoleTitle() {
 
   if (layout === 'compact') {
     return (
-      <p className="pointer-events-none absolute left-8 top-[4.4rem] max-w-[calc(100vw-4rem)] truncate text-[12px] text-parchment/70">
-        <span className="font-display text-[13px] text-parchment">{entry.shortName}</span>
-        <span className="mx-2 text-parchment/30">·</span>
+      <p className="pointer-events-none absolute left-8 top-[4.4rem] max-w-[calc(100vw-4rem)] truncate text-[12px] text-ink/70">
+        <ProductLogo entry={entry} height={13} />
+        <span className="mx-2 text-ink/30">·</span>
         {meta}
         {entry.manufacturer && (
           <>
-            <span className="mx-2 text-parchment/30">·</span>
-            {entry.manufacturer}
-            {year && <span className="mx-1.5 text-parchment/30">·</span>}
+            <span className="mx-2 text-ink/30">·</span>
+            <CompanyLogo manufacturer={entry.manufacturer} />
+            {year && <span className="mx-1.5 text-ink/30">·</span>}
             {year}
           </>
         )}
@@ -46,14 +48,14 @@ export function ConsoleTitle() {
       className="pointer-events-none absolute left-8 top-[16%]"
       style={{ width: `calc(${ROOM_CHROME.titleW * 100}vw - 4rem)` }}
     >
-      <p className="text-[11px] uppercase tracking-[0.24em] text-phosphor/80">{meta}</p>
-      <h1 className="mt-2 font-display text-7xl leading-[0.95] text-parchment">{entry.shortName}</h1>
-      <p className="mt-4 text-[13px] text-parchment/55">
-        {entry.manufacturer}
-        {year ? <span className="mx-2 text-parchment/30">·</span> : null}
+      <p className="text-[11px] uppercase tracking-[0.24em] text-ink/50">{meta}</p>
+      <ProductLogo entry={entry} height={56} />
+      <p className="mt-4 flex items-center gap-2 text-[13px] text-ink/55">
+        <CompanyLogo manufacturer={entry.manufacturer} height={10} />
+        {year ? <span className="text-ink/30">·</span> : null}
         {year}
       </p>
-      <p className="mt-2 max-w-md text-[13px] italic leading-relaxed text-parchment/65">
+      <p className="mt-2 max-w-md text-[13px] italic leading-relaxed text-ink/65">
         {entry.tagline}
       </p>
     </div>

@@ -283,12 +283,13 @@ beats in `approach.ts`):
 
 ## 4. Open threads
 
-- **`public/models/CREDITS.md` is empty while 12 third-party GLBs are in use.**
-  The table still reads `_(none yet)_`. The code comments in
-  `gltf-transforms.ts` identify these as Sketchfab exports, and CREDITS.md's
-  own text says a CC-BY licence "is only honoured if the credit is actually
-  written down somewhere, and this is that somewhere". Needs the source URL,
-  author and licence for each of the 12 — only whoever downloaded them knows.
+- **`public/models/CREDITS.md` now filled in (2026-08-16).** All 12
+  third-party GLBs credited — source URL, author and license pulled directly
+  from each file's embedded `asset.extras` (Sketchfab writes this into every
+  export), not from memory. Two of the twelve (PlayStation, PlayStation 3 —
+  both by Smoggybeard) are CC-BY-NC-SA-4.0, non-commercial; the rest are
+  CC-BY-4.0. Still open: an in-app Credits/About screen — CC-BY requires
+  attribution wherever the work is *displayed*, not just in a repo file.
 - **The hardware diagram art does not match the architecture.** Six finished
   PNGs sit in `diagrams/` (Atari 2600, NES, Master System, SNES, Genesis,
   PS1) but every one has its labels, leader lines and label pills *baked into

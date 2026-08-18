@@ -96,7 +96,18 @@ export function ChevronDownIcon(props: IconProps) {
   )
 }
 
-/** Back-to-shelf arrow, used by the brand mark. */
+/** Hamburger — opens the sidebar drawer in the compact layout. */
+export function MenuIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 6.5h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17.5h16" />
+    </svg>
+  )
+}
+
+/** Left arrow — the nav bar's previous-console step. */
 export function BackArrowIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

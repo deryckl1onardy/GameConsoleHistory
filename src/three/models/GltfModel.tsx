@@ -40,7 +40,7 @@ type ExistsState = 'checking' | 'present' | 'absent'
  * catch below and silently downgrading a model that exists and serves fine.
  * Anything we already know about should never be subject to that.
  */
-function useUrlExists(url: string, enabled: boolean): ExistsState {
+export function useUrlExists(url: string, enabled: boolean): ExistsState {
   // The verdict is stored WITH the url that produced it. The previous version
   // kept only the verdict and reset it inside the effect — which runs a commit
   // late, so the first render after a url change handed the loader the
@@ -92,7 +92,7 @@ function useUrlExists(url: string, enabled: boolean): ExistsState {
 type BoundaryProps = { fallback: ReactNode; resetKey: string; children: ReactNode }
 type BoundaryState = { failed: boolean; resetKey: string }
 
-class GltfErrorBoundary extends Component<BoundaryProps, BoundaryState> {
+export class GltfErrorBoundary extends Component<BoundaryProps, BoundaryState> {
   state: BoundaryState = { failed: false, resetKey: this.props.resetKey }
 
   static getDerivedStateFromError(): Partial<BoundaryState> {
@@ -125,6 +125,109 @@ class GltfErrorBoundary extends Component<BoundaryProps, BoundaryState> {
   }
 }
 
+/**
+ * Floor-align and centre a loaded glTF scene, returning the local offset that
+ * makes its visible meshes rest on y=0 centred at x/z=0 — the scene-wide
+ * convention every other object in a diorama follows. Shared by the console
+ * loader (GltfPrimitive below) and the cartridge loader (CartridgeModel), so
+ * a dropped-in file lands in the same frame either way.
+ *
+ * It also enforces `hideMeshIndices` and opts every mesh into shadow
+ * casting/receiving (GLTFLoader imports with both false), so a dropped-in
+ * file behaves like every other model in the scene.
+ */
+export function floorAlignOffset(
+  scene: Object3D,
+  hideMeshIndices: number[] | undefined,
+  url: string,
+): [number, number, number] {
+  const box = new Box3()
+  let index = 0
+  let shown = 0
+  const hide = hideMeshIndices?.length ? new Set(hideMeshIndices) : null
+
+  /*
+    Accumulated via LOCAL matrices walked up to `scene`, never `matrixWorld`
+    — this is the fix for a real bug, not a style preference. `scene` is
+    cached and shared by useGLTF across every component that has ever
+    rendered this URL (a console's shelf ArtifactSlot, then its own
+    HeroConsole once selected). This runs during React's RENDER phase,
+    before commit — at that point `scene` can still be attached
+    under its PREVIOUS owner's group, so `matrixWorld` (which folds in
+    every ancestor) reflects wherever that owner happened to place it,
+    not the identity-ish "just this model" frame this offset is supposed
+    to describe. Concretely: taking a console off the shelf picked up that
+    shelf bay's own board height (over 2m) as a phantom Y offset, launching
+    the console far below the floor the instant it was selected. Building
+    the transform from each mesh's own `.matrix` up through its ancestors
+    — stopping at `scene`, never reading anything above it — makes the
+    result depend only on the model's own authored hierarchy, so it can't
+    be corrupted by whatever `scene` is or isn't parented to right now.
+  */
+  const meshBox = new Box3()
+  const localToScene = new Matrix4()
+  scene.traverse((o) => {
+    if (!(o as Mesh).isMesh) return
+    const included = !hide?.has(index)
+    o.visible = included
+    // GLTFLoader imports meshes with three's defaults (castShadow and
+    // receiveShadow both false), so a dropped-in GLB never casts or receives
+    // a shadow — it floats over the room's shadow-catching floor and the
+    // museum plinths. The generated models (ConsoleFromForm, the SNES
+    // factory) opt in explicitly; this makes a GLB behave like every other
+    // model in the scene. The `scene` object is the shared useGLTF cache, so
+    // this is the same idempotent, wanted-everywhere mutation as `visible`
+    // above — every instance of this model (hero, shelf bay) casts and
+    // receives, which is the project's uniform posture.
+    o.castShadow = true
+    o.receiveShadow = true
+    if (included) {
+      localToScene.identity()
+      const chain: Object3D[] = []
+      for (let node: Object3D | null = o; node && node !== scene; node = node.parent) {
+        chain.push(node)
+      }
+      for (let i = chain.length - 1; i >= 0; i -= 1) {
+        chain[i].updateMatrix()
+        localToScene.multiply(chain[i].matrix)
+      }
+      const mesh = o as Mesh
+      mesh.geometry.computeBoundingBox()
+      if (mesh.geometry.boundingBox) {
+        meshBox.copy(mesh.geometry.boundingBox).applyMatrix4(localToScene)
+        box.union(meshBox)
+      }
+      shown += 1
+    }
+    index += 1
+  })
+
+  /*
+    These indices are positions in a specific export's mesh list, so they go
+    stale the moment a source file is re-exported or recompressed — and the
+    failure is silent and total. It has already happened once: n64.glb went
+    from 24 mesh nodes to 16, its index list still named 0-17, and the
+    console vanished from every screen it appears on with nothing logged.
+  */
+  if (import.meta.env.DEV && hide) {
+    const stale = [...hide].filter((i) => i >= index)
+    if (stale.length > 0) {
+      console.warn(
+        `[GltfModel] ${url}: hideMeshIndices names ${stale.join(', ')} but the file only ` +
+          `has ${index} meshes (0-${index - 1}). The list is stale — re-derive it.`,
+      )
+    }
+    if (shown === 0) {
+      console.warn(
+        `[GltfModel] ${url}: hideMeshIndices hides EVERY mesh, so nothing will render.`,
+      )
+    }
+  }
+
+  const center = box.getCenter(new Vector3())
+  return [-center.x, -box.min.y, -center.z] as [number, number, number]
+}
+
 function GltfPrimitive({
   url,
   scale,
@@ -155,82 +258,10 @@ function GltfPrimitive({
   // this object's own scale reaches it) — set directly on `scene`, whatever
   // offset is computed here would be applied at raw/unscaled magnitude by
   // the parent, not the scaled-down visual size.
-  const offset = useMemo(() => {
-    const box = new Box3()
-    let index = 0
-    let shown = 0
-    const hide = hideMeshIndices?.length ? new Set(hideMeshIndices) : null
-
-    /*
-      Accumulated via LOCAL matrices walked up to `scene`, never `matrixWorld`
-      — this is the fix for a real bug, not a style preference. `scene` is
-      cached and shared by useGLTF across every component that has ever
-      rendered this URL (a console's shelf ArtifactSlot, then its own
-      HeroConsole once selected). This useMemo runs during React's RENDER
-      phase, before commit — at that point `scene` can still be attached
-      under its PREVIOUS owner's group, so `matrixWorld` (which folds in
-      every ancestor) reflects wherever that owner happened to place it,
-      not the identity-ish "just this model" frame this offset is supposed
-      to describe. Concretely: taking a console off the shelf picked up that
-      shelf bay's own board height (over 2m) as a phantom Y offset, launching
-      the console far below the floor the instant it was selected. Building
-      the transform from each mesh's own `.matrix` up through its ancestors
-      — stopping at `scene`, never reading anything above it — makes the
-      result depend only on the model's own authored hierarchy, so it can't
-      be corrupted by whatever `scene` is or isn't parented to right now.
-    */
-    const meshBox = new Box3()
-    const localToScene = new Matrix4()
-    scene.traverse((o) => {
-      if (!(o as Mesh).isMesh) return
-      const included = !hide?.has(index)
-      o.visible = included
-      if (included) {
-        localToScene.identity()
-        const chain: Object3D[] = []
-        for (let node: Object3D | null = o; node && node !== scene; node = node.parent) {
-          chain.push(node)
-        }
-        for (let i = chain.length - 1; i >= 0; i -= 1) {
-          chain[i].updateMatrix()
-          localToScene.multiply(chain[i].matrix)
-        }
-        const mesh = o as Mesh
-        mesh.geometry.computeBoundingBox()
-        if (mesh.geometry.boundingBox) {
-          meshBox.copy(mesh.geometry.boundingBox).applyMatrix4(localToScene)
-          box.union(meshBox)
-        }
-        shown += 1
-      }
-      index += 1
-    })
-
-    /*
-      These indices are positions in a specific export's mesh list, so they go
-      stale the moment a source file is re-exported or recompressed — and the
-      failure is silent and total. It has already happened once: n64.glb went
-      from 24 mesh nodes to 16, its index list still named 0-17, and the
-      console vanished from every screen it appears on with nothing logged.
-    */
-    if (import.meta.env.DEV && hide) {
-      const stale = [...hide].filter((i) => i >= index)
-      if (stale.length > 0) {
-        console.warn(
-          `[GltfModel] ${url}: hideMeshIndices names ${stale.join(', ')} but the file only ` +
-            `has ${index} meshes (0-${index - 1}). The list is stale — re-derive it.`,
-        )
-      }
-      if (shown === 0) {
-        console.warn(
-          `[GltfModel] ${url}: hideMeshIndices hides EVERY mesh, so nothing will render.`,
-        )
-      }
-    }
-
-    const center = box.getCenter(new Vector3())
-    return [-center.x, -box.min.y, -center.z] as [number, number, number]
-  }, [scene, hideMeshIndices, url])
+  const offset = useMemo(
+    () => floorAlignOffset(scene, hideMeshIndices, url),
+    [scene, hideMeshIndices, url],
+  )
 
   return (
     <group scale={scale}>

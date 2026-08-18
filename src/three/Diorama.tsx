@@ -1,36 +1,56 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
-import type { AmbientLight, DirectionalLight } from 'three'
-import gsap from 'gsap'
+import { useEffect, useMemo, useRef } from 'react'
+import type { DirectionalLight, Object3D } from 'three'
 import type { ConsoleEntry, DioramaSpec, MediaArchetypeId } from '@/types/console'
+import { kelvinToColor } from './lighting'
+import { mediaAnchor } from './geometry/gameBox'
+import { MediaSpread } from './MediaSpread'
 import { useScene } from '@/store/scene'
-import { kelvinToColor, mm } from './lighting'
-import { ContactShadow } from './ContactShadow'
 
 /**
- * Lighting for the room screen. That's it — no walls, furniture, TV,
- * controller placement or game shelf.
+ * Lighting for the room screen, plus the two things the lights need to land
+ * on: the console (owned by HeroConsole, not here) and its games.
  *
  * This used to build the full period room (RoomShell, Prop, TvPlaceholder,
- * GameShelf, a placed ControllerModel) around whichever console HeroConsole
- * was showing. Pulled out because too much of it was clipping — walls into
- * the console, props into each other — and it wasn't worth chasing down
- * piece by piece right now. `entry`/`archetypeId` stay as props (unused for
- * now) because every removed piece read from them, and the signature
- * shouldn't need to change again if the room comes back.
+ * a wooden game shelf, a placed ControllerModel) around whichever console
+ * HeroConsole was showing. Pulled out because too much of it was clipping —
+ * walls into the console, props into each other — and it wasn't worth
+ * chasing down piece by piece right now. `entry`/`archetypeId` stay as props
+ * because MediaSpread reads both.
  *
  * Nothing here is deleted from the data model or the type system — DioramaSpec
- * still carries footprint/props/tv/shelfPosition/controllerPosition, GameShelf
- * and the prop kit still exist, `entry.controllers[0]` is still real data. This
- * component just stops drawing any of it. Re-adding the room later is
- * restoring the JSX that used to live here, not rebuilding the model.
+ * still carries footprint/props/tv/shelfPosition/controllerPosition, the prop
+ * kit still exists, `entry.controllers[0]` is still real data. This component
+ * just stops drawing most of it. Re-adding the room later is restoring the
+ * JSX that used to live here, not rebuilding the model. The one exception is
+ * the games: they were restored (as MediaSpread, standing on the floor rather
+ * than a wooden shelf) because the Games tab has nothing to show without them.
+ * MediaSpread only mounts while the Games section is actually open
+ * (section === 'games') — ten boxes standing beside the console at every
+ * other moment, including the very first paint before anyone has touched a
+ * section, read as clutter the user never asked to see, not a size
+ * comparison.
+ *
+ * The other visible piece that stays is the shadow-catching floor. A real
+ * directional shadow needs a surface to land on, and the console would
+ * otherwise float — so a single plane sits just under the console's base and
+ * receives the key light's shadow map. It is ShadowMaterial, fully transparent
+ * except where the shadow falls, so the clean cutaway look is untouched and
+ * only the console's own real, directional shadow appears.
  */
 
 /** The fill's fixed intensity — never varies by console, so a plain constant. */
 const FILL_INTENSITY = 0.35
 
+/** How dark the received shadow renders. The floor itself stays invisible. */
+const SHADOW_OPACITY = 0.45
+
+/** How far the floor dips below the console's base, to avoid z-fighting. */
+const FLOOR_EPSILON = 0.001
+
 export function Diorama({
   entry,
   spec,
+  archetypeId,
 }: {
   entry: ConsoleEntry
   spec: DioramaSpec
@@ -41,76 +61,26 @@ export function Diorama({
     [spec.lighting.tempK],
   )
 
-  /*
-    The contact shadow's disc radius, sized off the console's real footprint:
-    just beyond the longest side, so the dark core hides under the console
-    and the soft edge peeks out around it. A disc is rotation-invariant, so
-    the console's yaw never fights it.
-  */
-  const shadowRadius = useMemo(() => {
-    const w = mm(entry.dimensions.width)
-    const d = mm(entry.dimensions.depth)
-    return Math.max(w, d) * 0.9
-  }, [entry.dimensions.width, entry.dimensions.depth])
+  const spreadAnchor = useMemo(() => mediaAnchor(entry, spec), [entry, spec])
+  // The whole Games SECTION mounts the spread — list and artifact alike; in
+  // artifact mode MediaSpread itself dims everything but the selected box.
+  const showSpread = useScene((s) => s.section === 'games')
 
-  const approach = useScene((s) => s.approach)
-  const ambientRef = useRef<AmbientLight>(null)
   const keyRef = useRef<DirectionalLight>(null)
-  const fillRef = useRef<DirectionalLight>(null)
+  const keyTargetRef = useRef<Object3D>(null)
 
-  /*
-    Fade up from black on arrival — but only when there WAS an arrival.
-    Diorama mounts fresh exactly when `screen` flips to 'room', which is
-    either the tail end of the approach handoff (lights should ramp in) or a
-    plain direct room load with no museum ever involved (?screen=room, or
-    before this screen existed at all — lights should just be there, full
-    brightness, no unmotivated fade). `useScene.getState()` here, read once
-    at mount, not the reactive `approach` this component also holds below:
-    we want the value as it stood the INSTANT this component appeared, not
-    whatever it becomes a moment later when the approach effect advances it
-    to 'arriving'.
-
-    LAYOUT effect, deliberately: a plain effect would paint one frame with
-    the lights at their full JSX intensities before zeroing them — a double-
-    lit flash at the handoff. Zeroing must land before first paint.
-  */
-  useLayoutEffect(() => {
-    const cameFromApproach = useScene.getState().approach !== 'idle'
-    if (!cameFromApproach) return
-    const a = ambientRef.current
-    const k = keyRef.current
-    const f = fillRef.current
-    if (!a || !k || !f) return
-    a.intensity = 0
-    k.intensity = 0
-    f.intensity = 0
-    const duration = useScene.getState().reducedMotion ? 0 : 0.9
-    gsap.to(a, { intensity: spec.lighting.ambientIntensity, duration, ease: 'power2.out' })
-    gsap.to(k, { intensity: spec.lighting.intensity, duration, ease: 'power2.out' })
-    gsap.to(f, { intensity: FILL_INTENSITY, duration, ease: 'power2.out' })
-    // Mount-only: this is "did we arrive here," not a reactive binding.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // The reverse: fade to black BEFORE unmounting, while `screen` is still
-  // 'room' (it only flips at the retreat's own handoff, ~250ms after this
-  // fires) — so the room genuinely goes dark rather than popping straight to
-  // the museum mid-brightness.
+  // A directional light aims at its `target` object, which must itself be in
+  // the scene graph. The key aims at the console so the shadow frustum is
+  // centred where the shadow is actually cast, not at the room origin.
   useEffect(() => {
-    if (approach !== 'retreating') return
-    const a = ambientRef.current
-    const k = keyRef.current
-    const f = fillRef.current
-    if (!a || !k || !f) return
-    const duration = useScene.getState().reducedMotion ? 0 : 0.25
-    gsap.to(a, { intensity: 0, duration, ease: 'power2.in' })
-    gsap.to(k, { intensity: 0, duration, ease: 'power2.in' })
-    gsap.to(f, { intensity: 0, duration, ease: 'power2.in' })
-  }, [approach])
+    if (keyRef.current && keyTargetRef.current) {
+      keyRef.current.target = keyTargetRef.current
+    }
+  }, [])
 
   return (
     <group>
-      <ambientLight ref={ambientRef} intensity={spec.lighting.ambientIntensity} color={keyColor} />
+      <ambientLight intensity={spec.lighting.ambientIntensity} color={keyColor} />
 
       {/* Key light — position and temperature come from the era preset */}
       <directionalLight
@@ -122,12 +92,15 @@ export function Diorama({
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.02}
+        shadow-radius={4}
       >
         <orthographicCamera attach="shadow-camera" args={[-4, 4, 4, -4, 0.1, 20]} />
       </directionalLight>
 
+      <object3D ref={keyTargetRef} position={spec.consolePosition} />
+
       {/* Cool bounce fill from the open side, so shadows are not dead black */}
-      <directionalLight ref={fillRef} position={[-2.5, 1.6, 3]} intensity={FILL_INTENSITY} color="#9fb6d0" />
+      <directionalLight position={[-2.5, 1.6, 3]} intensity={FILL_INTENSITY} color="#9fb6d0" />
 
       {/*
         The console itself is NOT rendered here. HeroConsole owns the single
@@ -139,11 +112,36 @@ export function Diorama({
       */}
 
       {/*
-        The one thing the room DOES place: a fake contact shadow under the
-        console. There is no floor to catch a real one, and the console would
-        otherwise float — this is what makes it read as sitting on a plinth.
+        The console's ten games, standing on the same floor beside it — only
+        while the Games section is actually open. `mediaAnchor` derives the
+        position from spec.consolePosition, so the camera (shots.ts) and the
+        contents here can never disagree about where the spread actually is,
+        but WHETHER it's on screen at all is a separate question: at rest, in
+        the console section, the console is the subject and ten cartridges
+        parked beside it are visual noise nobody asked for.
       */}
-      <ContactShadow position={spec.consolePosition} radius={shadowRadius} />
+      {showSpread && <MediaSpread entry={entry} archetypeId={archetypeId} position={spreadAnchor} />}
+
+      {/*
+        The one surface the room DOES place: a shadow catcher under the
+        console. Sized to the room's own footprint and centred on the console,
+        sitting just beneath its base. It is ShadowMaterial, so it renders
+        nothing at all except the key light's shadow — the console casts a
+        real, directional shadow (toward -x/-z, away from the light) instead
+        of a painted-on disc, while the cutaway backdrop stays clean.
+      */}
+      <mesh
+        position={[
+          spec.consolePosition[0],
+          spec.consolePosition[1] - FLOOR_EPSILON,
+          spec.consolePosition[2],
+        ]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={spec.footprint} />
+        <shadowMaterial transparent opacity={SHADOW_OPACITY} depthWrite={false} />
+      </mesh>
     </group>
   )
 }

@@ -71,6 +71,34 @@ export const playstation: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'jewel-cd',
   model: '/models/consoles/playstation.glb',
+  // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
+  // comment for the method. The render (282 x 60 x 202mm) matches the real
+  // SCPH-1000 well (~9% per gltf-transforms.ts); anchors track the render box.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1411, 0.1411], y: [0, 0.0596], z: [-0.101, 0.101] },
+    callouts: [
+      {
+        label: 'Disc lid — the whole top flips open',
+        anchor: [0, 0.057, 0.01],
+        labelOffset: [0, 0.03, 0.015],
+      },
+      {
+        label: 'Power button — front right',
+        anchor: [0.1, 0.04, 0.099],
+        labelOffset: [0.035, 0.045, 0.005],
+      },
+      {
+        label: 'Open button — front left',
+        anchor: [-0.1, 0.04, 0.099],
+        labelOffset: [-0.035, 0.045, 0.005],
+      },
+      {
+        label: 'Controller + memory card ports (×4) — front',
+        anchor: [0, 0.015, 0.099],
+        labelOffset: [0, 0.03, 0.01],
+      },
+    ],
+  },
   // Aspirational mesh targets for a future authored model -- see the
   // Atari 2600 / NES entries for why the current dropped-in GLB can't be
   // targeted by name yet.

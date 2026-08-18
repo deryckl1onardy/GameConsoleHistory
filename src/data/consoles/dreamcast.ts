@@ -71,6 +71,34 @@ export const dreamcast: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'jewel-cd',
   model: '/models/consoles/dreamcast.glb',
+  // Measured against the actual rendered GLB (see snes.ts's hardwareDiagram
+  // comment for the method). The front face (ports + SEGA logo) is the +x
+  // face; the box is 197 x 67 x 189mm, close enough to the spec that the
+  // bounds test uses the published dimensions.
+  hardwareDiagram: {
+    callouts: [
+      {
+        label: 'Controller ports (×4) — the VMU lives in the pad, not the console',
+        anchor: [0.082, 0.045, 0],
+        labelOffset: [0.03, 0.025, 0],
+      },
+      {
+        label: 'SEGA logo — embossed above the port panel',
+        anchor: [0.081, 0.055, 0],
+        labelOffset: [0.045, 0.005, 0],
+      },
+      {
+        label: 'Disc lid — the GD-ROM loads through the top',
+        anchor: [0, 0.0668, 0.02],
+        labelOffset: [0, 0.03, 0.02],
+      },
+      {
+        label: 'Power button — top deck, front-left',
+        anchor: [0.055, 0.061, -0.05],
+        labelOffset: [0.015, 0.03, -0.015],
+      },
+    ],
+  },
   // Aspirational mesh targets — these name the parts the insert sequence and
   // failure states will drive once an authored model exists. Until then the
   // shell comes from the console form (see console-forms.ts), which generates

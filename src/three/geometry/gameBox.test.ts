@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   BOX_FACE,
+  boxProfile,
   boxSizeMetres,
   coverAspect,
   labelPlane,
-  layoutShelf,
-  shelfExtent,
+  layoutSpread,
+  mediaAnchor,
+  spreadExtent,
 } from './gameBox'
 import { archetype, MEDIA_ARCHETYPES } from '@/data/kits/media-archetypes'
 import { snes } from '@/data/consoles/snes'
@@ -46,6 +48,27 @@ describe('box geometry', () => {
   })
 })
 
+describe('box profile', () => {
+  it('converts width and height to metres, centred on the origin', () => {
+    const p = boxProfile(archetype('cart-snes-na'))
+    expect(p.w).toBeCloseTo(0.136, 6)
+    expect(p.h).toBeCloseTo(0.088, 6)
+  })
+
+  it('uses the published corner radius, in metres', () => {
+    const p = boxProfile(archetype('cart-nes'))
+    expect(p.r).toBeCloseTo(0.004, 6)
+  })
+
+  it('never lets the radius exceed half the shorter side', () => {
+    for (const a of Object.values(MEDIA_ARCHETYPES)) {
+      const p = boxProfile(a)
+      const shortSide = Math.min(a.dimensions.width, a.dimensions.height) * 0.001
+      expect(p.r, a.id).toBeLessThanOrEqual(shortSide / 2 + 1e-9)
+    }
+  })
+})
+
 describe('cartridge labels', () => {
   it('places the NES label at its published size, not a proportional guess', () => {
     // NESdev: 55 x 97 mm — 46% of the width but 72% of the height. A single
@@ -75,7 +98,18 @@ describe('cartridge labels', () => {
       expect(top, `${a.id} label overflows shell height`).toBeLessThanOrEqual(
         a.dimensions.height / 1000 + 1e-9,
       )
+      // A horizontal offset (the NES's ridge-clearing shift) must still
+      // leave the label fully inside the shell's width.
+      const right = Math.abs(plane.position[0]) + plane.width / 2
+      expect(right, `${a.id} label overflows shell width`).toBeLessThanOrEqual(
+        a.dimensions.width / 2000 + 1e-9,
+      )
     }
+  })
+
+  it('offsets the NES label right of centre, clear of the connector ridge', () => {
+    const plane = labelPlane(archetype('cart-nes'))!
+    expect(plane.position[0]).toBeGreaterThan(0)
   })
 
   it('returns no label plane for cases, which print edge to edge', () => {
@@ -90,111 +124,118 @@ describe('cartridge labels', () => {
   })
 })
 
-describe('shelf layout', () => {
+describe('spread layout', () => {
   const cart = archetype('cart-snes-na')
 
-  it('fits five 136mm cartridges across a 760mm shelf', () => {
-    const slots = layoutShelf({ archetype: cart, count: 10, shelfWidthMm: 760 })
+  it('splits ten games across two ranks as evenly as possible', () => {
+    const slots = layoutSpread({ archetype: cart, count: 10 })
     expect(slots).toHaveLength(10)
-    expect(new Set(slots.map((s) => s.row)).size).toBe(2)
-    expect(slots.filter((s) => s.row === 0)).toHaveLength(5)
+    expect(new Set(slots.map((s) => s.rank)).size).toBe(2)
+    expect(slots.filter((s) => s.rank === 0)).toHaveLength(5)
+    expect(slots.filter((s) => s.rank === 1)).toHaveLength(5)
   })
 
-  it('never overlaps neighbouring boxes in a row', () => {
-    const slots = layoutShelf({ archetype: cart, count: 10, shelfWidthMm: 760 })
+  it('sends any remainder to the front rank first', () => {
+    // 7 games over 2 ranks = 4 front, 3 back.
+    const slots = layoutSpread({ archetype: cart, count: 7 })
+    expect(slots.filter((s) => s.rank === 0)).toHaveLength(4)
+    expect(slots.filter((s) => s.rank === 1)).toHaveLength(3)
+  })
+
+  it('never overlaps neighbouring boxes within a rank', () => {
+    const slots = layoutSpread({ archetype: cart, count: 10 })
     const halfW = cart.dimensions.width / 2000
-    const row0 = slots.filter((s) => s.row === 0).sort((a, b) => a.position[0] - b.position[0])
-    for (let i = 1; i < row0.length; i++) {
-      const gap = row0[i].position[0] - halfW - (row0[i - 1].position[0] + halfW)
+    const front = slots.filter((s) => s.rank === 0).sort((a, b) => a.position[0] - b.position[0])
+    for (let i = 1; i < front.length; i++) {
+      const gap = front[i].position[0] - halfW - (front[i - 1].position[0] + halfW)
       expect(gap, `boxes ${i - 1}/${i} overlap`).toBeGreaterThanOrEqual(-1e-9)
     }
   })
 
-  it('stays inside the shelf width', () => {
-    const slots = layoutShelf({ archetype: cart, count: 10, shelfWidthMm: 760 })
-    const halfW = cart.dimensions.width / 2000
-    for (const s of slots) {
-      expect(Math.abs(s.position[0]) + halfW).toBeLessThanOrEqual(760 / 2000 + 1e-9)
-    }
+  it('centres each rank on its own occupancy', () => {
+    const slots = layoutSpread({ archetype: cart, count: 7 })
+    const back = slots.filter((s) => s.rank === 1)
+    expect(back).toHaveLength(3)
+    const xs = back.map((s) => s.position[0]).sort((a, b) => a - b)
+    // Symmetric about the centre line, since the back rank's stagger is a
+    // fixed offset applied to an otherwise-centred row.
+    expect(xs[0] + xs[2]).toBeCloseTo(2 * xs[1], 6)
   })
 
-  it('centres a short final row rather than left-aligning it', () => {
-    // 7 SNES carts = 5 + 2. The pair should straddle the centre line.
-    const slots = layoutShelf({ archetype: cart, count: 7, shelfWidthMm: 760 })
-    const lastRow = slots.filter((s) => s.row === 1)
-    expect(lastRow).toHaveLength(2)
-    const centre = (lastRow[0].position[0] + lastRow[1].position[0]) / 2
-    expect(centre).toBeCloseTo(0, 9)
-  })
-
-  it('stands every box on the row it belongs to, resting on the board', () => {
-    const slots = layoutShelf({ archetype: cart, count: 10, shelfWidthMm: 760 })
+  it('stands every box on the floor, never below it', () => {
+    const slots = layoutSpread({ archetype: cart, count: 10 })
     const halfH = cart.dimensions.height / 2000
     for (const s of slots) {
-      // Bottom of the box is at the row's board height, never below it.
       expect(s.position[1] - halfH).toBeGreaterThanOrEqual(-1e-9)
     }
-    const row1Y = slots.find((s) => s.row === 1)!.position[1]
-    const row0Y = slots.find((s) => s.row === 0)!.position[1]
-    expect(row1Y).toBeGreaterThan(row0Y)
   })
 
-  it('derives rows-per-shelf from width alone, for every archetype', () => {
-    // The point of the parametric kit: no per-console tuning anywhere. Packing
-    // is purely a function of the published width and the gap.
-    const shelfWidthMm = 760
-    const gapMm = 4
-    for (const a of Object.values(MEDIA_ARCHETYPES)) {
-      const slots = layoutShelf({ archetype: a, count: 10, shelfWidthMm })
-      const perRow = slots.filter((s) => s.row === 0).length
-      const expected = Math.max(
-        1,
-        Math.floor((shelfWidthMm + gapMm) / (a.dimensions.width + gapMm)),
-      )
-      expect(perRow, `${a.id}`).toBe(Math.min(expected, 10))
+  it('pushes the back rank away from the front along Z', () => {
+    const slots = layoutSpread({ archetype: cart, count: 10 })
+    const front = slots.find((s) => s.rank === 0)!
+    const back = slots.find((s) => s.rank === 1)!
+    expect(back.position[2]).toBeGreaterThan(front.position[2])
+  })
+
+  it('rakes every box back by the same angle', () => {
+    const slots = layoutSpread({ archetype: cart, count: 10, rakeDeg: 8 })
+    for (const s of slots) {
+      expect(s.rotation[0]).toBeCloseTo((8 * Math.PI) / 180, 6)
     }
   })
 
-  it('packs a narrow archetype more densely than a wide one', () => {
-    const wide = layoutShelf({ archetype: archetype('dvd-keepcase'), count: 12, shelfWidthMm: 600 })
-    const narrow = layoutShelf({ archetype: archetype('switch-case'), count: 12, shelfWidthMm: 600 })
-    const perRow = (s: typeof wide) => s.filter((x) => x.row === 0).length
-    expect(perRow(narrow)).toBeGreaterThan(perRow(wide))
+  it('staggers the back rank half a pitch from the front', () => {
+    const slots = layoutSpread({ archetype: cart, count: 4, ranks: 2, gapMm: 4 })
+    const front = slots.filter((s) => s.rank === 0).map((s) => s.position[0])
+    const back = slots.filter((s) => s.rank === 1).map((s) => s.position[0])
+    // Every back-rank x should differ from every front-rank x — nothing sits
+    // directly behind anything else.
+    for (const bx of back) {
+      for (const fx of front) {
+        expect(Math.abs(bx - fx)).toBeGreaterThan(0.001)
+      }
+    }
   })
 
-  it('handles empty and single-item shelves', () => {
-    expect(layoutShelf({ archetype: cart, count: 0, shelfWidthMm: 760 })).toEqual([])
-    const one = layoutShelf({ archetype: cart, count: 1, shelfWidthMm: 760 })
+  it('handles an empty and a single-item spread', () => {
+    expect(layoutSpread({ archetype: cart, count: 0 })).toEqual([])
+    const one = layoutSpread({ archetype: cart, count: 1 })
     expect(one).toHaveLength(1)
     expect(one[0].position[0]).toBeCloseTo(0, 9)
   })
 
-  it('falls back to one per row when the shelf is narrower than a box', () => {
-    const slots = layoutShelf({ archetype: cart, count: 3, shelfWidthMm: 50 })
-    expect(slots.map((s) => s.row)).toEqual([0, 1, 2])
+  it('reports an extent that matches the laid-out boxes', () => {
+    const slots = layoutSpread({ archetype: cart, count: 10 })
+    const { width, depth, height } = spreadExtent(slots, cart)
+    expect(width).toBeGreaterThan(0)
+    expect(depth).toBeGreaterThan(0)
+    expect(height).toBeCloseTo(cart.dimensions.height / 1000, 6)
   })
 
-  it('reports an extent that matches the laid-out boxes', () => {
-    const slots = layoutShelf({ archetype: cart, count: 10, shelfWidthMm: 760 })
-    const { width, height } = shelfExtent(slots, cart)
-    // Five 136mm carts plus four 4mm gaps.
-    expect(width).toBeCloseTo((5 * 136 + 4 * 4) / 1000, 6)
-    expect(height).toBeGreaterThan(cart.dimensions.height / 1000)
+  it('lays out every archetype without throwing', () => {
+    for (const a of Object.values(MEDIA_ARCHETYPES)) {
+      expect(() => layoutSpread({ archetype: a, count: 10 })).not.toThrow()
+    }
   })
 })
 
-describe('the SNES shelf as configured', () => {
-  it('lays out all ten games inside the bookshelf', () => {
-    const a = archetype(snes.mediaArchetype)
-    const slots = layoutShelf({
-      archetype: a,
-      count: snes.games.length,
-      shelfWidthMm: 760,
-    })
-    expect(slots).toHaveLength(10)
+describe('media anchor', () => {
+  it('sits beside the console, clear of its own footprint', () => {
+    const spec = snes.diorama
+    const anchor = mediaAnchor(snes, spec)
+    const consoleHalfWidth = snes.dimensions.width / 2000
+    expect(anchor[0]).toBeGreaterThan(spec.consolePosition[0] + consoleHalfWidth)
+  })
 
-    const { height } = shelfExtent(slots, a)
-    // Must fit within the 1600mm bookshelf, from its 550mm bottom board.
-    expect(height).toBeLessThan(1.6 - 0.55)
+  it('stays on the console\'s own floor level', () => {
+    const spec = snes.diorama
+    const anchor = mediaAnchor(snes, spec)
+    expect(anchor[1]).toBeCloseTo(spec.consolePosition[1], 9)
+  })
+
+  it('moves with the console when consolePosition moves', () => {
+    const spec = { ...snes.diorama, consolePosition: [1, 0.5, -2] as [number, number, number] }
+    const anchor = mediaAnchor(snes, spec)
+    expect(anchor[2]).toBeCloseTo(-2, 6)
   })
 })

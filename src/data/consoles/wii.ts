@@ -70,6 +70,41 @@ export const wii: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'dvd-keepcase',
   model: '/models/consoles/wii.glb',
+  // Anchors measured against the rendered GLB (see snes.ts's hardwareDiagram
+  // comment). The front face (disc slot, buttons, logo) is the +x face of the
+  // console body. The GLB bundles console + stand + Wiimote + nunchuk as one
+  // display composition (224 x 206 x 179mm), so the bounds test validates
+  // against renderBox rather than the body-only `dimensions`.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1122, 0.1122], y: [0, 0.2057], z: [-0.0893, 0.0893] },
+    callouts: [
+      {
+        label: 'Disc slot — front face, right side',
+        anchor: [0.09, 0.15, -0.04],
+        labelOffset: [0.03, 0.03, -0.01],
+      },
+      {
+        label: 'Eject button — just below the slot',
+        anchor: [0.091, 0.115, -0.045],
+        labelOffset: [0.03, 0.03, -0.01],
+      },
+      {
+        label: 'Power button — bottom-left of the front',
+        anchor: [0.105, 0.048, -0.07],
+        labelOffset: [0.035, 0.02, -0.01],
+      },
+      {
+        label: 'Reset button — beside the power',
+        anchor: [0.105, 0.048, -0.05],
+        labelOffset: [0.035, 0.02, -0.01],
+      },
+      {
+        label: 'Wii Remote + Nunchuk — posed on their own stands',
+        anchor: [0.031, 0.1, 0.012],
+        labelOffset: [0.02, 0.04, 0.01],
+      },
+    ],
+  },
   // Aspirational mesh targets — these name the parts the insert sequence and
   // failure states will drive once an authored model exists. Until then the
   // shell comes from the console form (see console-forms.ts), which generates

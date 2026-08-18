@@ -1,5 +1,5 @@
-import type { MediaArchetype } from '@/types/console'
-import { MM } from '@/data/kits/media-archetypes'
+import type { ConsoleEntry, DioramaSpec, MediaArchetype } from '@/types/console'
+import { MM, archetype } from '@/data/kits/media-archetypes'
 
 /**
  * Game-box geometry maths.
@@ -18,6 +18,14 @@ import { MM } from '@/data/kits/media-archetypes'
  * three.js BoxGeometry emits its six faces as material groups in this fixed
  * order. Naming them stops the front cover ending up on the underside.
  */
+/**
+ * How high the selected box lifts off the floor, in metres. The pick-up-a-
+ * game metaphor of the spread: selection lifts the box for reading. Shared
+ * between GameBox (which renders the lift) and the artifact shot (which aims
+ * the camera at the LIFTED position, so the box is dead-centre in frame).
+ */
+export const LIFT_M = 0.05
+
 export const BOX_FACE = {
   right: 0, // +X
   left: 1, // -X  — the spine when a case stands on a shelf
@@ -32,6 +40,44 @@ export type BoxFace = keyof typeof BOX_FACE
 /** Archetype size as scene metres, [width, height, depth]. */
 export function boxSizeMetres(a: MediaArchetype): [number, number, number] {
   return [a.dimensions.width * MM, a.dimensions.height * MM, a.dimensions.depth * MM]
+}
+
+/**
+ * The shell's rounded-rect profile in scene metres, centred on the origin —
+ * the cross-section `GameBox` extrudes to build the case. `cornerRadiusMm`
+ * lives on every archetype and was unused before this: carts are chunky
+ * (4-6mm), cases are near-square (2-3mm), and a plain cuboid read as a block
+ * of wood next to the real thing.
+ */
+export function boxProfile(a: MediaArchetype): { w: number; h: number; r: number } {
+  return {
+    w: a.dimensions.width * MM,
+    h: a.dimensions.height * MM,
+    // Never let the radius exceed half the shorter side — a badly authored
+    // archetype should degrade to a pill, not throw or self-intersect.
+    r: Math.min(a.cornerRadiusMm * MM, (Math.min(a.dimensions.width, a.dimensions.height) / 2) * MM),
+  }
+}
+
+/**
+ * Edge roundover applied to the extruded shell, in metres — shared with
+ * GameBox.tsx's `useShellGeometry` so there is exactly one source of truth
+ * for it. This has to live here, not just in GameBox.tsx: three.js's
+ * ExtrudeGeometry bevel does not stay INSIDE the box's nominal depth — the
+ * flat front/back caps themselves shift outward by `bevelThickness` beyond
+ * `±depth/2`. `labelPlane` below computes the label's proud-ness from
+ * `depth/2` alone, so anything printed on the front face has to add this
+ * offset too, or the (now-further-forward) shell simply buries it. A real
+ * bug caught by measuring the built geometry's bounding box: the shell's
+ * true front sat 0.65mm ahead of the label for the Atari cartridge, hiding
+ * it completely.
+ */
+/** Nominal edge bevel before the per-archetype clamps in `edgeBevelMetres`. */
+export const EDGE_BEVEL_M = 0.0008
+
+export function edgeBevelMetres(a: MediaArchetype, depthM: number): number {
+  const { r } = boxProfile(a)
+  return Math.min(EDGE_BEVEL_M, r * 0.5, depthM * 0.2)
 }
 
 export type LabelPlane = {
@@ -65,7 +111,7 @@ export function labelPlane(a: MediaArchetype): LabelPlane | null {
   return {
     width,
     height,
-    position: [0, l.offsetYMm * MM, z],
+    position: [(l.offsetXMm ?? 0) * MM, l.offsetYMm * MM, z],
     aspect: l.widthMm / l.heightMm,
   }
 }
@@ -81,109 +127,161 @@ export function coverAspect(a: MediaArchetype): number {
 }
 
 /* ------------------------------------------------------------------ */
-/* Shelf layout                                                        */
+/* Spread layout                                                       */
 /* ------------------------------------------------------------------ */
 
-export type ShelfSlot = {
+/**
+ * Cases and cartridges stand up unaided — no furniture is needed to show them
+ * honestly. The ten games lay out as two staggered ranks standing upright,
+ * faced out, raked back slightly, directly on the same floor the console
+ * stands on. This replaces the wooden-shelf layout (`layoutShelf`, deleted
+ * along with GameShelf.tsx): a lone bookshelf in a room that otherwise holds
+ * only a shadow-catching floor read as a leftover prop.
+ */
+
+export type SpreadSlot = {
   index: number
-  row: number
+  /** 0 = front rank, closest to the viewer. */
+  rank: number
   column: number
-  /** Metres, relative to the shelf anchor (centre of the bottom row). */
+  /** Metres, relative to the spread anchor (floor centre of the front rank). */
   position: [number, number, number]
+  /** Radians. Only X (the rake) is ever non-zero today. */
+  rotation: [number, number, number]
 }
 
-export type ShelfLayoutOptions = {
+export type SpreadOptions = {
   archetype: MediaArchetype
   count: number
-  /** Usable interior width of the shelf, in mm. */
-  shelfWidthMm: number
-  /** Vertical spacing between shelf boards, in mm. Defaults to box height + clearance. */
-  rowPitchMm?: number
-  /** Gap between neighbouring boxes, in mm. */
+  /** How many rows of depth. Defaults to 2 — enough to stagger, not a wall. */
+  ranks?: number
+  /** Gap between neighbouring boxes within a rank, in mm. */
   gapMm?: number
+  /** Distance between ranks, in mm. Defaults to a generous multiple of depth. */
+  rankDepthMm?: number
+  /** How far the boxes tip back from vertical, in degrees. */
+  rakeDeg?: number
 }
 
 const DEFAULT_GAP_MM = 4
-const ROW_CLEARANCE_MM = 45
-
-export type ShelfMetrics = {
-  perRow: number
-  rows: number
-  rowPitchMm: number
-  gapMm: number
-}
+const DEFAULT_RANKS = 2
+const DEFAULT_RANK_DEPTH_FACTOR = 2.2
+const DEFAULT_RAKE_DEG = 8
 
 /**
- * How the boxes pack. Shared by the layout and by the shelving unit that draws
- * boards under each row, so the carcass can never disagree with its contents.
+ * How many ranks the ten-game spread actually uses in the scene (MediaSpread
+ * and the library camera shot in shots.ts both import this — never the bare
+ * `layoutSpread` default — so the two can never disagree about the shape
+ * being framed). Two ranks of five is eight times wider than it is deep: to
+ * fit that width in frame, the camera has to pull back so far that each
+ * box's face — only ~70mm tall for a cartridge — becomes a sliver of the
+ * screen, unreadable regardless of how good the art or the geometry is. Four
+ * ranks keeps the footprint close to square, so the camera can sit near
+ * enough for a box to actually read as an object.
  */
-export function shelfMetrics({
-  archetype: a,
-  count,
-  shelfWidthMm,
-  rowPitchMm,
-  gapMm = DEFAULT_GAP_MM,
-}: ShelfLayoutOptions): ShelfMetrics {
-  const perRow = Math.max(1, Math.floor((shelfWidthMm + gapMm) / (a.dimensions.width + gapMm)))
-  return {
-    perRow,
-    rows: Math.max(0, Math.ceil(count / perRow)),
-    rowPitchMm: rowPitchMm ?? a.dimensions.height + ROW_CLEARANCE_MM,
-    gapMm,
-  }
-}
+export const MEDIA_SPREAD_RANKS = 4
 
 /**
- * Arrange boxes standing upright, faced out, filling left to right and then
- * upward. Faced-out rather than spine-out is both readable and honest: this is
- * how cartridges were actually stood on a shelf, and it is the only arrangement
+ * Arrange boxes standing upright, faced out, split across `ranks` rows of
+ * depth. Faced-out rather than spine-out is both readable and honest: this is
+ * how cartridges were actually displayed, and it is the only arrangement
  * where a cartridge is identifiable at all — carts have no spine print.
  *
- * Rows are centred individually, so a short final row sits centred rather than
- * hanging off the left edge.
+ * Each rank is centred on its own occupancy, so a short final rank sits
+ * centred rather than hanging off one edge. The back rank is offset half a
+ * pitch in X so it staggers visibly behind the gaps in the front rank instead
+ * of hiding directly behind it.
  */
-export function layoutShelf(options: ShelfLayoutOptions): ShelfSlot[] {
-  const { archetype: a, count } = options
-  if (count <= 0) return []
+export function layoutSpread({
+  archetype: a,
+  count,
+  ranks = DEFAULT_RANKS,
+  gapMm = DEFAULT_GAP_MM,
+  rankDepthMm,
+  rakeDeg = DEFAULT_RAKE_DEG,
+}: SpreadOptions): SpreadSlot[] {
+  if (count <= 0 || ranks <= 0) return []
 
   const boxW = a.dimensions.width
   const boxH = a.dimensions.height
-  const { perRow, rowPitchMm: pitch, gapMm } = shelfMetrics(options)
+  const pitch = rankDepthMm ?? a.dimensions.depth * DEFAULT_RANK_DEPTH_FACTOR
+  const rakeRad = (rakeDeg * Math.PI) / 180
 
-  const slots: ShelfSlot[] = []
-  for (let i = 0; i < count; i++) {
-    const row = Math.floor(i / perRow)
-    const column = i % perRow
+  // Split as evenly as possible across ranks; any remainder fills the front
+  // ranks first, so the front reads fullest rather than the back.
+  const base = Math.floor(count / ranks)
+  const remainder = count % ranks
+  const perRank = Array.from({ length: ranks }, (_, r) => base + (r < remainder ? 1 : 0))
 
-    // Centre each row on its own occupancy, not on the theoretical full row.
-    const inThisRow = Math.min(perRow, count - row * perRow)
-    const rowWidth = inThisRow * boxW + (inThisRow - 1) * gapMm
+  const slots: SpreadSlot[] = []
+  let index = 0
+  for (let rank = 0; rank < ranks; rank++) {
+    const inThisRank = perRank[rank]
+    if (inThisRank <= 0) continue
 
-    const xMm = -rowWidth / 2 + column * (boxW + gapMm) + boxW / 2
-    const yMm = row * pitch + boxH / 2
+    const rowWidth = inThisRank * boxW + (inThisRank - 1) * gapMm
+    // Stagger every other rank half a pitch, so a box in the back rank sits
+    // behind a gap in the front rank instead of directly behind a box.
+    const stagger = rank % 2 === 1 ? (boxW + gapMm) / 2 : 0
 
-    slots.push({
-      index: i,
-      row,
-      column,
-      position: [xMm * MM, yMm * MM, 0],
-    })
+    for (let column = 0; column < inThisRank; column++) {
+      const xMm = -rowWidth / 2 + column * (boxW + gapMm) + boxW / 2 + stagger
+      const zMm = rank * pitch
+      const yMm = boxH / 2
+
+      slots.push({
+        index,
+        rank,
+        column,
+        position: [xMm * MM, yMm * MM, zMm * MM],
+        rotation: [rakeRad, 0, 0],
+      })
+      index += 1
+    }
   }
   return slots
 }
 
-/** Total footprint of a laid-out shelf, in metres — useful for framing shots. */
-export function shelfExtent(slots: ShelfSlot[], a: MediaArchetype) {
-  if (slots.length === 0) return { width: 0, height: 0 }
+/** Total footprint of a laid-out spread, in metres — useful for framing shots. */
+export function spreadExtent(
+  slots: SpreadSlot[],
+  a: MediaArchetype,
+): { width: number; height: number; depth: number } {
+  if (slots.length === 0) return { width: 0, height: 0, depth: 0 }
   const halfW = (a.dimensions.width / 2) * MM
   const halfH = (a.dimensions.height / 2) * MM
+  const halfD = (a.dimensions.depth / 2) * MM
   let minX = Infinity
   let maxX = -Infinity
   let maxY = -Infinity
+  let maxZ = -Infinity
   for (const s of slots) {
     minX = Math.min(minX, s.position[0] - halfW)
     maxX = Math.max(maxX, s.position[0] + halfW)
     maxY = Math.max(maxY, s.position[1] + halfH)
+    maxZ = Math.max(maxZ, s.position[2] + halfD)
   }
-  return { width: maxX - minX, height: maxY }
+  return { width: maxX - minX, height: maxY, depth: maxZ }
+}
+
+/**
+ * Where the spread sits: on the console's own floor plane, beside it. Derived
+ * from `spec.consolePosition` rather than authored per console, so all 22
+ * consoles inherit it and the camera (shots.ts) and the contents (MediaSpread)
+ * can never disagree about where it is — `spec.shelfPosition` is not used
+ * here; it names a wall the room no longer has.
+ */
+const CONSOLE_CLEARANCE_M = 0.12
+
+export function mediaAnchor(entry: ConsoleEntry, spec: DioramaSpec): [number, number, number] {
+  const media = archetype(entry.mediaArchetype)
+  const slots = layoutSpread({ archetype: media, count: entry.games.length, ranks: MEDIA_SPREAD_RANKS })
+  const extent = spreadExtent(slots, media)
+  const consoleHalfWidth = (entry.dimensions.width * MM) / 2
+
+  return [
+    spec.consolePosition[0] + consoleHalfWidth + CONSOLE_CLEARANCE_M + extent.width / 2,
+    spec.consolePosition[1],
+    spec.consolePosition[2],
+  ]
 }

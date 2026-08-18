@@ -1,6 +1,5 @@
-import { Suspense, useEffect, useLayoutEffect, useRef } from 'react'
+import { Suspense, useEffect, useLayoutEffect } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-import gsap from 'gsap'
 import { PerformanceMonitor } from '@react-three/drei'
 import {
   Bloom,
@@ -14,16 +13,14 @@ import {
 import * as THREE from 'three'
 import { Diorama } from './Diorama'
 import { CameraRig } from './CameraRig'
+import { CAMERA_FOV_DEG } from './shots'
 import { HeroConsole, heroGroupRef } from './HeroConsole'
-import { MuseumScene } from './museum/MuseumScene'
 import {
   useActiveArchetypeId,
   useActiveConsole,
   useActiveDiorama,
   useScene,
-  useSceneMounts,
 } from '@/store/scene'
-import { APPROACH_TIMING } from './museum/approach'
 
 /**
  * The tilt-shift toy diorama look.
@@ -50,7 +47,7 @@ import { APPROACH_TIMING } from './museum/approach'
  * 20cm console at 1.2m and a 4.2m room at 13m.
  */
 const CAMERA = {
-  fov: 24,
+  fov: CAMERA_FOV_DEG,
   position: [7.5, 5.7, 8.75] as [number, number, number],
   near: 0.05,
   far: 120,
@@ -67,24 +64,15 @@ const fxParam =
     : null
 
 /**
- * Post-processing, and it is NOT the same for both screens.
- *
- * The tilt-shift band is a MINIATURE effect: it blurs by screen position so a
- * real-sized room reads as a model on a table. That is exactly right for the
- * room and exactly wrong for the shelf, where the subject is a whole
- * collection and the neighbouring generations are the content — blurring them
- * dissolved every bay but one into an unreadable smear and fought the one
- * thing the shelf exists to do. It used to apply to both screens because this
- * component never knew which screen it was on.
- *
- * The shelf keeps the effects that describe SOLID OBJECTS IN A SPACE —
- * ambient occlusion and antialiasing — and drops the ones that fake a lens:
- * the band, the bloom, and the heavy vignette (which on a bright gallery
- * would read as dirt in the corners rather than as focus).
+ * Post-processing — the room's miniature kit. The tilt-shift band is a
+ * MINIATURE effect: it blurs by screen position so a real-sized room reads as
+ * a model on a table. Ambient occlusion and antialiasing describe solid
+ * objects in a space; bloom, the band, a saturation lift and a faint vignette
+ * fake the lens.
  */
 function Effects() {
   const quality = useScene((s) => s.quality)
-  const screen = useScene((s) => s.screen)
+  const mode = useScene((s) => s.mode)
   // The room's frame offset lifts the subject up on screen (frame.ts), so the
   // focus band has to rise with it or the console renders permanently blurred
   // while the chrome says it's sharp. CameraRig mirrors the applied offset
@@ -95,30 +83,29 @@ function Effects() {
   const bandStart = 0.44 + offset.dy
   const bandEnd = 0.64 + offset.dy
 
+  /*
+    The tilt-shift band is tuned to where the CONSOLE sits on screen, not
+    where the library shot's media spread ends up — the spread sits off to
+    the console's side and lower in frame, well outside that band, which
+    rendered every cartridge permanently blurred regardless of how good the
+    geometry or the art was. The toy-diorama illusion the band exists for
+    also doesn't apply once you're this close, inspecting individual boxes —
+    sharpness matters more there than the miniature effect. Skip it entirely
+    in library and artifact mode rather than trying to re-tune a moving band
+    per shot (artifact is the same argument, one box closer).
+  */
+  const showTiltShift = mode !== 'library' && mode !== 'artifact'
+
   if (fxParam === 'none') return null
 
-  const onShelf = screen === 'shelf'
-
   if (quality === 'low') {
-    // Low quality drops to the two cheapest effects. On the shelf that leaves
-    // nothing worth composing for, so it renders untouched rather than paying
-    // for a pass that only darkens the corners.
-    if (onShelf) return null
+    // Low quality drops to the two cheapest effects.
     return (
       <EffectComposer multisampling={0}>
-        <TiltShift2 blur={0.35} taper={0.5} samples={6} start={[0, bandStart]} end={[1, bandEnd]} />
-        <Vignette offset={0.4} darkness={0.22} />
-      </EffectComposer>
-    )
-  }
-
-  if (onShelf) {
-    return (
-      <EffectComposer multisampling={0}>
-        {fxParam !== 'noao' && (
-          <N8AO aoRadius={0.45} intensity={2.2} distanceFalloff={0.8} quality="medium" />
+        {showTiltShift && (
+          <TiltShift2 blur={0.35} taper={0.5} samples={6} start={[0, bandStart]} end={[1, bandEnd]} />
         )}
-        <SMAA />
+        <Vignette offset={0.4} darkness={0.22} />
       </EffectComposer>
     )
   }
@@ -133,18 +120,20 @@ function Effects() {
         The focus band is narrow and sits slightly below centre, where the set
         actually is. A wide band does nothing — the whole point is that only a
         shallow slice is sharp, which is what the eye reads as "very close to a
-        small object".
+        small object". See showTiltShift above for why it's skipped in library
+        mode.
       */}
-      <TiltShift2 blur={1.15} taper={0.9} samples={14} start={[0, bandStart]} end={[1, bandEnd]} />
+      {showTiltShift && (
+        <TiltShift2 blur={1.15} taper={0.9} samples={14} start={[0, bandStart]} end={[1, bandEnd]} />
+      )}
       <Bloom intensity={0.4} luminanceThreshold={0.75} luminanceSmoothing={0.3} mipmapBlur />
       <HueSaturation saturation={0.16} />
       {/*
         A near-black backdrop could carry a heavy vignette; a white gallery
         one cannot — the same darkening that used to read as cinematic focus
-        reads as dirt smeared into the corners of a bright room (the exact
-        reason the shelf itself dropped this effect entirely, see Effects()
-        above). Kept faint rather than removed: the room still wants a soft
-        lens falloff, just not one heavy enough to fight its own backdrop.
+        reads as dirt smeared into the corners of a bright room. Kept faint
+        rather than removed: the room still wants a soft lens falloff, just
+        not one heavy enough to fight its own backdrop.
       */}
       <Vignette offset={0.4} darkness={0.22} />
       <SMAA />
@@ -175,113 +164,42 @@ function DebugHandles() {
 
 function Backdrop() {
   const spec = useActiveDiorama()
-  const approach = useScene((s) => s.approach)
-  const reducedMotion = useScene((s) => s.reducedMotion)
-  const matRef = useRef<THREE.MeshBasicMaterial>(null)
-
-  /*
-    Fade in over the arrival instead of popping in behind the handoff. The
-    sheet is an UNLIT material, so it stays at full brightness while the room
-    lights are still ramping — an opacity fade keeps it in step with the
-    world. Read once at mount (the Diorama trick): a direct room load
-    (?screen=room) had approach === 'idle' and wants the sheet there.
-    LAYOUT effect: a plain effect would paint one frame of the opaque sheet
-    behind the handoff before zeroing it.
-  */
-  useLayoutEffect(() => {
-    const cameFromApproach = useScene.getState().approach !== 'idle'
-    const m = matRef.current
-    if (!m || !cameFromApproach) return
-    m.opacity = 0
-    const duration = useScene.getState().reducedMotion ? 0 : APPROACH_TIMING.ARRIVE_MS / 1000
-    gsap.to(m, { opacity: 1, duration, ease: 'power2.out' })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Retreat: go transparent during the fade so the teleport never leaves a
-  // bright unlit sheet behind the museum for a frame.
-  useEffect(() => {
-    if (approach !== 'retreating') return
-    const m = matRef.current
-    if (!m) return
-    const duration = reducedMotion ? 0 : APPROACH_TIMING.RETREAT_FADE_MS / 1000
-    gsap.to(m, { opacity: 0, duration, ease: 'power2.in' })
-  }, [approach, reducedMotion])
 
   return (
     <mesh position={[0, 2, -14]}>
       <planeGeometry args={[90, 50]} />
-      <meshBasicMaterial
-        ref={matRef}
-        color={spec.lighting.backdrop}
-        toneMapped={false}
-        transparent
-      />
+      <meshBasicMaterial color={spec.lighting.backdrop} toneMapped={false} />
     </mesh>
   )
 }
 
 /**
- * The far background, owned here (not via <color attach>) so its colour can
- * be TWEENED across the handoff instead of snapping. The hall warms into the
- * era room's backdrop over the arrival and cools back over the retreat fade —
- * same clock as the lights, so the whole world changes at one speed.
+ * The far background, owned here (not via <color attach>) so the colour can
+ * change with the console. Each console's era room has its own backdrop, so
+ * switching consoles warms or cools the whole world behind the set.
  */
 function Background() {
   const scene = useThree((s) => s.scene)
   const spec = useActiveDiorama()
-  const screen = useScene((s) => s.screen)
-  const approach = useScene((s) => s.approach)
-  const reducedMotion = useScene((s) => s.reducedMotion)
 
   // Layout effect so the very first paint never shows a null/transparent
   // background (R3F's default) before the colour is established.
   useLayoutEffect(() => {
     if (!(scene.background instanceof THREE.Color)) {
-      scene.background = new THREE.Color(MUSEUM_BACKDROP)
+      scene.background = new THREE.Color(spec.lighting.backdrop)
+    } else {
+      scene.background.copy(new THREE.Color(spec.lighting.backdrop))
     }
-    const bg = scene.background as THREE.Color
-    const target = new THREE.Color(
-      screen === 'room' ? spec.lighting.backdrop : MUSEUM_BACKDROP,
-    )
-    const ms =
-      approach === 'arriving'
-        ? APPROACH_TIMING.ARRIVE_MS
-        : approach === 'retreating'
-          ? APPROACH_TIMING.RETREAT_FADE_MS
-          : 0
-    const duration = ms > 0 && !reducedMotion ? ms / 1000 : 0
-    gsap.killTweensOf(bg)
-    if (duration === 0) {
-      bg.copy(target)
-      return
-    }
-    gsap.to(bg, { r: target.r, g: target.g, b: target.b, duration, ease: 'power2.inOut' })
-  }, [screen, approach, spec.lighting.backdrop, reducedMotion, scene])
+  }, [spec.lighting.backdrop, scene])
 
   return null
 }
-
-/**
- * The hall's own ground — a bright gallery white, sitting just under the
- * plaster of the walls so the architecture still reads against it.
- *
- * A *chosen* white, not the cool grey every UI kit ships as its neutral: it
- * carries a little warmth, which keeps it a plastered room rather than a
- * wireframe. Because `Background` tweens this into the era room's own
- * backdrop across the handoff, the approach now reads as walking out of a
- * bright public gallery into a dim private living room — a far bigger change
- * than the old near-black hall could ever have delivered, and the whole
- * reason the room's warmth lands.
- */
-const MUSEUM_BACKDROP = '#eeeeea'
 
 export function Scene() {
   const entry = useActiveConsole()
   const spec = useActiveDiorama()
   const archetypeId = useActiveArchetypeId()
   const setQuality = useScene((s) => s.setQuality)
-  const { museum, room } = useSceneMounts()
 
   return (
     <Canvas
@@ -312,38 +230,19 @@ export function Scene() {
       />
 
       <CameraRig />
-      {/*
-        The backdrop plane is meshBasicMaterial, so it ignores lights entirely
-        and would stay lit while the museum goes dark. It belongs to the room
-        only; `scene.background` covers the museum.
-      */}
-      {room && <Backdrop />}
+      <Backdrop />
       <DebugHandles />
 
       {/*
-        Mounted unconditionally, outside both branches below — this is the
-        ONE instance of whichever console is active, whichever screen is
-        showing. Neither MuseumScene nor Diorama render a console themselves;
-        see HeroConsole.tsx for why exactly one owner is the whole point.
+        Mounted unconditionally — this is the ONE instance of whichever
+        console is active. Diorama never renders a console itself; see
+        HeroConsole.tsx for why exactly one owner is the whole point.
       */}
       <HeroConsole />
 
-      {/*
-        One Suspense per SCENE rather than one for everything. The old single
-        boundary meant any suspending child blanked the entire diorama; with
-        twelve models on a shelf that would have strobed the whole museum.
-      */}
-      {museum && (
-        <Suspense fallback={null}>
-          <MuseumScene />
-        </Suspense>
-      )}
-
-      {room && (
-        <Suspense fallback={null}>
-          <Diorama entry={entry} spec={spec} archetypeId={archetypeId} />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        <Diorama entry={entry} spec={spec} archetypeId={archetypeId} />
+      </Suspense>
 
       <Effects />
     </Canvas>

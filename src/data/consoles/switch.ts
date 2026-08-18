@@ -70,6 +70,48 @@ export const nintendoSwitch: ConsoleEntry = {
   mediaKind: 'card',
   mediaArchetype: 'switch-case',
   model: '/models/consoles/switch.glb',
+  // Anchors measured against the rendered GLB (see snes.ts's hardwareDiagram
+  // comment). The model is the handheld in table-top mode: both Joy-Cons and
+  // the deployed kickstand are fused into one mesh, and the screen faces -z
+  // (the hero yaw carries the half-turn that shows it to the room). The data's
+  // `dimensions` describe the tablet alone (173 x 104 x 54mm), but the render
+  // is 243 x 101 x 51mm — the Joy-Cons widen it and the open kickstand
+  // inflates the depth — so the bounds test validates against renderBox.
+  hardwareDiagram: {
+    renderBox: { x: [-0.1214, 0.1214], y: [0, 0.1008], z: [-0.0253, 0.0253] },
+    callouts: [
+      {
+        label: '7-inch LCD — 1280×720, the console is also the screen',
+        anchor: [0, 0.055, -0.009],
+        labelOffset: [0, 0.04, -0.005],
+      },
+      {
+        label: 'Left Joy-Con — stick, d-pad and capture button',
+        anchor: [-0.105, 0.05, -0.013],
+        labelOffset: [-0.035, 0.02, 0],
+      },
+      {
+        label: 'Right Joy-Con — stick, face buttons and home',
+        anchor: [0.105, 0.05, -0.01],
+        labelOffset: [0.035, 0.02, 0],
+      },
+      {
+        label: 'Kickstand — the whole console rests on this flap',
+        anchor: [-0.07, 0.012, 0.024],
+        labelOffset: [-0.01, 0.04, 0.01],
+      },
+      {
+        label: 'USB-C port — bottom edge, centre',
+        anchor: [0, 0.012, -0.024],
+        labelOffset: [0, -0.035, -0.005],
+      },
+      {
+        label: 'Game card slot — top edge, left of centre',
+        anchor: [-0.04, 0.098, 0.005],
+        labelOffset: [-0.03, 0.03, 0],
+      },
+    ],
+  },
   // Aspirational mesh targets — these name the parts the insert sequence and
   // failure states will drive once an authored model exists. Until then the
   // shell comes from the console form (see console-forms.ts), which generates
@@ -193,7 +235,10 @@ export const nintendoSwitch: ConsoleEntry = {
     tvPosition: [-0.3, 0.62, -1.2],
     tvRotation: [0, 0.1, 0],
     consolePosition: [0.5, 0.5, -1.05],
-    consoleRotation: [0, -0.24, 0],
+    // The GLB is authored back-first (screen on its -z face, kickstand + logo
+    // on +z), so the yaw carries an extra half-turn to show the screen — the
+    // reason the other consoles' yaw is just a small tilt.
+    consoleRotation: [0, Math.PI - 0.24, 0],
     controllerPosition: [-0.18, 0.014, 0.45],
     controllerRotation: [0, 0.5, 0],
     shelfPosition: [-1.4, 0.55, -1.58],

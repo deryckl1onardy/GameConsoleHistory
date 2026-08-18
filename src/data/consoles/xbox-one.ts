@@ -70,6 +70,34 @@ export const xboxOne: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'bluray-case',
   model: '/models/consoles/xbox-one.glb',
+  // Anchors measured against the rendered GLB (see snes.ts's hardwareDiagram
+  // comment). Front face (disc slot + power button) is the +z face; the
+  // model's own mesh names pin the power button exactly. Renders ~329 x 80 x
+  // 273mm against a 333 x 79 x 274 spec — within the bounds test's slack.
+  hardwareDiagram: {
+    callouts: [
+      {
+        label: 'Power button — the glowing Xbox logo',
+        anchor: [0.129, 0.045, 0.136],
+        labelOffset: [0.035, 0.025, 0],
+      },
+      {
+        label: 'Blu-ray slot — the left half of the front',
+        anchor: [-0.09, 0.045, 0.136],
+        labelOffset: [-0.03, 0.03, 0],
+      },
+      {
+        label: 'USB port and sync — the left edge',
+        anchor: [-0.16, 0.028, 0.06],
+        labelOffset: [-0.03, 0.02, 0.01],
+      },
+      {
+        label: 'Top vents — the front edge of the deck',
+        anchor: [0, 0.079, 0.02],
+        labelOffset: [0, 0.025, 0],
+      },
+    ],
+  },
   // Aspirational mesh targets — these name the parts the insert sequence and
   // failure states will drive once an authored model exists. Until then the
   // shell comes from the console form (see console-forms.ts), which generates

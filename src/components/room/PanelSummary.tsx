@@ -68,9 +68,9 @@ function SecondaryStat({
 }) {
   if (compact) {
     return (
-      <p className="flex min-w-0 items-baseline gap-1.5 text-[12px] text-parchment/85">
-        <Icon size={11} className="shrink-0 translate-y-[1px] text-phosphor/70" />
-        <span className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-parchment/40">
+      <p className="flex min-w-0 items-baseline gap-1.5 text-[12px] text-ink/85">
+        <Icon size={11} className="shrink-0 translate-y-[1px] text-amber/70" />
+        <span className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-ink/40">
           {caption}
         </span>
         <span className="min-w-0 truncate tabular-nums">{value}</span>
@@ -79,13 +79,13 @@ function SecondaryStat({
   }
   return (
     <div className="min-w-0">
-      <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-parchment/40">
-        <Icon size={11} className="text-phosphor/70" />
+      <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-ink/40">
+        <Icon size={11} className="text-amber/70" />
         {caption}
       </p>
-      <p className="mt-0.5 text-[13px] text-parchment/85">
+      <p className="mt-0.5 text-[13px] text-ink/85">
         <span className="tabular-nums">{value}</span>
-        {sub && <span className="text-parchment/40"> · {sub}</span>}
+        {sub && <span className="text-ink/40"> · {sub}</span>}
       </p>
     </div>
   )
@@ -98,20 +98,20 @@ export function PanelSummary({ compact = false }: { compact?: boolean }) {
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <div className="shrink-0">
-        <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-parchment/45">
-          <GlobeIcon size={12} className="text-phosphor/80" />
+        <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-ink/45">
+          <GlobeIcon size={12} className="text-amber/80" />
           {COPY.statUnits} · {COPY.statUnitsSub}
         </p>
         <p
           className={[
-            'font-display leading-none tabular-nums text-parchment',
+            'font-display leading-none tabular-nums text-ink',
             compact ? 'mt-1.5 text-3xl' : 'mt-2 text-4xl',
           ].join(' ')}
         >
           {formatUnits(entry.unitsSold)}
         </p>
 
-        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-parchment/10 pt-2.5">
+        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-ink/10 pt-2.5">
           <SecondaryStat
             icon={TagIcon}
             caption={COPY.statPrice}
@@ -129,9 +129,9 @@ export function PanelSummary({ compact = false }: { compact?: boolean }) {
         </div>
       </div>
 
-      <div className="border-t border-parchment/10 pt-3">
-        <p className="text-[13px] leading-relaxed text-parchment/75">{entry.summary}</p>
-        <p className="mt-3 text-[10px] leading-relaxed text-parchment/25">
+      <div className="border-t border-ink/10 pt-3">
+        <p className="text-[13px] leading-relaxed text-ink/75">{entry.summary}</p>
+        <p className="mt-3 text-[10px] leading-relaxed text-ink/25">
           {released ? `Released ${new Date(released).getFullYear()}. ` : ''}
           {COPY.footer}
         </p>

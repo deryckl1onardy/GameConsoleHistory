@@ -71,6 +71,46 @@ export const wiiU: ConsoleEntry = {
   mediaKind: 'optical',
   mediaArchetype: 'bluray-case',
   model: '/models/consoles/wii-u.glb',
+  // Anchors measured against the rendered GLB (see snes.ts's hardwareDiagram
+  // comment). The model lies flat with its front face along +x; the data's
+  // `dimensions` (172 x 46 x 268.5) describe width along z and depth along x,
+  // which the GLB matches, but the render measures 264 x 47 x 172 — wider
+  // than the spec — so the bounds test validates against renderBox.
+  hardwareDiagram: {
+    renderBox: { x: [-0.132, 0.132], y: [0, 0.0474], z: [-0.086, 0.086] },
+    callouts: [
+      {
+        label: 'Disc slot — upper centre of the front panel',
+        anchor: [0.132, 0.03, -0.005],
+        labelOffset: [0.03, 0.02, 0],
+      },
+      {
+        label: 'Eject button — the top-left stack',
+        anchor: [0.107, 0.033, -0.055],
+        labelOffset: [0.03, 0.02, -0.01],
+      },
+      {
+        label: 'Power button — below eject',
+        anchor: [0.132, 0.022, -0.05],
+        labelOffset: [0.03, 0.02, -0.01],
+      },
+      {
+        label: 'Sync button — the little red LED',
+        anchor: [0.132, 0.016, 0.005],
+        labelOffset: [0.03, 0.02, 0],
+      },
+      {
+        label: 'Wii U logo — bottom-right of the front',
+        anchor: [0.132, 0.008, 0.05],
+        labelOffset: [0.035, -0.015, 0.01],
+      },
+      {
+        label: 'SD card door — right side of the front panel',
+        anchor: [0.132, 0.012, 0.06],
+        labelOffset: [0.035, 0.015, 0.01],
+      },
+    ],
+  },
   // Aspirational mesh targets — these name the parts the insert sequence and
   // failure states will drive once an authored model exists. Until then the
   // shell comes from the console form (see console-forms.ts), which generates

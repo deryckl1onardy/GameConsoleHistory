@@ -38,6 +38,17 @@
   --color-parchment-dim: #e5dccd;
   --color-phosphor: #6ee7a8;
   --color-amber: #d98c34;
+  /*
+   * The room's own surface, now that its 3D backdrop is the same neutral
+   * white as the gallery hall (see MUSEUM_BACKDROP in Scene.tsx). Not the
+   * warm `parchment` cream above — that reads as the reflexive "tasteful
+   * premium" background the hall itself was deliberately built to avoid, and
+   * reusing it here would reintroduce that on every console's detail screen.
+   * A neutral near-white instead, matched to the museum plinth's own top
+   * colour (`PLINTH_TOP_COLOR` in ShelfBay.tsx) so panels floating over the
+   * room read as the same material as the ones floating over the hall.
+   */
+  --color-paper: #fbfbf9;
 
   --font-display: 'Sentient', ui-serif, Georgia, serif;
   /*
