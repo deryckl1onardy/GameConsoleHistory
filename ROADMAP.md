@@ -13,6 +13,10 @@ repository reads this file first and updates it before finishing.
 | What counts as success | **Portfolio first, revenue optional.** Ship it, get it seen, keep the revenue door open |
 | First audience | **Retro collectors and gamers** — r/gamecollecting, r/retrogaming, retro YouTube |
 | Time available | **5–10 hrs per week.** One channel done properly beats five done thinly |
+| Era theming — bands | **Eras are the 8 generations.** `eraOf(entry)` returns `entry.generation`, so the existing sidebar grouping and its 6 tests need no change |
+| Era theming — scope | **Tier 1 only before launch** (theme, lighting, motion). Rooms are Tier 2, gated |
+| Era theming — glow | **Period effects in the 3D layer only.** The DOM stays tonal — panels and chrome keep the existing no-glow standard |
+| Era theming — the blur | **Keep the tilt-shift; restore the rooms anyway.** Blurred-but-legible period atmosphere is the intent, not a compromise |
 
 ---
 
@@ -135,6 +139,16 @@ first three weeks.
 - [ ] **Fix or delete `IMPLEMENTATION_STATUS.md`** — see the warning above. It presents
       deleted code as shipped.
 
+- [ ] **Era theme system, Tier 1** — full spec in
+      [`docs/era-theme-implementation.md`](docs/era-theme-implementation.md). Per-era
+      colour, display face, 3D light temperature and motion language, keyed on
+      `entry.generation`. ~3–4 hrs of the estimate above; the DOM theme is near-free
+      because every colour already routes through 7 CSS variables and there are zero
+      hardcoded colours in components.
+      **Why it belongs in Phase 0 and not later:** it makes the 242 OG share cards differ
+      per generation, which is distribution, not polish. Shipping generic and re-skinning
+      afterwards is wasted work.
+
 ### Phase 0 verification
 
 Do not tick this phase off until all of the following pass.
@@ -231,6 +245,28 @@ This is the point of the whole exercise. Evaluate after **8 weeks live**:
 
 ---
 
+## Gated — Era theme system, Tier 2 (the period rooms)
+
+**Status:** deferred by scope, **not blocked**. Do not start during Phase 0.
+
+Restore the deleted period rooms around each console — furniture, TV, controller — so the
+era reads from the environment and not only from the chrome. Spec and recovery commands in
+[`docs/era-theme-implementation.md`](docs/era-theme-implementation.md) §8.
+
+The design question that stalled this is **resolved**: keep the tilt-shift focus band and
+restore the rooms anyway, because blurred-but-legible period atmosphere is the intent. That
+also makes it cheap — blur eats detail, so the props never need GLBs; the deleted `Prop`
+component was already a correctly-proportioned box with the right colour and roughness, and
+behind a tilt-shift fall-off that is the finished look.
+
+Most of it already exists as unrendered data: `src/data/kits/prop-kit.ts` (9 furniture
+types, real mm, 22 material variants, **zero importers**), ~176 authored prop placements,
+11 TV specs. The renderer recovers verbatim from `git show 5029346:src/three/Diorama.tsx`.
+What must be fixed is the placement bug that caused the removal — a data problem, not an
+architecture one.
+
+---
+
 ## Phase 3 — The Collector's Shelf
 
 **Status:** BLOCKED behind the Phase 1 gate. Do not start.
@@ -294,6 +330,13 @@ The specific traps in this batch:
 
 Newest first. One line per completed task or changed decision, dated.
 
+- **2026-08-22** — Era theme system specced into
+  [`docs/era-theme-implementation.md`](docs/era-theme-implementation.md) and added to Phase
+  0 as Tier 1. Four decisions locked (eras = generations; Tier 1 only before launch; period
+  effects in 3D only; keep the tilt-shift and restore the rooms anyway). Tier 2 recorded as
+  gated. Exploration found the DOM theme near-free (every colour already routes through 7
+  CSS variables, zero hardcoded colours in components) and the 3D era data ~90% authored
+  but 0% rendered. Nothing built yet.
 - **2026-08-22** — Roadmap created. Strategy study completed: project has never shipped
   (one URL, stock title, no meta/router/analytics/deploy). Decisions locked with owner:
   portfolio-first, retro-collector audience, 5–10 hrs/week. Nothing built yet.
