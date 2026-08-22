@@ -1,11 +1,16 @@
 # Font credits
 
-**Sentient** — display serif (`--font-display`), used for museum labels, console
-names and headings.
-Source: [Fontshare](https://www.fontshare.com/fonts/sentient), Indian Type
-Foundry. Free for personal and commercial use, self-hosting permitted —
-see [Fontshare's licence](https://www.fontshare.com/licenses/wf-1.0.0).
-Weights shipped: Regular 400, Italic 400, Medium 500 (`public/fonts/sentient-*.woff2`).
+**Bebas Neue** — display face (`--font-display`), used for museum labels,
+console names, headings and stats.
+Source: [Google Fonts](https://fonts.google.com/specimen/Bebas+Neue) / the
+[Bebas Neue Project](https://github.com/dharmatype/Bebas-Neue), Dharma Type.
+Licensed under the SIL Open Font License 1.1 — self-hosting permitted.
+Single weight shipped: Regular 400 (`public/fonts/bebas-neue-regular.woff2`).
+
+Sentient (Fontshare) previously carried `--font-display` and was replaced
+with Bebas Neue at the user's explicit direction. Its files
+(`sentient-*.woff2`) are left in place but unreferenced, in case the swap is
+ever reverted.
 
 No other font is self-hosted. `--font-sans` is the plain `ui-sans-serif,
 system-ui, sans-serif` stack — the neutral, unchosen choice a body/label face

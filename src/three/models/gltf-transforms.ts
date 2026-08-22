@@ -368,12 +368,29 @@ export const CARTRIDGE_TRANSFORMS: Partial<Record<MediaArchetypeId, GltfTransfor
     // named "shell-front-lower") keeps its real baked texture — ridges,
     // screws, connector — same as the other two shell meshes always have.
     scale: 0.00054,
-    rotationX: -Math.PI / 2,
+    // rotationX is 0: the whole-hierarchy wrapper rotation (CartridgeModel.tsx)
+    // that replaced the old per-mesh geometry bake was tried at -PI/2 first
+    // (matching the old per-mesh value) and it stood the model up on the
+    // WRONG axis — measured live: shell world size came out 136 x 22.8 x 88mm
+    // (Y and Z swapped versus the archetype's 136 x 88 x 20 spec), i.e. the
+    // cartridge lay on its back instead of standing. At rotationX: 0 the
+    // model's own node hierarchy already has the right axes for standing
+    // (confirmed live: 136 x 88 x 22.8mm) — the per-node rotations baked into
+    // this file (see CartridgeModel.tsx's rotationX doc comment) already do
+    // that job, so no additional X rotation is needed once it's applied
+    // whole-hierarchy instead of per-mesh.
+    // No rotationY needed: measured live (mesh face-normal, cross product of
+    // two triangle edges, transformed by matrixWorld), the label's world
+    // normal at rotationY: 0 is already (0, -0.14, 0.99) — facing +Z, the
+    // scene convention — no further turn required. (rotationY: PI was tried
+    // first and measured flipping the normal to -Z; removed.)
+    rotationX: 0,
     stripShellTexture: false,
     notes:
       'SNES Game Pak (NTSC), imported from the user-supplied snes_cartridge.glb (Sketchfab, Cartucho.fbx). ' +
-      'Width-anchored fit: 136.0 x 87.4 x 18.1mm vs spec 136 x 88 x 20 — height off 0.7%, depth off 10% ' +
-      '(shell-halves overlap in the source geometry). rotationX = -PI/2 turns the label from -Y to +Z. ' +
+      'Width-anchored fit: 136.0 x 88.0 x 22.8mm vs spec 136 x 88 x 20 — height exact, depth 14% over ' +
+      '(shell-halves overlap in the source geometry). rotationX: 0 — the model\'s own node hierarchy already ' +
+      'stands it up correctly and faces the label toward +Z with no rotationY needed (both measured live). ' +
       'The real label plate is a small decal quad added by .img2threejs/cart/split-snes-label.mjs, sitting on ' +
       'the model\'s own measured flat recessed panel (Y=0.8016 exactly, verified planar). Every other mesh ' +
       'keeps its original Sketchfab-baked texture (ridges, screws, connector) — stripShellTexture is off.',

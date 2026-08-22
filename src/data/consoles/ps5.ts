@@ -33,7 +33,7 @@ export const ps5: ConsoleEntry = {
   msrpUsdAdjusted: 499,
   tagline: 'It made load screens feel like a thing of the past.',
   summary:
-    'The PlayStation 5 launched at $499 for the disc edition and $399 for an all-digital model with no drive at all, into a pandemic-driven chip shortage that kept both versions effectively sold out for the better part of two years. Its custom NVMe SSD was the real generational leap: games that once opened with a minute-plus loading screen now resumed in seconds, a change so immediate that Sony rebuilt its own marketing around it. The trade-off was size — a chassis tall and wide enough that "will it fit in my TV stand" became a genuine pre-order question, and one reviewers kept circling back to even as they praised everything running inside it.',
+    'The PlayStation 5 launched at $499 for the disc edition and $399 for an all-digital model with no drive at all, into a pandemic-driven chip shortage that kept both versions effectively sold out for the better part of two years. Its custom NVMe SSD was the real generational leap: games that once opened with a minute-plus loading screen now resumed in seconds, a change so immediate that Sony rebuilt its own marketing around it. The trade-off was size: a chassis tall and wide enough that "will it fit in my TV stand" became a genuine pre-order question, and one reviewers kept circling back to even as they praised everything running inside it.',
 
   specs: {
     cpu: 'AMD Zen 2 (8-core, custom)',
@@ -51,7 +51,7 @@ export const ps5: ConsoleEntry = {
       label: 'Custom NVMe SSD',
       value: '825 GB, ~5.5 GB/s raw throughput',
       comparison:
-        'Turned loading screens that used to run a minute or more into a near-instant resume — the single biggest felt difference of the whole generation, not the graphics.',
+        'Turned loading screens that used to run a minute or more into a near-instant resume: the single biggest felt difference of the whole generation, not the graphics.',
     },
     {
       label: 'Two editions at launch',
@@ -63,7 +63,7 @@ export const ps5: ConsoleEntry = {
       label: 'Chassis size',
       value: 'One of the largest consoles ever shipped',
       comparison:
-        'Big enough that "will it fit my TV stand" became a real pre-launch concern — reviewers joked about it standing taller than a router and wider than a game case turned sideways.',
+        'Big enough that "will it fit my TV stand" became a real pre-launch concern: reviewers joked about it standing taller than a router and wider than a game case turned sideways.',
     },
     {
       label: 'Lifetime sales (so far)',
@@ -86,27 +86,27 @@ export const ps5: ConsoleEntry = {
     renderBox: { x: [-0.1128, 0.1128], y: [0, 0.3563], z: [-0.0778, 0.0778] },
     callouts: [
       {
-        label: "The white fins — the console's silhouette",
+        label: "The white fins: the console's silhouette",
         anchor: [0.105, 0.28, 0.03],
         labelOffset: [0.03, 0.03, 0.01],
       },
       {
-        label: 'Disc drive — the bulge on the right side',
+        label: 'Disc drive: the bulge on the right side',
         anchor: [0.105, 0.09, -0.024],
         labelOffset: [0.03, 0.03, 0.01],
       },
       {
-        label: 'Disc slot + eject — right side, mid-height',
+        label: 'Disc slot + eject: right side, mid-height',
         anchor: [0.103, 0.17, 0.011],
         labelOffset: [0.03, 0.03, 0.01],
       },
       {
-        label: 'Front ports — USB-C and USB-A, top',
+        label: 'Front ports: USB-C and USB-A, top',
         anchor: [0, 0.34, 0.05],
         labelOffset: [0, 0.03, 0.005],
       },
       {
-        label: 'Power button — front, below the ports',
+        label: 'Power button: front, below the ports',
         anchor: [0, 0.3, 0.05],
         labelOffset: [0, 0.035, 0.005],
       },
@@ -134,7 +134,7 @@ export const ps5: ConsoleEntry = {
       // Dimensions.com: 160mm W x 106mm H x 66mm D.
       dimensions: { width: 160, height: 66, depth: 106 },
       innovations: [
-        'Adaptive triggers that vary their own resistance in software — a bowstring pulling back, a car\'s brake pedal engaging, felt as genuine mechanical tension rather than a fixed click.',
+        'Adaptive triggers that vary their own resistance in software: a bowstring pulling back, a car\'s brake pedal engaging, felt as genuine mechanical tension rather than a fixed click.',
         'Haptic feedback fine enough to distinguish rain from footsteps from gunfire as separate, located sensations, replacing the single rumble motor used since the DualShock 3.',
         'A built-in microphone array for chat with no headset required, plus the same touchpad and light bar carried over from the DualShock 4.',
       ],
@@ -165,22 +165,22 @@ export const ps5: ConsoleEntry = {
     {
       id: 'ssd-load-times',
       title: 'The SSD, not the graphics, was the real leap',
-      body: 'The PS5\'s custom NVMe SSD moved data fast enough to collapse loading screens that had run a minute or longer on PS4 into a near-instant resume. It changed how open-world games could even be designed — fast travel and streaming worlds no longer needed a loading screen to hide behind.',
+      body: 'The PS5\'s custom NVMe SSD moved data fast enough to collapse loading screens that had run a minute or longer on PS4 into a near-instant resume. It changed how open-world games could even be designed: fast travel and streaming worlds no longer needed a loading screen to hide behind.',
     },
     {
       id: 'two-editions-launch',
       title: 'Two consoles, one generation, at once',
-      body: 'Sony launched a $499 Disc Edition and a $399 Digital Edition with no drive at all side by side — the first mainline PlayStation to split its launch lineup into a disc and a no-disc model from day one.',
+      body: 'Sony launched a $499 Disc Edition and a $399 Digital Edition with no drive at all side by side: the first mainline PlayStation to split its launch lineup into a disc and a no-disc model from day one.',
     },
     {
       id: 'shortage-years',
       title: 'It stayed hard to buy for nearly two years',
-      body: 'A global chip shortage compounded by pandemic-era supply chain disruption kept the PS5 in short supply well into 2022 — resellers and bots dominated the retail market for the first stretch of the console\'s life.',
+      body: 'A global chip shortage compounded by pandemic-era supply chain disruption kept the PS5 in short supply well into 2022, resellers and bots dominated the retail market for the first stretch of the console\'s life.',
     },
     {
       id: 'chassis-size-jokes',
       title: 'Its size became part of the conversation',
-      body: 'At roughly 390mm tall, the PS5 stands notably larger than any prior mainline PlayStation — big enough that fitting it into an existing TV stand became a genuine pre-order consideration, and a running joke online well before launch.',
+      body: 'At roughly 390mm tall, the PS5 stands notably larger than any prior mainline PlayStation: big enough that fitting it into an existing TV stand became a genuine pre-order consideration, and a running joke online well before launch.',
     },
   ],
 
@@ -188,7 +188,7 @@ export const ps5: ConsoleEntry = {
     {
       id: 'disc-drive-noise',
       name: 'Disc drive grinding noise',
-      body: 'A handful of early Disc Edition units developed an audible grinding or whirring from the optical drive under load, traced by some owners to disc-detection hardware — Sony addressed it through standard warranty repair rather than a formal recall.',
+      body: 'A handful of early Disc Edition units developed an audible grinding or whirring from the optical drive under load, traced by some owners to disc-detection hardware. Sony addressed it through standard warranty repair rather than a formal recall.',
       target: 'lid',
       effect: 'dim',
     },

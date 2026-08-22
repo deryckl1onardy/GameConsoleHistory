@@ -28,7 +28,7 @@ export const playstation: ConsoleEntry = {
   msrpUsdAdjusted: 630,
   tagline: 'The add-on Nintendo walked away from, turned into a company.',
   summary:
-    'Sony was building a CD-ROM drive for the Super Nintendo. Nintendo announced a rival deal with Philips instead, at a trade show, without warning Sony beforehand. Sony finished the hardware anyway and shipped it as its own console. What resulted was not a niche upstart — the original PlayStation sold over 102 million units, more than the SNES, Genesis and Saturn combined, and turned 3D polygonal graphics from a novelty into the industry default. Its 1995 North American price announcement was, famously, one word: "$299," delivered on stage by Sony executive Steve Race seconds after Sega tried to steal the moment with a surprise Saturn launch. The room laughed. Sony had already won it.',
+    'Sony was building a CD-ROM drive for the Super Nintendo. Nintendo announced a rival deal with Philips instead, at a trade show, without warning Sony beforehand. Sony finished the hardware anyway and shipped it as its own console. What resulted was not a niche upstart: the original PlayStation sold over 102 million units, more than the SNES, Genesis and Saturn combined, and turned 3D polygonal graphics from a novelty into the industry default. Its 1995 North American price announcement was, famously, one word: "$299," delivered on stage by Sony executive Steve Race seconds after Sega tried to steal the moment with a surprise Saturn launch. The room laughed. Sony had already won it.',
 
   specs: {
     cpu: 'MIPS R3000A (LSI CoreWare CW33300)',
@@ -46,13 +46,13 @@ export const playstation: ConsoleEntry = {
       label: 'The price announcement',
       value: '"$299"',
       comparison:
-        'Sony\'s entire E3 1995 price reveal was one word, spoken on stage — no slide, no ceremony — delivered right after a competitor\'s surprise launch tried to steal the room.',
+        'Sony\'s entire E3 1995 price reveal was one word, spoken on stage, no slide, no ceremony, delivered right after a competitor\'s surprise launch tried to steal the room.',
     },
     {
       label: 'Lifetime sales',
       value: '102.49 million',
       comparison:
-        'More units than the SNES, Genesis and Saturn sold combined — the console built from Nintendo\'s abandoned CD add-on outsold the company that walked away from it.',
+        'More units than the SNES, Genesis and Saturn sold combined: the console built from Nintendo\'s abandoned CD add-on outsold the company that walked away from it.',
     },
     {
       label: 'Colour depth',
@@ -78,22 +78,22 @@ export const playstation: ConsoleEntry = {
     renderBox: { x: [-0.1411, 0.1411], y: [0, 0.0596], z: [-0.101, 0.101] },
     callouts: [
       {
-        label: 'Disc lid — the whole top flips open',
+        label: 'Disc lid: the whole top flips open',
         anchor: [0, 0.057, 0.01],
         labelOffset: [0, 0.03, 0.015],
       },
       {
-        label: 'Power button — front right',
+        label: 'Power button: front right',
         anchor: [0.1, 0.04, 0.099],
         labelOffset: [0.035, 0.045, 0.005],
       },
       {
-        label: 'Open button — front left',
+        label: 'Open button: front left',
         anchor: [-0.1, 0.04, 0.099],
         labelOffset: [-0.035, 0.045, 0.005],
       },
       {
-        label: 'Controller + memory card ports (×4) — front',
+        label: 'Controller + memory card ports (×4): front',
         anchor: [0, 0.015, 0.099],
         labelOffset: [0, 0.03, 0.01],
       },
@@ -118,7 +118,7 @@ export const playstation: ConsoleEntry = {
       model: '/models/controllers/dualshock.glb',
       dimensions: { width: 157, height: 55, depth: 95 },
       innovations: [
-        'Twin analog sticks, positioned symmetrically below the face buttons and shoulder buttons — the layout every PlayStation, and most of its competitors, still use.',
+        'Twin analog sticks, positioned symmetrically below the face buttons and shoulder buttons: the layout every PlayStation, and most of its competitors, still use.',
         'Dual vibration motors of two different sizes gave the controller its name, and its own physical feedback for the first time on a Sony pad.',
       ],
       buttons: [
@@ -146,22 +146,22 @@ export const playstation: ConsoleEntry = {
     {
       id: 'nintendo-abandoned-deal',
       title: 'It began as an SNES add-on Nintendo walked away from',
-      body: 'Sony was under contract to build a CD-ROM drive for the Super Nintendo. Nintendo then announced a competing deal with Philips at the 1991 Consumer Electronics Show — the same show where Sony was set to unveil the joint project — without telling Sony first. Sony finished the hardware anyway and turned it into its own console.',
+      body: 'Sony was under contract to build a CD-ROM drive for the Super Nintendo. Nintendo then announced a competing deal with Philips at the 1991 Consumer Electronics Show, the same show where Sony was set to unveil the joint project, without telling Sony first. Sony finished the hardware anyway and turned it into its own console.',
     },
     {
       id: 'no-analog-at-launch',
       title: 'It launched with no analog sticks at all',
-      body: 'The original 1994 PlayStation controller had a D-pad, four face buttons and four shoulder buttons — no analog sticks, no vibration. The Dual Analog Controller (1997) and then the DualShock (1997) added both, and the DualShock\'s layout has been the PlayStation standard ever since.',
+      body: 'The original 1994 PlayStation controller had a D-pad, four face buttons and four shoulder buttons: no analog sticks, no vibration. The Dual Analog Controller (1997) and then the DualShock (1997) added both, and the DualShock\'s layout has been the PlayStation standard ever since.',
     },
     {
       id: 'e3-price-ambush',
       title: 'The whole price announcement was one word',
-      body: 'Minutes after Sega ambushed E3 1995 with a surprise same-day Saturn launch, Sony\'s Steve Race walked on stage, said "$299," and walked off — undercutting the Saturn\'s $399 price by a hundred dollars in the shortest, most quoted moment of the console\'s launch.',
+      body: 'Minutes after Sega ambushed E3 1995 with a surprise same-day Saturn launch, Sony\'s Steve Race walked on stage, said "$299," and walked off: undercutting the Saturn\'s $399 price by a hundred dollars in the shortest, most quoted moment of the console\'s launch.',
     },
     {
       id: 'outsold-everyone',
       title: 'It outsold its entire generation combined',
-      body: 'At 102.49 million units, the original PlayStation sold more than the SNES, Genesis and Saturn added together — the console born from a cancelled Nintendo side-project ended up defining the generation that followed it.',
+      body: 'At 102.49 million units, the original PlayStation sold more than the SNES, Genesis and Saturn added together: the console born from a cancelled Nintendo side-project ended up defining the generation that followed it.',
     },
   ],
 
@@ -169,7 +169,7 @@ export const playstation: ConsoleEntry = {
     {
       id: 'disc-read-error',
       name: 'The tilted-lens disc read error',
-      body: 'A worn spindle motor or a laser lens that drifts out of alignment produces the console\'s most notorious failure — a game that refuses to read past the startup screen, often "fixable" for a while by physically tilting the console during boot, a workaround an entire generation of owners discovered independently.',
+      body: 'A worn spindle motor or a laser lens that drifts out of alignment produces the console\'s most notorious failure: a game that refuses to read past the startup screen, often "fixable" for a while by physically tilting the console during boot, a workaround an entire generation of owners discovered independently.',
       target: 'lid',
       effect: 'no-signal',
     },
@@ -223,7 +223,7 @@ export const playstation: ConsoleEntry = {
   },
 
   games: [
-    { rank: 1, title: 'Gran Turismo', year: 1997, unitsSold: 10_850_000, developer: 'Polyphony Digital', publisher: 'Sony Computer Entertainment', blurb: 'A racing simulator with hundreds of real, licensed cars — the game that made "sim racer" a mainstream console genre.' },
+    { rank: 1, title: 'Gran Turismo', year: 1997, unitsSold: 10_850_000, developer: 'Polyphony Digital', publisher: 'Sony Computer Entertainment', blurb: 'A racing simulator with hundreds of real, licensed cars: the game that made "sim racer" a mainstream console genre.' },
     { rank: 2, title: 'Final Fantasy VII', year: 1997, unitsSold: 10_022_228, developer: 'Square', publisher: 'Square / Sony Computer Entertainment', blurb: 'The RPG that moved millions of PlayStations on its own, and the reason Square left Nintendo\'s cartridge platform behind entirely.' },
     { rank: 3, title: 'Gran Turismo 2', year: 1999, unitsSold: 9_370_000, developer: 'Polyphony Digital', publisher: 'Sony Computer Entertainment', blurb: 'Doubled the car count and the ambition, and doubled the sales of the original.' },
     { rank: 4, title: 'Final Fantasy VIII', year: 1999, unitsSold: 8_600_000, developer: 'Square', publisher: 'Square', blurb: 'Photorealistic-for-its-time character models and a junction-based system that split the fanbase and sold anyway.' },

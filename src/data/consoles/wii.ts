@@ -27,7 +27,7 @@ export const wii: ConsoleEntry = {
   msrpUsdAdjusted: 390,
   tagline: 'Wii would like to play.',
   summary:
-    'While Sony and Microsoft spent the generation competing on processing power, Nintendo shipped a console barely more capable than its own six-year-old GameCube and sold it on a single idea: you point the controller at the screen and swing it. The Wii Remote made the console legible to people who had never held a gamepad — it was bought by grandparents, put in nursing homes and hospital wards, and used for physiotherapy. Wii Sports, bundled in the box almost everywhere, became one of the best-selling games ever made. The machine sold over a hundred million units, more than the PS3 or the 360, and Nintendo made a profit on every single one, having never sold the hardware at a loss.',
+    'While Sony and Microsoft spent the generation competing on processing power, Nintendo shipped a console barely more capable than its own six-year-old GameCube and sold it on a single idea: you point the controller at the screen and swing it. The Wii Remote made the console legible to people who had never held a gamepad: it was bought by grandparents, put in nursing homes and hospital wards, and used for physiotherapy. Wii Sports, bundled in the box almost everywhere, became one of the best-selling games ever made. The machine sold over a hundred million units, more than the PS3 or the 360, and Nintendo made a profit on every single one, having never sold the hardware at a loss.',
 
   specs: {
     cpu: 'IBM PowerPC "Broadway"',
@@ -45,7 +45,7 @@ export const wii: ConsoleEntry = {
       label: 'Resolution',
       value: '480p, no HD',
       comparison:
-        'It was the only console of its generation that could not output high definition, launching the same year as the first widely affordable HDTVs — and it outsold both machines that could.',
+        'It was the only console of its generation that could not output high definition, launching the same year as the first widely affordable HDTVs, and it outsold both machines that could.',
     },
     {
       label: 'Wii Sports',
@@ -79,27 +79,27 @@ export const wii: ConsoleEntry = {
     renderBox: { x: [-0.1122, 0.1122], y: [0, 0.2057], z: [-0.0893, 0.0893] },
     callouts: [
       {
-        label: 'Disc slot — front face, right side',
+        label: 'Disc slot: front face, right side',
         anchor: [0.09, 0.15, -0.04],
         labelOffset: [0.03, 0.03, -0.01],
       },
       {
-        label: 'Eject button — just below the slot',
+        label: 'Eject button: just below the slot',
         anchor: [0.091, 0.115, -0.045],
         labelOffset: [0.03, 0.03, -0.01],
       },
       {
-        label: 'Power button — bottom-left of the front',
+        label: 'Power button: bottom-left of the front',
         anchor: [0.105, 0.048, -0.07],
         labelOffset: [0.035, 0.02, -0.01],
       },
       {
-        label: 'Reset button — beside the power',
+        label: 'Reset button: beside the power',
         anchor: [0.105, 0.048, -0.05],
         labelOffset: [0.035, 0.02, -0.01],
       },
       {
-        label: 'Wii Remote + Nunchuk — posed on their own stands',
+        label: 'Wii Remote + Nunchuk: posed on their own stands',
         anchor: [0.031, 0.1, 0.012],
         labelOffset: [0.02, 0.04, 0.01],
       },
@@ -133,7 +133,7 @@ export const wii: ConsoleEntry = {
       // front-to-back away from the hand).
       dimensions: { width: 36.2, height: 30.8, depth: 148 },
       innovations: [
-        'Held like a remote control rather than gripped in two hands — the single decision that made the console legible to people who had never played a game.',
+        'Held like a remote control rather than gripped in two hands: the single decision that made the console legible to people who had never played a game.',
         'An infrared camera in the nose that tracks two LEDs on a sensor bar, giving true absolute pointing at the screen rather than relative motion.',
         'A speaker in the controller itself, so a sound could come from your hand instead of the television.',
       ],
@@ -157,22 +157,22 @@ export const wii: ConsoleEntry = {
     {
       id: 'not-competing-on-power',
       title: 'It deliberately lost the specification war',
-      body: 'Nintendo\'s internal target for the Wii was not performance but disruption: the console had to be small, quiet, cheap to build and immediately understandable. It shipped without high-definition output in the year HDTVs went mainstream, and it outsold both of the machines that had it. The strategy has a name inside Nintendo — the "blue ocean" approach, competing where nobody else is rather than where everybody is.',
+      body: 'Nintendo\'s internal target for the Wii was not performance but disruption: the console had to be small, quiet, cheap to build and immediately understandable. It shipped without high-definition output in the year HDTVs went mainstream, and it outsold both of the machines that had it. The strategy has a name inside Nintendo: the "blue ocean" approach, competing where nobody else is rather than where everybody is.',
     },
     {
       id: 'pointing-not-waving',
       title: 'It points, it does not just wave',
-      body: 'The Wii Remote is usually described as motion-sensing, but the part that made it feel magical is a small infrared camera in its nose. The "sensor bar" on the television emits no signal at all — it is just two clusters of infrared LEDs, and the remote looks at them to work out exactly where on screen it is aimed. You can replace it with two candles, and people did.',
+      body: 'The Wii Remote is usually described as motion-sensing, but the part that made it feel magical is a small infrared camera in its nose. The "sensor bar" on the television emits no signal at all: it is just two clusters of infrared LEDs, and the remote looks at them to work out exactly where on screen it is aimed. You can replace it with two candles, and people did.',
     },
     {
       id: 'wii-sports-bundle',
       title: 'A pack-in game that outsold the industry',
-      body: 'Wii Sports was bundled with the console everywhere except Japan, and went on to sell 82.9 million copies — for years the best-selling single-platform game ever made. Its five sports were designed as demonstrations of the controller rather than as a game, which is exactly why they worked on people who had never played one.',
+      body: 'Wii Sports was bundled with the console everywhere except Japan, and went on to sell 82.9 million copies, for years the best-selling single-platform game ever made. Its five sports were designed as demonstrations of the controller rather than as a game, which is exactly why they worked on people who had never played one.',
     },
     {
       id: 'straps-and-tvs',
       title: 'Nintendo had to redesign the strap',
-      body: 'Within weeks of launch, players swinging hard enough at virtual tennis balls were losing their grip and putting the remote through their televisions. Nintendo replaced the wrist strap with a thicker one, offered free replacements to everyone who already owned one, and later added a silicone sleeve — a hardware recall caused entirely by the console being played too enthusiastically.',
+      body: 'Within weeks of launch, players swinging hard enough at virtual tennis balls were losing their grip and putting the remote through their televisions. Nintendo replaced the wrist strap with a thicker one, offered free replacements to everyone who already owned one, and later added a silicone sleeve: a hardware recall caused entirely by the console being played too enthusiastically.',
     },
   ],
 
@@ -180,7 +180,7 @@ export const wii: ConsoleEntry = {
     {
       id: 'disc-read-error',
       name: 'Unable to read disc',
-      body: 'The slot-loading drive collects dust and its laser loses calibration with age. The console boots to its channel menu perfectly and then reports that the disc cannot be read — the failure that sent most Wiis to a repair shop.',
+      body: 'The slot-loading drive collects dust and its laser loses calibration with age. The console boots to its channel menu perfectly and then reports that the disc cannot be read: the failure that sent most Wiis to a repair shop.',
       target: 'disc_slot',
       effect: 'no-signal',
     },
@@ -237,10 +237,10 @@ export const wii: ConsoleEntry = {
     { rank: 2, title: 'Mario Kart Wii', year: 2008, unitsSold: 37_380_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Shipped with a plastic steering wheel to slot the remote into, which sold tens of millions on its own.' },
     { rank: 3, title: 'Wii Sports Resort', year: 2009, unitsSold: 33_140_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Bundled the MotionPlus accessory that finally gave the remote true one-to-one rotation tracking.' },
     { rank: 4, title: 'New Super Mario Bros. Wii', year: 2009, unitsSold: 30_320_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Brought four-player simultaneous Mario to a console for the first time, mostly so players could shove each other into pits.' },
-    { rank: 5, title: 'Wii Play', year: 2006, unitsSold: 28_020_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Nine minigames sold at barely more than the price of the extra controller it came with — which is how it sold 28 million copies.' },
+    { rank: 5, title: 'Wii Play', year: 2006, unitsSold: 28_020_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Nine minigames sold at barely more than the price of the extra controller it came with, which is how it sold 28 million copies.' },
     { rank: 6, title: 'Wii Fit', year: 2007, unitsSold: 22_670_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'A pressure-sensing board you stand on, sold as exercise equipment, bought by people who did not consider themselves players at all.' },
     { rank: 7, title: 'Wii Fit Plus', year: 2009, unitsSold: 21_130_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'The follow-up that added routines and stricter tracking to the same board.' },
-    { rank: 8, title: 'Super Smash Bros. Brawl', year: 2008, unitsSold: 13_320_000, developer: 'Sora Ltd.', publisher: 'Nintendo', blurb: 'Added third-party fighters — Snake and Sonic in a Nintendo game, which had been unthinkable.' },
+    { rank: 8, title: 'Super Smash Bros. Brawl', year: 2008, unitsSold: 13_320_000, developer: 'Sora Ltd.', publisher: 'Nintendo', blurb: 'Added third-party fighters: Snake and Sonic in a Nintendo game, which had been unthinkable.' },
     { rank: 9, title: 'Super Mario Galaxy', year: 2007, unitsSold: 12_800_000, developer: 'Nintendo EAD Tokyo', publisher: 'Nintendo', blurb: 'Built its levels as tiny spherical worlds with their own gravity, and is still regularly named among the best games ever made.' },
     { rank: 10, title: 'Wii Party', year: 2010, unitsSold: 9_350_000, developer: 'Nd Cube', publisher: 'Nintendo', blurb: 'Board games and minigames aimed squarely at the households the console had reached who owned nothing else.' },
   ],

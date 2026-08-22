@@ -30,7 +30,7 @@ export const n64: ConsoleEntry = {
   msrpUsdAdjusted: 410,
   tagline: 'The first controller with a stick you could actually move through.',
   summary:
-    'Nintendo committed to cartridges for the N64 at the exact moment the rest of the industry moved to CD — a choice that cost it Square, cost it storage capacity, and bought it load times close to zero. The console\'s real invention wasn\'t the cartridge fight, though; it was the controller. Genyo Takeda\'s team built the first analog stick ever shipped on a game controller, specifically because a D-pad could not move a character smoothly through a real 3D space, and the whole three-pronged "trident" shape existed to let one controller hold both an analog stick and a traditional D-pad without redesigning every existing 2D game\'s input scheme around it. Every analog stick on every controller made since, on any platform, descends from this one design decision.',
+    'Nintendo committed to cartridges for the N64 at the exact moment the rest of the industry moved to CD: a choice that cost it Square, cost it storage capacity, and bought it load times close to zero. The console\'s real invention wasn\'t the cartridge fight, though; it was the controller. Genyo Takeda\'s team built the first analog stick ever shipped on a game controller, specifically because a D-pad could not move a character smoothly through a real 3D space, and the whole three-pronged "trident" shape existed to let one controller hold both an analog stick and a traditional D-pad without redesigning every existing 2D game\'s input scheme around it. Every analog stick on every controller made since, on any platform, descends from this one design decision.',
 
   specs: {
     cpu: 'NEC VR4300 (64-bit)',
@@ -48,25 +48,25 @@ export const n64: ConsoleEntry = {
       label: 'The analog stick',
       value: 'A world first',
       comparison:
-        'No controller before this one — on any console, from any company — had an analog stick. Every thumbstick on every controller made since traces back to this one design.',
+        'No controller before this one, on any console, from any company, had an analog stick. Every thumbstick on every controller made since traces back to this one design.',
     },
     {
       label: 'CPU architecture',
       value: '64-bit',
       comparison:
-        'Named for its own processor width — the console\'s entire brand identity is a specification most players could not otherwise explain.',
+        'Named for its own processor width: the console\'s entire brand identity is a specification most players could not otherwise explain.',
     },
     {
       label: 'Cartridge load time',
       value: 'Near zero',
       comparison:
-        'While CD-based competitors sat on loading screens, N64 cartridges read data almost instantly — the trade-off Nintendo picked storage capacity to lose.',
+        'While CD-based competitors sat on loading screens, N64 cartridges read data almost instantly: the trade-off Nintendo picked storage capacity to lose.',
     },
     {
       label: 'Expansion Pak',
       value: '+4 MB RAM',
       comparison:
-        'An entire memory upgrade sold as a physical cartridge-slot accessory — doubling the console\'s RAM was something you bought at a store, not a firmware update.',
+        'An entire memory upgrade sold as a physical cartridge-slot accessory: doubling the console\'s RAM was something you bought at a store, not a firmware update.',
     },
   ],
 
@@ -82,27 +82,27 @@ export const n64: ConsoleEntry = {
     renderBox: { x: [-0.1074, 0.1074], y: [0, 0.101], z: [-0.0789, 0.0789] },
     callouts: [
       {
-        label: 'Controller ports (×4) — the front trident',
+        label: 'Controller ports (×4): the front trident',
         anchor: [0, 0.029, 0.077],
         labelOffset: [0, 0.045, 0.01],
       },
       {
-        label: 'Power switch — front right',
+        label: 'Power switch: front right',
         anchor: [0.075, 0.055, 0.07],
         labelOffset: [0.035, 0.04, 0.005],
       },
       {
-        label: 'Reset button — below the power switch',
+        label: 'Reset button: below the power switch',
         anchor: [0.075, 0.032, 0.07],
         labelOffset: [0.035, 0.045, 0.005],
       },
       {
-        label: 'Cartridge slot — top, centre',
+        label: 'Cartridge slot: top, centre',
         anchor: [0, 0.098, 0.005],
         labelOffset: [0, 0.03, 0.015],
       },
       {
-        label: 'Expansion Pak door — top, toward the back',
+        label: 'Expansion Pak door: top, toward the back',
         anchor: [0, 0.098, -0.043],
         labelOffset: [0, 0.035, -0.01],
       },
@@ -132,9 +132,9 @@ export const n64: ConsoleEntry = {
       // height 66.7 (thickness in the hand) — approximate, not precise.
       dimensions: { width: 160, height: 66.7, depth: 152.6 },
       innovations: [
-        'The first analog stick on any game controller — built by Genyo Takeda\'s team specifically because a D-pad could not move a character smoothly through real 3D space.',
+        'The first analog stick on any game controller: built by Genyo Takeda\'s team specifically because a D-pad could not move a character smoothly through real 3D space.',
         'A three-pronged "trident" shape that let one controller hold both a D-pad and an analog stick without forcing every existing 2D input scheme to be redesigned around the new stick.',
-        'The Z trigger, mounted on the underside of the centre prong — the first controller to put an input where the index finger already rested during 3D aiming.',
+        'The Z trigger, mounted on the underside of the centre prong: the first controller to put an input where the index finger already rested during 3D aiming.',
       ],
       buttons: [
         { id: 'dpad-up', mesh: 'dpad', label: 'D-pad Up', key: 'ArrowUp', travel: [0, -0.0008, 0], position: [-52, 10], shape: 'cross', sizeMm: 22 },
@@ -160,7 +160,7 @@ export const n64: ConsoleEntry = {
     {
       id: 'first-analog-stick',
       title: 'It invented the analog stick',
-      body: 'Every thumbstick on every controller made since — on PlayStation, Xbox, mobile controllers, all of it — descends from Genyo Takeda\'s design for the N64. Before this console, no home controller had ever shipped with one.',
+      body: 'Every thumbstick on every controller made since, on PlayStation, Xbox, mobile controllers, all of it, descends from Genyo Takeda\'s design for the N64. Before this console, no home controller had ever shipped with one.',
     },
     {
       id: 'cartridges-cost-square',
@@ -170,12 +170,12 @@ export const n64: ConsoleEntry = {
     {
       id: 'trident-shape-reason',
       title: 'The strange shape solved a real problem',
-      body: 'A controller with only an analog stick would have broken every existing 2D-style game design overnight. The three-pronged trident let players grip either the D-pad-and-stick side or the stick-and-C-buttons side depending on what a given game actually needed — one controller, two effective layouts.',
+      body: 'A controller with only an analog stick would have broken every existing 2D-style game design overnight. The three-pronged trident let players grip either the D-pad-and-stick side or the stick-and-C-buttons side depending on what a given game actually needed: one controller, two effective layouts.',
     },
     {
       id: 'goldeneye-fps-standard',
       title: 'A licensed movie tie-in defined console first-person shooters',
-      body: 'GoldenEye 007, built by Rare with no prior FPS experience on the team, established control conventions — aiming with C-buttons, strafing, objective-based level design — that shaped how console shooters were built for a decade afterward.',
+      body: 'GoldenEye 007, built by Rare with no prior FPS experience on the team, established control conventions (aiming with C-buttons, strafing, objective-based level design) that shaped how console shooters were built for a decade afterward.',
     },
   ],
 
@@ -183,7 +183,7 @@ export const n64: ConsoleEntry = {
     {
       id: 'stick-wear',
       name: 'Analog stick wear',
-      body: 'The N64\'s stick uses a mechanical gate with no self-centering spring assist the way later sticks do, and the plastic gear inside wears down with heavy use until the stick develops a permanent loose, wobbly drift — a fate that met an enormous number of Mario Party and GoldenEye controllers specifically.',
+      body: 'The N64\'s stick uses a mechanical gate with no self-centering spring assist the way later sticks do, and the plastic gear inside wears down with heavy use until the stick develops a permanent loose, wobbly drift, a fate that met an enormous number of Mario Party and GoldenEye controllers specifically.',
       target: 'shell',
       effect: 'dim',
     },
@@ -242,7 +242,7 @@ export const n64: ConsoleEntry = {
     { rank: 3, title: 'GoldenEye 007', year: 1997, unitsSold: 8_090_000, developer: 'Rare', publisher: 'Nintendo', blurb: 'A licensed movie tie-in built by a team with no prior shooter experience, and one of the most influential console FPS games ever made.' },
     { rank: 4, title: 'The Legend of Zelda: Ocarina of Time', year: 1998, unitsSold: 7_600_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Widely cited for decades as one of the greatest games ever made, and the template 3D Zelda still follows.' },
     { rank: 5, title: 'Super Smash Bros.', year: 1999, unitsSold: 5_550_000, developer: 'HAL Laboratory', publisher: 'Nintendo', blurb: 'A crossover fighting game nobody asked for that became one of Nintendo\'s biggest franchises.' },
-    { rank: 6, title: 'Pokémon Stadium', year: 1999, unitsSold: 5_460_000, developer: 'Nintendo EAD / HAL Laboratory', publisher: 'Nintendo', blurb: 'Let Game Boy Pokémon battle in 3D via the Transfer Pak — a handheld franchise, finally on the TV.' },
+    { rank: 6, title: 'Pokémon Stadium', year: 1999, unitsSold: 5_460_000, developer: 'Nintendo EAD / HAL Laboratory', publisher: 'Nintendo', blurb: 'Let Game Boy Pokémon battle in 3D via the Transfer Pak: a handheld franchise, finally on the TV.' },
     { rank: 7, title: 'Donkey Kong 64', year: 1999, unitsSold: 5_270_000, developer: 'Rare', publisher: 'Nintendo', blurb: 'A collectathon so dense it shipped with its own Expansion Pak requirement just to run.' },
     { rank: 8, title: 'Diddy Kong Racing', year: 1997, unitsSold: 4_880_000, developer: 'Rare', publisher: 'Rare', blurb: 'A kart racer with an adventure-game overworld wrapped around it, ambitious for a genre that rarely bothered.' },
     { rank: 9, title: 'Star Fox 64', year: 1997, unitsSold: 4_000_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Rumble Pak support and full voice acting, both novelties for a console game in 1997.' },

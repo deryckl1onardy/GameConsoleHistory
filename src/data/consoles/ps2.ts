@@ -27,7 +27,7 @@ export const ps2: ConsoleEntry = {
   msrpUsdAdjusted: 555,
   tagline: 'It sold a DVD player and a games console for the price of the DVD player alone.',
   summary:
-    'Standalone DVD players cost $300–$1,000 when the PlayStation 2 launched at $299 with one built in — for a lot of early buyers, the games console paid for itself before a single game was purchased. Full backward compatibility with the original PlayStation meant nobody had to abandon their existing library to upgrade, an option almost no console before it had offered. Thirteen years, over 3,800 games and 160 million units later, it remains the best-selling home console ever made, and nothing released since has come within reach of the number.',
+    'Standalone DVD players cost $300–$1,000 when the PlayStation 2 launched at $299 with one built in: for a lot of early buyers, the games console paid for itself before a single game was purchased. Full backward compatibility with the original PlayStation meant nobody had to abandon their existing library to upgrade, an option almost no console before it had offered. Thirteen years, over 3,800 games and 160 million units later, it remains the best-selling home console ever made, and nothing released since has come within reach of the number.',
 
   specs: {
     cpu: 'Emotion Engine',
@@ -45,25 +45,25 @@ export const ps2: ConsoleEntry = {
       label: 'Lifetime sales',
       value: '160 million',
       comparison:
-        'Still the best-selling home console ever built, by a wide margin — no console released since, on any platform, has caught up to the number.',
+        'Still the best-selling home console ever built, by a wide margin: no console released since, on any platform, has caught up to the number.',
     },
     {
       label: 'Built-in DVD player',
       value: 'Cost less than a standalone one',
       comparison:
-        'A dedicated DVD player alone often cost as much as the entire PS2 in 2000 — buying the console to watch movies wasn\'t a stretch, it was the cheaper option.',
+        'A dedicated DVD player alone often cost as much as the entire PS2 in 2000: buying the console to watch movies wasn\'t a stretch, it was the cheaper option.',
     },
     {
       label: 'Games released',
       value: '3,800+',
       comparison:
-        'One of the largest game libraries any single console has ever had — more titles exist for the PS2 than most people could play in a lifetime of weekends.',
+        'One of the largest game libraries any single console has ever had: more titles exist for the PS2 than most people could play in a lifetime of weekends.',
     },
     {
       label: 'Backward compatibility',
       value: 'The whole PS1 library',
       comparison:
-        'Every disc from the console before it still worked — upgrading did not mean abandoning what you already owned, which almost no console generation before it had offered.',
+        'Every disc from the console before it still worked: upgrading did not mean abandoning what you already owned, which almost no console generation before it had offered.',
     },
   ],
 
@@ -80,17 +80,17 @@ export const ps2: ConsoleEntry = {
     renderBox: { x: [-0.0961, 0.0961], y: [0, 0.0723], z: [-0.1556, 0.1556] },
     callouts: [
       {
-        label: 'Power + eject buttons — the front edge',
+        label: 'Power + eject buttons: the front edge',
         anchor: [-0.094, 0.052, 0.137],
         labelOffset: [-0.04, 0.035, 0.01],
       },
       {
-        label: 'USB ports (×2) — front, toward the back',
+        label: 'USB ports (×2): front, toward the back',
         anchor: [-0.073, 0.012, -0.128],
         labelOffset: [-0.035, 0.03, 0.01],
       },
       {
-        label: 'Disc tray — the slot on the front',
+        label: 'Disc tray: the slot on the front',
         anchor: [-0.092, 0.045, -0.02],
         labelOffset: [-0.045, 0.03, 0.01],
       },
@@ -116,7 +116,7 @@ export const ps2: ConsoleEntry = {
       // Dimensions.com: 157mm W x 95mm H x 54.9mm D.
       dimensions: { width: 157, height: 54.9, depth: 95 },
       innovations: [
-        'Pressure-sensitive face and shoulder buttons — how hard you pressed became an input value in its own right, not just on or off.',
+        'Pressure-sensitive face and shoulder buttons: how hard you pressed became an input value in its own right, not just on or off.',
         'The same DualShock analog-stick layout the PS1\'s late-cycle pad had introduced, refined and bundled as standard from day one this time.',
       ],
       buttons: [
@@ -144,7 +144,7 @@ export const ps2: ConsoleEntry = {
     {
       id: 'dvd-trojan-horse',
       title: 'The DVD player was the actual pitch',
-      body: 'In 2000, a standalone DVD player often cost as much as the entire PS2. Sony priced the console at $299 with a DVD player built in, and a meaningful share of early buyers picked it up primarily to watch movies — the games console rode in on the back of a cheaper home theatre upgrade.',
+      body: 'In 2000, a standalone DVD player often cost as much as the entire PS2. Sony priced the console at $299 with a DVD player built in, and a meaningful share of early buyers picked it up primarily to watch movies: the games console rode in on the back of a cheaper home theatre upgrade.',
     },
     {
       id: 'backward-compat-first',
@@ -154,12 +154,12 @@ export const ps2: ConsoleEntry = {
     {
       id: 'best-selling-ever',
       title: 'Still the best-selling console ever made',
-      body: 'At 160 million units over thirteen years, the PS2 remains the best-selling home video game console in history. Every console released since — PS3, PS4, PS5, every Xbox, every Switch — has sold fewer units than a console that stopped being manufactured in 2013.',
+      body: 'At 160 million units over thirteen years, the PS2 remains the best-selling home video game console in history. Every console released since (PS3, PS4, PS5, every Xbox, every Switch) has sold fewer units than a console that stopped being manufactured in 2013.',
     },
     {
       id: 'thirteen-year-run',
       title: 'It outlived its own successor\'s early years',
-      body: 'Sony kept manufacturing new PS2 units until January 2013 — nearly seven years after the PS3 launched, and well into the PS4\'s own development. Its game library kept growing on both consoles at once for the better part of a decade.',
+      body: 'Sony kept manufacturing new PS2 units until January 2013, nearly seven years after the PS3 launched, and well into the PS4\'s own development. Its game library kept growing on both consoles at once for the better part of a decade.',
     },
   ],
 
@@ -167,14 +167,14 @@ export const ps2: ConsoleEntry = {
     {
       id: 'disc-read-error-ps2',
       name: 'Disc read error',
-      body: 'A worn spindle motor belt or a laser lens degraded by dust produces the PS2\'s signature failure — games and DVDs that spin up, fail to read, and eject with a "disc read error," a fault common enough on the original "fat" model that a whole aftermarket of replacement laser assemblies exists for it.',
+      body: 'A worn spindle motor belt or a laser lens degraded by dust produces the PS2\'s signature failure: games and DVDs that spin up, fail to read, and eject with a "disc read error," a fault common enough on the original "fat" model that a whole aftermarket of replacement laser assemblies exists for it.',
       target: 'lid',
       effect: 'no-signal',
     },
     {
       id: 'memory-card-corruption',
       name: 'Memory card corruption',
-      body: 'The console\'s proprietary memory cards corrupt more easily than later flash storage, especially if power is lost mid-save — a failure mode that could silently erase dozens of hours of progress with no warning.',
+      body: 'The console\'s proprietary memory cards corrupt more easily than later flash storage, especially if power is lost mid-save, a failure mode that could silently erase dozens of hours of progress with no warning.',
       target: 'shell',
       effect: 'dim',
     },
@@ -230,7 +230,7 @@ export const ps2: ConsoleEntry = {
     { rank: 7, title: 'Final Fantasy X', year: 2001, unitsSold: 8_600_000, developer: 'Square', publisher: 'Square / Square Electronic Arts', blurb: 'Full voice acting for the first time in the mainline series, on a launch-window PS2 disc.' },
     { rank: 8, title: 'Metal Gear Solid 2: Sons of Liberty', year: 2001, unitsSold: 7_030_000, developer: 'Konami Computer Entertainment Japan', publisher: 'Konami', blurb: 'A sequel infamous for swapping its own protagonist mid-story, on purpose, to make a point about the previous game\'s hero worship.' },
     { rank: 9, title: 'Final Fantasy XII', year: 2006, unitsSold: 6_400_000, developer: 'Square Enix', publisher: 'Square Enix', blurb: 'A late-cycle PS2 release with a real-time battle system that broke from a decade of the series\' own conventions.' },
-    { rank: 10, title: 'Kingdom Hearts', year: 2002, unitsSold: 6_300_000, developer: 'Square', publisher: 'Square / Square Electronic Arts', blurb: 'Disney characters and Final Fantasy characters in one action-RPG — a pitch that should not have worked and became a franchise anyway.' },
+    { rank: 10, title: 'Kingdom Hearts', year: 2002, unitsSold: 6_300_000, developer: 'Square', publisher: 'Square / Square Electronic Arts', blurb: 'Disney characters and Final Fantasy characters in one action-RPG: a pitch that should not have worked and became a franchise anyway.' },
   ],
 
   sources: [

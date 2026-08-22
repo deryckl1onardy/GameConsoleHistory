@@ -27,7 +27,7 @@ export const nintendoSwitch: ConsoleEntry = {
   msrpUsdAdjusted: 390,
   tagline: 'Play anywhere.',
   summary:
-    'The Switch is a tablet. Drop it into the dock and it plays on the television; lift it out mid-game and the same save keeps running in your hands; slide the controllers off its sides and there are two of them, one for each player, with no extra purchase. Nintendo had tried the second half of this idea on the Wii U and failed to explain it; here the explanation is the object itself, and the first advertisement was essentially a person picking the console up and walking out of the room. It launched alongside Breath of the Wild, sold more units than the Wii, and made the distinction between a home console and a handheld — a line Nintendo itself had drawn for thirty years — simply stop existing.',
+    'The Switch is a tablet. Drop it into the dock and it plays on the television; lift it out mid-game and the same save keeps running in your hands; slide the controllers off its sides and there are two of them, one for each player, with no extra purchase. Nintendo had tried the second half of this idea on the Wii U and failed to explain it; here the explanation is the object itself, and the first advertisement was essentially a person picking the console up and walking out of the room. It launched alongside Breath of the Wild, sold more units than the Wii, and made the distinction between a home console and a handheld, a line Nintendo itself had drawn for thirty years, simply stop existing.',
 
   specs: {
     cpu: 'NVIDIA Tegra X1, four ARM Cortex-A57 cores',
@@ -45,7 +45,7 @@ export const nintendoSwitch: ConsoleEntry = {
       label: 'Two consoles, one machine',
       value: 'Dock or handheld',
       comparison:
-        'It downclocks itself when undocked and runs at a lower resolution on the smaller screen. The game does not restart, pause or reload — the transition happens while you are holding it.',
+        'It downclocks itself when undocked and runs at a lower resolution on the smaller screen. The game does not restart, pause or reload: the transition happens while you are holding it.',
     },
     {
       label: 'Two controllers, in the box',
@@ -81,32 +81,32 @@ export const nintendoSwitch: ConsoleEntry = {
     renderBox: { x: [-0.1214, 0.1214], y: [0, 0.1008], z: [-0.0253, 0.0253] },
     callouts: [
       {
-        label: '7-inch LCD — 1280×720, the console is also the screen',
+        label: '7-inch LCD: 1280×720, the console is also the screen',
         anchor: [0, 0.055, -0.009],
         labelOffset: [0, 0.04, -0.005],
       },
       {
-        label: 'Left Joy-Con — stick, d-pad and capture button',
+        label: 'Left Joy-Con: stick, d-pad and capture button',
         anchor: [-0.105, 0.05, -0.013],
         labelOffset: [-0.035, 0.02, 0],
       },
       {
-        label: 'Right Joy-Con — stick, face buttons and home',
+        label: 'Right Joy-Con: stick, face buttons and home',
         anchor: [0.105, 0.05, -0.01],
         labelOffset: [0.035, 0.02, 0],
       },
       {
-        label: 'Kickstand — the whole console rests on this flap',
+        label: 'Kickstand: the whole console rests on this flap',
         anchor: [-0.07, 0.012, 0.024],
         labelOffset: [-0.01, 0.04, 0.01],
       },
       {
-        label: 'USB-C port — bottom edge, centre',
+        label: 'USB-C port: bottom edge, centre',
         anchor: [0, 0.012, -0.024],
         labelOffset: [0, -0.035, -0.005],
       },
       {
-        label: 'Game card slot — top edge, left of centre',
+        label: 'Game card slot: top edge, left of centre',
         anchor: [-0.04, 0.098, 0.005],
         labelOffset: [-0.03, 0.03, 0],
       },
@@ -140,7 +140,7 @@ export const nintendoSwitch: ConsoleEntry = {
       dimensions: { width: 152, height: 60, depth: 106 },
       innovations: [
         'They detach and become two independent controllers, so a second player costs nothing and needs no setup.',
-        'HD Rumble: a linear resonant actuator precise enough to simulate individual objects — the standard demonstration is counting virtual ice cubes rolling inside a glass you cannot see.',
+        'HD Rumble: a linear resonant actuator precise enough to simulate individual objects, the standard demonstration is counting virtual ice cubes rolling inside a glass you cannot see.',
         'An infrared depth camera in the right Joy-Con that can read shapes and distance, and a gyroscope in each half for independent motion aiming.',
       ],
       buttons: [
@@ -166,7 +166,7 @@ export const nintendoSwitch: ConsoleEntry = {
     {
       id: 'the-tether-cut',
       title: 'The Wii U, portable',
-      body: 'A screen in your hands running the console\'s game is exactly what the Wii U offered in 2012, and it sold 13.5 million units. The Switch is the same proposition with the range limit removed, and it has sold over 150 million. The lesson Nintendo took was not that the idea was wrong but that it had to be obvious — you understand the Switch by watching somebody pick it up.',
+      body: 'A screen in your hands running the console\'s game is exactly what the Wii U offered in 2012, and it sold 13.5 million units. The Switch is the same proposition with the range limit removed, and it has sold over 150 million. The lesson Nintendo took was not that the idea was wrong but that it had to be obvious: you understand the Switch by watching somebody pick it up.',
     },
     {
       id: 'bitter-cartridges',
@@ -176,12 +176,12 @@ export const nintendoSwitch: ConsoleEntry = {
     {
       id: 'joy-con-drift',
       title: 'A defect that ended in court',
-      body: 'The Joy-Con analog sticks wear internally and start reporting movement that is not happening — "drift". It became widespread enough to draw class-action lawsuits and a formal European consumer-group complaint, and Nintendo eventually repaired affected controllers free of charge regardless of warranty status.',
+      body: 'The Joy-Con analog sticks wear internally and start reporting movement that is not happening: "drift". It became widespread enough to draw class-action lawsuits and a formal European consumer-group complaint, and Nintendo eventually repaired affected controllers free of charge regardless of warranty status.',
     },
     {
       id: 'launch-with-zelda',
       title: 'It launched with a masterpiece',
-      body: 'Breath of the Wild released the same day as the console and was scored as one of the best-reviewed games ever made. For a period after launch it had an attach rate above 100% in some regions — more copies sold than consoles existed, because people were buying it before they could find hardware.',
+      body: 'Breath of the Wild released the same day as the console and was scored as one of the best-reviewed games ever made. For a period after launch it had an attach rate above 100% in some regions: more copies sold than consoles existed, because people were buying it before they could find hardware.',
     },
   ],
 
@@ -196,7 +196,7 @@ export const nintendoSwitch: ConsoleEntry = {
     {
       id: 'dock-screen-scratch',
       name: 'Dock scratching the screen',
-      body: 'The original dock holds the tablet against a hard plastic lip with no give, and sliding it in and out repeatedly can score the unprotected screen — a design fault that launched an entire market in third-party docks and screen protectors.',
+      body: 'The original dock holds the tablet against a hard plastic lip with no give, and sliding it in and out repeatedly can score the unprotected screen: a design fault that launched an entire market in third-party docks and screen protectors.',
       target: 'dock_led',
       effect: 'dim',
     },
@@ -247,7 +247,7 @@ export const nintendoSwitch: ConsoleEntry = {
   games: [
     { rank: 1, title: 'Mario Kart 8 Deluxe', year: 2017, unitsSold: 69_180_000, developer: 'Nintendo EPD', publisher: 'Nintendo', blurb: 'A Wii U game given a second life, and now one of the best-selling games ever released on any platform.' },
     { rank: 2, title: 'Animal Crossing: New Horizons', year: 2020, unitsSold: 47_910_000, developer: 'Nintendo EPD', publisher: 'Nintendo', blurb: 'Released three days after much of the world went into lockdown, and became the year\'s defining social space.' },
-    { rank: 3, title: 'Super Smash Bros. Ultimate', year: 2018, unitsSold: 36_310_000, developer: 'Sora Ltd. / Bandai Namco', publisher: 'Nintendo', blurb: 'Every fighter from every previous game in the series, all at once — an act of preservation as much as a sequel.' },
+    { rank: 3, title: 'Super Smash Bros. Ultimate', year: 2018, unitsSold: 36_310_000, developer: 'Sora Ltd. / Bandai Namco', publisher: 'Nintendo', blurb: 'Every fighter from every previous game in the series, all at once: an act of preservation as much as a sequel.' },
     { rank: 4, title: 'The Legend of Zelda: Breath of the Wild', year: 2017, unitsSold: 32_620_000, developer: 'Nintendo EPD', publisher: 'Nintendo', blurb: 'The launch title, built around letting you walk to anything you can see, including the final boss.' },
     { rank: 5, title: 'Super Mario Odyssey', year: 2017, unitsSold: 29_040_000, developer: 'Nintendo EPD', publisher: 'Nintendo', blurb: 'Mario throws his hat onto other creatures and becomes them, which turns the whole game into a toy box.' },
     { rank: 6, title: 'Pokémon Sword and Shield', year: 2019, unitsSold: 26_690_000, developer: 'Game Freak', publisher: 'Nintendo', blurb: 'The first mainline Pokémon built for a television as well as a handheld.' },

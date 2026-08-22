@@ -7,6 +7,8 @@ import {
   labelPlane,
   layoutSpread,
   mediaAnchor,
+  printsPerFace,
+  spineAspect,
   spreadExtent,
 } from './gameBox'
 import { archetype, MEDIA_ARCHETYPES } from '@/data/kits/media-archetypes'
@@ -121,6 +123,43 @@ describe('cartridge labels', () => {
   it('authors cover art at the label aspect for carts, face aspect for cases', () => {
     expect(coverAspect(archetype('cart-nes'))).toBeCloseTo(55 / 97, 6)
     expect(coverAspect(archetype('dvd-keepcase'))).toBeCloseTo(135 / 190, 6)
+  })
+
+  it('face-maps boxes and cases, and only cartridges keep the inset label plane', () => {
+    // The switch between GameBox's two constructions. Cartridges need a
+    // separate plane because their label is inset and offset; everything
+    // else prints full-bleed and paints the geometry's own faces.
+    const faceMapped = Object.values(MEDIA_ARCHETYPES)
+      .filter(printsPerFace)
+      .map((a) => a.id)
+    // Declaration order in MEDIA_ARCHETYPES — box-sms sits third, in the
+    // slot the old cart-sms cartridge archetype used to occupy. jewel-square
+    // and jewel-longbox sit right after jewel-cd, the slots they were added
+    // in.
+    expect(faceMapped).toEqual([
+      'box-sms',
+      'jewel-cd',
+      'jewel-square',
+      'jewel-longbox',
+      'dvd-keepcase',
+      'bluray-case',
+      'switch-case',
+    ])
+
+    for (const a of Object.values(MEDIA_ARCHETYPES)) {
+      // A face-mapped archetype must have no label to place, and a
+      // plane-printed one must have one — the two can never both be true.
+      expect(printsPerFace(a), `${a.id}`).toBe(a.cartridgeLabel === null)
+      if (!printsPerFace(a)) expect(a.kind, `${a.id}`).toBe('cartridge')
+    }
+  })
+
+  it('authors spine art at depth-by-height, the narrow strip read on a shelf', () => {
+    // box-sms: 129 x 178 x 26mm — a tall, noticeably thick box, so its spine
+    // reads as a real strip (0.146) rather than the near-zero sliver a thin
+    // case like dvd-keepcase (135 x 190 x 14mm, 0.074) gives.
+    expect(spineAspect(archetype('box-sms'))).toBeCloseTo(26 / 178, 6)
+    expect(spineAspect(archetype('dvd-keepcase'))).toBeCloseTo(14 / 190, 6)
   })
 })
 

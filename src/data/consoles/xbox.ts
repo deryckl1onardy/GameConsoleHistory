@@ -27,7 +27,7 @@ export const xbox: ConsoleEntry = {
   msrpUsdAdjusted: 540,
   tagline: 'The console with a hard drive in it.',
   summary:
-    'Microsoft built its first console the way it built PCs: a 733 MHz Intel processor, an NVIDIA graphics chip, an ethernet port, and — the decision that mattered most — a hard drive fitted as standard in every unit. No memory cards, no shuffling saves, and games that could stream data off a disk instead of a disc. A year later Xbox Live turned that ethernet port into a single account, one friends list and one voice channel across every game, which is the model essentially all console online services still use. It sold 24 million units against the PS2\'s 160 million and reportedly lost money on nearly every one, and Microsoft treated the whole thing as the price of admission to a business it had decided to be in permanently.',
+    'Microsoft built its first console the way it built PCs: a 733 MHz Intel processor, an NVIDIA graphics chip, an ethernet port, and (the decision that mattered most) a hard drive fitted as standard in every unit. No memory cards, no shuffling saves, and games that could stream data off a disk instead of a disc. A year later Xbox Live turned that ethernet port into a single account, one friends list and one voice channel across every game, which is the model essentially all console online services still use. It sold 24 million units against the PS2\'s 160 million and reportedly lost money on nearly every one, and Microsoft treated the whole thing as the price of admission to a business it had decided to be in permanently.',
 
   specs: {
     cpu: 'Custom Intel Pentium III',
@@ -45,13 +45,13 @@ export const xbox: ConsoleEntry = {
       label: 'Hard drive, standard',
       value: '8 GB',
       comparison:
-        'The first console to fit one in every unit. It meant no memory cards, and it meant you could rip a CD onto the console and play your own music inside a racing game — a feature that felt like a PC habit smuggled into the living room.',
+        'The first console to fit one in every unit. It meant no memory cards, and it meant you could rip a CD onto the console and play your own music inside a racing game: a feature that felt like a PC habit smuggled into the living room.',
     },
     {
       label: 'Memory',
       value: '64 MB',
       comparison:
-        'Double the PS2\'s 32 MB, and unified — the CPU and graphics chip drew from one pool instead of separate banks, which is why Xbox ports of the same game so often ran at a higher resolution.',
+        'Double the PS2\'s 32 MB, and unified: the CPU and graphics chip drew from one pool instead of separate banks, which is why Xbox ports of the same game so often ran at a higher resolution.',
     },
     {
       label: 'Halo, attached',
@@ -63,7 +63,7 @@ export const xbox: ConsoleEntry = {
       label: 'The launch controller',
       value: 'Nicknamed "the Duke"',
       comparison:
-        'Large enough that Japanese reviewers singled it out, and replaced within two years by the smaller Controller S — which was designed for Japan first and then quietly became the standard everywhere.',
+        'Large enough that Japanese reviewers singled it out, and replaced within two years by the smaller Controller S, which was designed for Japan first and then quietly became the standard everywhere.',
     },
   ],
 
@@ -77,27 +77,27 @@ export const xbox: ConsoleEntry = {
   hardwareDiagram: {
     callouts: [
       {
-        label: 'The jewel — power button, the glowing green X',
+        label: 'The jewel: power button, the glowing green X',
         anchor: [0, 0.03, 0.128],
         labelOffset: [0, 0.035, 0.01],
       },
       {
-        label: 'XBOX logo — embossed at the top-left',
+        label: 'XBOX logo: embossed at the top-left',
         anchor: [-0.09, 0.088, 0.123],
         labelOffset: [-0.025, 0.03, 0.01],
       },
       {
-        label: 'Disc tray — the left half of the front',
+        label: 'Disc tray: the left half of the front',
         anchor: [-0.07, 0.055, 0.1295],
         labelOffset: [-0.03, 0.03, 0],
       },
       {
-        label: 'Controller ports (×4) — along the bottom',
+        label: 'Controller ports (×4): along the bottom',
         anchor: [0.02, 0.015, 0.1295],
         labelOffset: [0.02, 0.04, 0],
       },
       {
-        label: 'Top vent — the deck exhales here',
+        label: 'Top vent: the deck exhales here',
         anchor: [0, 0.104, -0.003],
         labelOffset: [0, 0.035, 0],
       },
@@ -129,7 +129,7 @@ export const xbox: ConsoleEntry = {
       // depth 105 (front-to-back).
       dimensions: { width: 185, height: 65, depth: 105 },
       innovations: [
-        'Two analog triggers plus two analog sticks and a d-pad as one standard layout — the arrangement almost every controller since has converged on.',
+        'Two analog triggers plus two analog sticks and a d-pad as one standard layout: the arrangement almost every controller since has converged on.',
         'Two memory-card slots built into the pad itself, a holdover made redundant by the console\'s own hard drive.',
       ],
       buttons: [
@@ -165,12 +165,12 @@ export const xbox: ConsoleEntry = {
     {
       id: 'halo-carried-it',
       title: 'A launch game that carried the platform',
-      body: 'Halo: Combat Evolved was not originally an Xbox game — it was announced as a Mac and PC title, and became a console exclusive when Microsoft bought Bungie in 2000. It went on to sell to roughly half of all Xbox owners, and its two-stick control scheme became the default for first-person shooters on every console since.',
+      body: 'Halo: Combat Evolved was not originally an Xbox game: it was announced as a Mac and PC title, and became a console exclusive when Microsoft bought Bungie in 2000. It went on to sell to roughly half of all Xbox owners, and its two-stick control scheme became the default for first-person shooters on every console since.',
     },
     {
       id: 'clock-capacitor',
       title: 'A component that destroys the console it is in',
-      body: 'Most original Xboxes contain a small clock capacitor that leaks corrosive electrolyte onto the motherboard as it ages. It serves only to keep the clock running while unplugged, and the standard advice among people preserving these machines is now simply to remove it — a console whose most urgent repair is the deletion of a part.',
+      body: 'Most original Xboxes contain a small clock capacitor that leaks corrosive electrolyte onto the motherboard as it ages. It serves only to keep the clock running while unplugged, and the standard advice among people preserving these machines is now simply to remove it: a console whose most urgent repair is the deletion of a part.',
     },
   ],
 
@@ -178,7 +178,7 @@ export const xbox: ConsoleEntry = {
     {
       id: 'clock-cap-leak',
       name: 'Clock capacitor leak',
-      body: 'The clock capacitor leaks onto the board and corrodes the traces beneath it. Symptoms escalate from an intermittent boot to a console that will not power on at all, and the damage is progressive — an Xbox sitting unused in a cupboard is still slowly destroying itself.',
+      body: 'The clock capacitor leaks onto the board and corrodes the traces beneath it. Symptoms escalate from an intermittent boot to a console that will not power on at all, and the damage is progressive: an Xbox sitting unused in a cupboard is still slowly destroying itself.',
       target: 'shell',
       effect: 'dim',
     },
@@ -233,15 +233,15 @@ export const xbox: ConsoleEntry = {
 
   games: [
     { rank: 1, title: 'Halo 2', year: 2004, unitsSold: 8_490_000, developer: 'Bungie', publisher: 'Microsoft Game Studios', blurb: 'Took $125 million on its first day and effectively built Xbox Live into a mass-market service on its own.' },
-    { rank: 2, title: 'Halo: Combat Evolved', year: 2001, unitsSold: 6_430_000, developer: 'Bungie', publisher: 'Microsoft Game Studios', blurb: 'The launch title that fixed the console first-person shooter — two sticks, regenerating shields, and only two weapons at a time.' },
+    { rank: 2, title: 'Halo: Combat Evolved', year: 2001, unitsSold: 6_430_000, developer: 'Bungie', publisher: 'Microsoft Game Studios', blurb: 'The launch title that fixed the console first-person shooter: two sticks, regenerating shields, and only two weapons at a time.' },
     { rank: 3, title: 'Tom Clancy\'s Splinter Cell', year: 2002, unitsSold: 3_000_000, developer: 'Ubisoft Montreal', publisher: 'Ubisoft', blurb: 'Built its whole design around dynamic light and shadow, which the Xbox\'s graphics chip could render and its rivals largely could not.' },
-    { rank: 4, title: 'Fable', year: 2004, unitsSold: 3_000_000, developer: 'Lionhead Studios', publisher: 'Microsoft Game Studios', blurb: 'A role-playing game where your choices visibly aged and scarred your character — famously promising even more than it delivered.' },
+    { rank: 4, title: 'Fable', year: 2004, unitsSold: 3_000_000, developer: 'Lionhead Studios', publisher: 'Microsoft Game Studios', blurb: 'A role-playing game where your choices visibly aged and scarred your character: famously promising even more than it delivered.' },
     { rank: 5, title: 'Star Wars: Knights of the Old Republic', year: 2003, unitsSold: 2_500_000, developer: 'BioWare', publisher: 'LucasArts', blurb: 'Set four thousand years before the films, which freed it from continuity entirely and let it write its own twist.' },
     { rank: 6, title: 'Project Gotham Racing 2', year: 2003, unitsSold: 2_000_000, developer: 'Bizarre Creations', publisher: 'Microsoft Game Studios', blurb: 'Scored you on driving with style rather than just speed, and was among the first racers built for online leaderboards.' },
     { rank: 7, title: 'Forza Motorsport', year: 2005, unitsSold: 2_000_000, developer: 'Turn 10 Studios', publisher: 'Microsoft Game Studios', blurb: 'Microsoft\'s answer to Gran Turismo, arriving late in the console\'s life and setting up a series that outlived it.' },
     { rank: 8, title: 'The Elder Scrolls III: Morrowind', year: 2002, unitsSold: 1_500_000, developer: 'Bethesda Game Studios', publisher: 'Bethesda Softworks', blurb: 'An open world of a scale nobody expected a console to hold, leaning hard on the hard drive to stream it.' },
     { rank: 9, title: 'Ninja Gaiden', year: 2004, unitsSold: 1_500_000, developer: 'Team Ninja', publisher: 'Tecmo', blurb: 'Notoriously difficult, and held up as the best-looking game on the platform when it launched.' },
-    { rank: 10, title: 'Jet Set Radio Future', year: 2002, unitsSold: 1_000_000, developer: 'Smilebit', publisher: 'Sega', blurb: 'Sega making games for Microsoft one year after leaving hardware — bundled with the console in much of its life.' },
+    { rank: 10, title: 'Jet Set Radio Future', year: 2002, unitsSold: 1_000_000, developer: 'Smilebit', publisher: 'Sega', blurb: 'Sega making games for Microsoft one year after leaving hardware: bundled with the console in much of its life.' },
   ],
 
   sources: [

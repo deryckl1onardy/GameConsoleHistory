@@ -35,7 +35,7 @@ export const masterSystem: ConsoleEntry = {
   msrpUsdAdjusted: 590,
   tagline: 'Better hardware. Worse contracts. It lost the war it should have won.',
   summary:
-    'On paper the Master System beat the NES: a faster Zilog Z80A, more colours on screen, a proper FM sound chip available in Japan, and two ways to load software instead of one. It still barely registered in the United States, because Nintendo\'s publisher licensing terms effectively forced studios to choose sides — support the NES exclusively or risk losing access to it altogether, and the NES was the market that mattered. Sega placed second in a two-console race it had the hardware to win. Then Brazil happened: Nintendo never properly launched there, Tectoy became Sega\'s official partner, and the Master System became the definitive console of an entire country. It never stopped being made. Tectoy is still manufacturing new units in 2026.',
+    'On paper the Master System beat the NES: a faster Zilog Z80A, more colours on screen, a proper FM sound chip available in Japan, and two ways to load software instead of one. It still barely registered in the United States, because Nintendo\'s publisher licensing terms effectively forced studios to choose sides: support the NES exclusively or risk losing access to it altogether, and the NES was the market that mattered. Sega placed second in a two-console race it had the hardware to win. Then Brazil happened: Nintendo never properly launched there, Tectoy became Sega\'s official partner, and the Master System became the definitive console of an entire country. It never stopped being made. Tectoy is still manufacturing new units in 2026.',
 
   specs: {
     cpu: 'Zilog Z80A',
@@ -53,13 +53,13 @@ export const masterSystem: ConsoleEntry = {
       label: 'Two ways to load a game',
       value: 'Cartridge + Sega Card',
       comparison:
-        'The credit-card-thin Sega Card was cheaper to manufacture than a cartridge shell, meant for budget titles — an idea Nintendo would not revisit until the Switch, four decades later.',
+        'The credit-card-thin Sega Card was cheaper to manufacture than a cartridge shell, meant for budget titles: an idea Nintendo would not revisit until the Switch, four decades later.',
     },
     {
       label: 'CPU clock speed',
       value: '3.58 MHz',
       comparison:
-        'Twice the clock speed of the NES sitting across the console war from it — the Master System was, quite literally, the faster chip.',
+        'Twice the clock speed of the NES sitting across the console war from it: the Master System was, quite literally, the faster chip.',
     },
     {
       label: 'FM sound chip',
@@ -71,12 +71,16 @@ export const masterSystem: ConsoleEntry = {
       label: 'Still in production',
       value: '39 years',
       comparison:
-        'Tectoy is manufacturing brand-new Master System units in Brazil in 2026 — the same year this sentence was written.',
+        'Tectoy is manufacturing brand-new Master System units in Brazil in 2026, the same year this sentence was written.',
     },
   ],
 
-  mediaKind: 'cartridge',
-  mediaArchetype: 'cart-sms',
+  // The retail unit is the printed cardboard box the cartridge ships
+  // inside, not the bare cartridge shell — see box-sms in
+  // media-archetypes.ts for the measured proportions and why 'card' (not
+  // 'cartridge') is the right kind for it.
+  mediaKind: 'card',
+  mediaArchetype: 'box-sms',
   model: '/models/consoles/master-system.glb',
   // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
   // comment for the method. The render (354 x 72 x 169mm) matches the real
@@ -87,22 +91,22 @@ export const masterSystem: ConsoleEntry = {
     renderBox: { x: [-0.177, 0.177], y: [0, 0.0716], z: [-0.0845, 0.0845] },
     callouts: [
       {
-        label: 'Card slot — the deep recess on the front',
+        label: 'Card slot: the deep recess on the front',
         anchor: [0.1, 0.04, 0.083],
         labelOffset: [0.035, 0.045, 0.005],
       },
       {
-        label: 'Controller ports (×2) — front left',
+        label: 'Controller ports (×2): front left',
         anchor: [-0.1, 0.025, 0.075],
         labelOffset: [-0.035, 0.04, 0.005],
       },
       {
-        label: 'Cartridge slot — on the top, right side',
+        label: 'Cartridge slot: on the top, right side',
         anchor: [0.06, 0.069, -0.042],
         labelOffset: [0.03, 0.03, -0.01],
       },
       {
-        label: 'Power switch — right side',
+        label: 'Power switch: right side',
         anchor: [0.15, 0.05, 0.03],
         labelOffset: [0.03, 0.035, 0.01],
       },
@@ -131,8 +135,8 @@ export const masterSystem: ConsoleEntry = {
       // contemporary NES controller. Flagged approximate rather than cited.
       dimensions: { width: 120, height: 20, depth: 55 },
       innovations: [
-        'A rounder, more disc-like D-pad than the NES\'s sharp cross — aimed at arcade-style precision, though it read as "mushy" to many players used to Nintendo\'s tighter cross.',
-        'No Start or Select — the console\'s own Pause button on the front of the shell did that job instead, keeping the pad itself to just direction and two buttons.',
+        'A rounder, more disc-like D-pad than the NES\'s sharp cross: aimed at arcade-style precision, though it read as "mushy" to many players used to Nintendo\'s tighter cross.',
+        'No Start or Select: the console\'s own Pause button on the front of the shell did that job instead, keeping the pad itself to just direction and two buttons.',
       ],
       buttons: [
         { id: 'dpad-up', mesh: 'dpad', label: 'D-pad Up', key: 'ArrowUp', travel: [0, -0.0008, 0], position: [-35, 0], shape: 'cross', sizeMm: 24 },
@@ -149,22 +153,22 @@ export const masterSystem: ConsoleEntry = {
     {
       id: 'licensing-lockout',
       title: 'It lost on contracts, not hardware',
-      body: 'Nintendo\'s publisher agreements required a degree of NES exclusivity that made supporting the Master System commercially risky for third parties — with the NES holding the overwhelming majority of the US market, most studios simply didn\'t. Sega had the faster chip and lost anyway.',
+      body: 'Nintendo\'s publisher agreements required a degree of NES exclusivity that made supporting the Master System commercially risky for third parties: with the NES holding the overwhelming majority of the US market, most studios simply didn\'t. Sega had the faster chip and lost anyway.',
     },
     {
       id: 'brazil-forever',
       title: 'Brazil is where this console actually won',
-      body: 'Nintendo never established an official presence in Brazil during the 8-bit era. Sega licensed the console to Tectoy, a local toy company, and the Master System became Brazil\'s default home console — a market Sega owned so completely that Tectoy is still building new hardware for it decades after every other Master System on Earth went out of production.',
+      body: 'Nintendo never established an official presence in Brazil during the 8-bit era. Sega licensed the console to Tectoy, a local toy company, and the Master System became Brazil\'s default home console: a market Sega owned so completely that Tectoy is still building new hardware for it decades after every other Master System on Earth went out of production.',
     },
     {
       id: 'fm-chip-japan-only',
       title: 'Japanese owners heard a different console',
-      body: 'The Japanese Master System shipped with a built-in Yamaha YM2413 FM synthesis chip as standard, giving its games genuinely richer music than the beeps and squares every other region got from the base PSG sound chip alone — the same soundtrack, playing on fundamentally different hardware, depending only on where you bought the console.',
+      body: 'The Japanese Master System shipped with a built-in Yamaha YM2413 FM synthesis chip as standard, giving its games genuinely richer music than the beeps and squares every other region got from the base PSG sound chip alone, the same soundtrack, playing on fundamentally different hardware, depending only on where you bought the console.',
     },
     {
       id: 'better-specs-worse-outcome',
       title: 'The more powerful console came second',
-      body: 'Double the NES\'s clock speed, more simultaneous colours, and two media formats instead of one — the Master System was the technically superior machine of its generation almost across the board. It is one of the clearest examples in the industry\'s history that winning a console war is a distribution and licensing problem first, and a hardware problem a distant second.',
+      body: 'Double the NES\'s clock speed, more simultaneous colours, and two media formats instead of one: the Master System was the technically superior machine of its generation almost across the board. It is one of the clearest examples in the industry\'s history that winning a console war is a distribution and licensing problem first, and a hardware problem a distant second.',
     },
   ],
 
@@ -172,14 +176,14 @@ export const masterSystem: ConsoleEntry = {
     {
       id: 'vdp-color-bleed',
       name: 'VDP colour bleed',
-      body: 'A degrading video display processor or a failing RF modulator produces streaking, colour bleed and horizontal noise across the picture — a slow failure that many units display for months before finally refusing to output a usable image at all.',
+      body: 'A degrading video display processor or a failing RF modulator produces streaking, colour bleed and horizontal noise across the picture, a slow failure that many units display for months before finally refusing to output a usable image at all.',
       target: 'shell',
       effect: 'screen-garbage',
     },
     {
       id: 'card-slot-corrosion',
       name: 'Card-edge corrosion',
-      body: 'The thin card-edge contacts on both the cartridge slot and the rarely-used Sega Card slot corrode with age, producing the same garbled-boot symptom as a dirty NES connector — reseating usually clears it, permanently fixing it does not.',
+      body: 'The thin card-edge contacts on both the cartridge slot and the rarely-used Sega Card slot corrode with age, producing the same garbled-boot symptom as a dirty NES connector: reseating usually clears it, permanently fixing it does not.',
       target: 'cart_slot',
       effect: 'screen-garbage',
     },
@@ -228,13 +232,13 @@ export const masterSystem: ConsoleEntry = {
   games: [
     { rank: 1, title: 'Alex Kidd in Miracle World', year: 1986, unitsSold: 1_600_000, developer: 'Sega', publisher: 'Sega', blurb: 'Sega\'s answer to Mario, and the console\'s pack-in mascot platformer for most of its life.' },
     { rank: 2, title: 'Sonic the Hedgehog (8-bit)', year: 1991, unitsSold: 700_000, developer: 'Ancient', publisher: 'Sega', blurb: 'A parallel, differently-designed 8-bit Sonic built alongside the Genesis original, for a console that had no business getting its own version at all.' },
-    { rank: 3, title: 'Wonder Boy III: The Dragon\'s Trap', year: 1989, unitsSold: 450_000, developer: 'Westone', publisher: 'Sega', blurb: 'A platformer that turns into an open-world RPG mid-game — still cited as one of the finest games the hardware ever ran.' },
-    { rank: 4, title: 'Phantasy Star', year: 1987, unitsSold: 400_000, developer: 'Sega', publisher: 'Sega', blurb: 'A genuine, ambitious RPG with a female lead in 1987 — years ahead of what most 8-bit hardware attempted.' },
+    { rank: 3, title: 'Wonder Boy III: The Dragon\'s Trap', year: 1989, unitsSold: 450_000, developer: 'Westone', publisher: 'Sega', blurb: 'A platformer that turns into an open-world RPG mid-game, still cited as one of the finest games the hardware ever ran.' },
+    { rank: 4, title: 'Phantasy Star', year: 1987, unitsSold: 400_000, developer: 'Sega', publisher: 'Sega', blurb: 'A genuine, ambitious RPG with a female lead in 1987, years ahead of what most 8-bit hardware attempted.' },
     { rank: 5, title: 'Golden Axe Warrior', year: 1991, unitsSold: 300_000, developer: 'Sega', publisher: 'Sega', blurb: 'An unabashed answer to Zelda, built specifically because the Master System had nothing like it.' },
-    { rank: 6, title: 'R-Type', year: 1988, unitsSold: 280_000, developer: 'Irem / Sega', publisher: 'Sega', blurb: 'The brutal arcade shooter, ported down to a system that could not quite keep up with the original\'s scale — and was loved anyway.' },
-    { rank: 7, title: 'Fantasy Zone', year: 1986, unitsSold: 260_000, developer: 'Sega', publisher: 'Sega', blurb: 'A candy-colored shoot-em-up that let you buy upgrades mid-run — an early example of a run\'s own economy as a game mechanic.' },
+    { rank: 6, title: 'R-Type', year: 1988, unitsSold: 280_000, developer: 'Irem / Sega', publisher: 'Sega', blurb: 'The brutal arcade shooter, ported down to a system that could not quite keep up with the original\'s scale, and was loved anyway.' },
+    { rank: 7, title: 'Fantasy Zone', year: 1986, unitsSold: 260_000, developer: 'Sega', publisher: 'Sega', blurb: 'A candy-colored shoot-em-up that let you buy upgrades mid-run: an early example of a run\'s own economy as a game mechanic.' },
     { rank: 8, title: 'Ys', year: 1988, unitsSold: 220_000, developer: 'Nihon Falcom / Sega', publisher: 'Sega', blurb: 'A bump-to-attack action RPG port that introduced a generation of Master System owners to a whole different design philosophy.' },
-    { rank: 9, title: 'Zillion', year: 1987, unitsSold: 200_000, developer: 'Sega', publisher: 'Sega', blurb: 'A stealth-action game tied to an anime made specifically to sell the console — merchandising built backward from a cartoon.' },
+    { rank: 9, title: 'Zillion', year: 1987, unitsSold: 200_000, developer: 'Sega', publisher: 'Sega', blurb: 'A stealth-action game tied to an anime made specifically to sell the console: merchandising built backward from a cartoon.' },
     { rank: 10, title: 'OutRun', year: 1987, unitsSold: 190_000, developer: 'Sega', publisher: 'Sega', blurb: 'The arcade racer\'s scaling-sprite road, rebuilt for hardware never designed to draw it.' },
   ],
 

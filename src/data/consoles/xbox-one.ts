@@ -27,7 +27,7 @@ export const xboxOne: ConsoleEntry = {
   msrpUsdAdjusted: 680,
   tagline: 'All in one, input one.',
   summary:
-    'Microsoft announced the Xbox One in 2013 as a living-room hub: television passthrough, a Kinect camera required to be plugged in at all times, a mandatory daily internet check, and restrictions on lending or reselling your own games. It also cost $100 more than the PS4 because the camera was not optional. The reaction was severe enough that Microsoft reversed the online and used-game policies within a week, unbundled Kinect within a year, and eventually abandoned the television ambitions entirely. What was left was a good console that spent a generation in second place — and the platform quietly rebuilt itself around things that outlasted the hardware: Game Pass, backwards compatibility running three generations deep, and play across Xbox and PC from one purchase.',
+    'Microsoft announced the Xbox One in 2013 as a living-room hub: television passthrough, a Kinect camera required to be plugged in at all times, a mandatory daily internet check, and restrictions on lending or reselling your own games. It also cost $100 more than the PS4 because the camera was not optional. The reaction was severe enough that Microsoft reversed the online and used-game policies within a week, unbundled Kinect within a year, and eventually abandoned the television ambitions entirely. What was left was a good console that spent a generation in second place, and the platform quietly rebuilt itself around things that outlasted the hardware: Game Pass, backwards compatibility running three generations deep, and play across Xbox and PC from one purchase.',
 
   specs: {
     cpu: 'AMD "Jaguar", eight cores',
@@ -57,7 +57,7 @@ export const xboxOne: ConsoleEntry = {
       label: 'Backwards compatibility',
       value: 'Three generations',
       comparison:
-        'By the end of its life it ran a curated library of original Xbox and Xbox 360 games from disc or download, at higher resolution than the hardware they were written for — something no competitor attempted.',
+        'By the end of its life it ran a curated library of original Xbox and Xbox 360 games from disc or download, at higher resolution than the hardware they were written for: something no competitor attempted.',
     },
     {
       label: 'Graphics scratchpad',
@@ -77,22 +77,22 @@ export const xboxOne: ConsoleEntry = {
   hardwareDiagram: {
     callouts: [
       {
-        label: 'Power button — the glowing Xbox logo',
+        label: 'Power button: the glowing Xbox logo',
         anchor: [0.129, 0.045, 0.136],
         labelOffset: [0.035, 0.025, 0],
       },
       {
-        label: 'Blu-ray slot — the left half of the front',
+        label: 'Blu-ray slot: the left half of the front',
         anchor: [-0.09, 0.045, 0.136],
         labelOffset: [-0.03, 0.03, 0],
       },
       {
-        label: 'USB port and sync — the left edge',
+        label: 'USB port and sync: the left edge',
         anchor: [-0.16, 0.028, 0.06],
         labelOffset: [-0.03, 0.02, 0.01],
       },
       {
-        label: 'Top vents — the front edge of the deck',
+        label: 'Top vents: the front edge of the deck',
         anchor: [0, 0.079, 0.02],
         labelOffset: [0, 0.025, 0],
       },
@@ -123,7 +123,7 @@ export const xboxOne: ConsoleEntry = {
       // height 60 (thickness), depth 103 (front-to-back).
       dimensions: { width: 152, height: 60, depth: 103 },
       innovations: [
-        'Impulse triggers — a separate rumble motor inside each trigger, so a gun\'s recoil or a tyre losing grip is felt under the fingertip rather than through the whole pad.',
+        'Impulse triggers: a separate rumble motor inside each trigger, so a gun\'s recoil or a tyre losing grip is felt under the fingertip rather than through the whole pad.',
         'A d-pad rebuilt as a four-way cross with a real click, replacing the widely disliked disc of the 360 pad.',
         'A 3.5mm headphone jack added in the 2015 revision, ending the proprietary headset adapter.',
       ],
@@ -151,7 +151,7 @@ export const xboxOne: ConsoleEntry = {
     {
       id: 'the-reversal',
       title: 'Eight days from policy to reversal',
-      body: 'The Xbox One was announced requiring an internet check every 24 hours and placing publisher-controlled restrictions on lending or reselling discs. After a sustained public backlash — and a competitor video explaining how to share a PS4 game that consisted of one person handing a disc to another — Microsoft reversed both policies within about a week of E3, before a single console had shipped.',
+      body: 'The Xbox One was announced requiring an internet check every 24 hours and placing publisher-controlled restrictions on lending or reselling discs. After a sustained public backlash, and a competitor video explaining how to share a PS4 game that consisted of one person handing a disc to another, Microsoft reversed both policies within about a week of E3, before a single console had shipped.',
     },
     {
       id: 'kinect-required',
@@ -166,7 +166,7 @@ export const xboxOne: ConsoleEntry = {
     {
       id: 'game-pass-pivot',
       title: 'The platform outgrew the box',
-      body: 'Game Pass launched in 2017 as a subscription library, and Microsoft began releasing its own games to Xbox and PC simultaneously, included on day one. It was the beginning of a strategy that treats the console as one way in rather than the product itself — the position the company still holds.',
+      body: 'Game Pass launched in 2017 as a subscription library, and Microsoft began releasing its own games to Xbox and PC simultaneously, included on day one. It was the beginning of a strategy that treats the console as one way in rather than the product itself: the position the company still holds.',
     },
   ],
 
@@ -231,7 +231,7 @@ export const xboxOne: ConsoleEntry = {
     { rank: 2, title: 'Call of Duty: Black Ops III', year: 2015, unitsSold: 6_800_000, developer: 'Treyarch', publisher: 'Activision', blurb: 'Wall-running and thruster jumps, at the point the series was pushing hardest away from the ground.' },
     { rank: 3, title: 'Minecraft', year: 2014, unitsSold: 6_000_000, developer: 'Mojang', publisher: 'Microsoft Studios', blurb: 'Microsoft bought Mojang for $2.5 billion the year this version shipped, and it has looked cheap ever since.' },
     { rank: 4, title: 'Call of Duty: WWII', year: 2017, unitsSold: 5_100_000, developer: 'Sledgehammer Games', publisher: 'Activision', blurb: 'The series returning to the war it started with, after a decade in the future.' },
-    { rank: 5, title: 'Halo 5: Guardians', year: 2015, unitsSold: 5_000_000, developer: '343 Industries', publisher: 'Microsoft Studios', blurb: 'The console\'s biggest exclusive, and the first mainline Halo with no split-screen campaign — a decision that did not go over well.' },
+    { rank: 5, title: 'Halo 5: Guardians', year: 2015, unitsSold: 5_000_000, developer: '343 Industries', publisher: 'Microsoft Studios', blurb: 'The console\'s biggest exclusive, and the first mainline Halo with no split-screen campaign: a decision that did not go over well.' },
     { rank: 6, title: 'Fallout 4', year: 2015, unitsSold: 4_300_000, developer: 'Bethesda Game Studios', publisher: 'Bethesda Softworks', blurb: 'The first console Fallout to support mods, which Bethesda enabled on Xbox before PlayStation.' },
     { rank: 7, title: 'Red Dead Redemption 2', year: 2018, unitsSold: 4_200_000, developer: 'Rockstar Studios', publisher: 'Rockstar Games', blurb: 'Eight years in development, and among the most detailed worlds ever built for a console.' },
     { rank: 8, title: 'FIFA 17', year: 2016, unitsSold: 3_600_000, developer: 'EA Vancouver', publisher: 'EA Sports', blurb: 'The first FIFA on the Frostbite engine, and the first with a story mode.' },

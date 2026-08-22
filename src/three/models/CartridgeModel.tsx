@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useGLTF } from '@react-three/drei'
-import { Matrix4, type BufferGeometry, type Group, type Mesh, type MeshStandardMaterial, type Texture } from 'three'
+import { type BufferGeometry, Group, type Mesh, type MeshStandardMaterial, type Texture } from 'three'
 import type { MediaArchetypeId } from '@/types/console'
 import { GltfErrorBoundary, floorAlignOffset, useUrlExists } from './GltfModel'
 import { CARTRIDGE_TRANSFORMS } from './gltf-transforms'
@@ -115,30 +115,45 @@ function CartridgeScene({
   stripShellTexture?: boolean
 }) {
   const { scene } = useGLTF(url)
-  // rotationX is baked into the GEOMETRY (not the node) so that
-  // floorAlignOffset sees the correct rotated bounding box. Applying it to
-  // the instance node doesn't work: floorAlignOffset walks meshes UP TO but
-  // NOT INCLUDING the instance, so the node's own rotation is invisible to
-  // the offset computation — the model ends up placed for the unrotated shape
-  // but rendered rotated, landing below the floor.
-  const rotatedGeometriesRef = useRef<BufferGeometry[]>([])
+  // rotationX rotates the whole assembled model as ONE rigid unit — a
+  // wrapper Group holding every one of the clone's top-level children,
+  // never a per-mesh geometry rotation.
+  //
+  // A REAL BUG, caught and fixed here: this used to bake the rotation into
+  // each MESH's own geometry vertices individually (traversing every mesh
+  // and applying the matrix to its local geometry). That looks equivalent
+  // to "rotate the model" but isn't, whenever the source file's own nodes
+  // don't all share one local orientation — the SNES cartridge GLB parents
+  // its "back shell" piece under a node that already carries its own 180°
+  // rotation (correctly — mirroring the front shell to close up the case).
+  // Applying the SAME extra rotation inside each mesh's own local space,
+  // ahead of that mesh's own differing ancestor rotation, does not commute:
+  // the front and back shell pieces ended up rotated by DIFFERENT effective
+  // amounts in world space, so they no longer met at the seam their own
+  // authored positions were built for — pieces floated tens of millimetres
+  // apart, reading as "the cartridge is broken into 3 parts". Wrapping the
+  // clone's children in one Group and rotating THAT applies the rotation
+  // exactly once, after every piece's own correct relative position and
+  // orientation has already been resolved by the normal scene graph — a
+  // rigid transform of the whole assembly, which is what "rotate the model"
+  // actually means. Confirmed live: with the old per-mesh approach the two
+  // shell halves' bounding boxes were tens of mm apart in both Y and Z;
+  // with this wrapper approach they sit flush with no manual offset needed.
+  //
+  // The wrapper still needs to sit BELOW `instance` (not be a rotation on
+  // `instance`/`scene` itself) so floorAlignOffset — which walks each mesh's
+  // local matrix up through its ancestors STOPPING AT `scene`, deliberately
+  // blind to `scene`'s own transform (see floorAlignOffset's own doc
+  // comment) — actually sees this rotation when it computes the floor
+  // offset. A rotation on `instance` itself would be invisible to it, same
+  // failure mode floorAlignOffset already documents for the console loader.
   const instance = useMemo(() => {
-    // Dispose geometries from the previous computation (useMemo has no
-    // built-in cleanup — the next call disposes the previous batch).
-    for (const g of rotatedGeometriesRef.current) g.dispose()
-    rotatedGeometriesRef.current = []
     const clone = scene.clone(true)
     if (rotationX) {
-      const rot = new Matrix4().makeRotationX(rotationX)
-      clone.traverse((o) => {
-        if ((o as Mesh).isMesh) {
-          const mesh = o as Mesh
-          const g = mesh.geometry.clone()
-          g.applyMatrix4(rot)
-          mesh.geometry = g
-          rotatedGeometriesRef.current.push(g)
-        }
-      })
+      const wrapper = new Group()
+      wrapper.rotation.x = rotationX
+      while (clone.children.length) wrapper.add(clone.children[0])
+      clone.add(wrapper)
     }
     return clone
   }, [scene, rotationX])
@@ -146,15 +161,6 @@ function CartridgeScene({
   const offset = useMemo(
     () => floorAlignOffset(instance, hideMeshIndices, url),
     [instance, hideMeshIndices, url],
-  )
-
-  // Dispose rotated geometry clones on unmount.
-  useEffect(
-    () => () => {
-      for (const g of rotatedGeometriesRef.current) g.dispose()
-      rotatedGeometriesRef.current = []
-    },
-    [],
   )
 
   // Applied ONCE per model instance, in its own effect — not folded into the

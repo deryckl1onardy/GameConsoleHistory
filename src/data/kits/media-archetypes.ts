@@ -24,12 +24,23 @@ export const MEDIA_ARCHETYPES: Record<MediaArchetypeId, MediaArchetype> = {
     id: 'cart-atari-2600',
     kind: 'cartridge',
     label: 'Atari 2600 Game Program cartridge',
-    dimensions: { width: 102, height: 70, depth: 16 },
+    // Was 102 x 70 x 16 (landscape — wider than tall), which had the box
+    // lying the wrong way: a real Atari 2600 Game Program cartridge is
+    // portrait, like the NES and SNES carts. Corrected from the published
+    // spec (Google's product panel, matching common references): 3.87 x
+    // 3.25 x 0.75in = 98 x 83 x 19mm.
+    dimensions: { width: 83, height: 98, depth: 19 },
     cornerRadiusMm: 3,
-    cartridgeLabel: { widthMm: 64, heightMm: 44, offsetYMm: 6, precision: 'approximate' },
+    // Real Atari carts print nearly edge-to-edge with a thin dark margin —
+    // sized to most of the corrected portrait face, not the old landscape
+    // rect. offsetYMm nudges it up slightly to leave a touch more margin at
+    // the bottom edge than the top, matching reference photos.
+    cartridgeLabel: { widthMm: 72, heightMm: 88, offsetYMm: 2, precision: 'approximate' },
     hasBackArt: false,
-    precision: 'approximate',
-    source: 'Collector consensus — re-measure before Atari 2600 ships.',
+    precision: 'exact',
+    source:
+      'Google product spec / common references: 3.87in (98mm) H x 3.25in (83mm) W x 0.75in (19mm) D. ' +
+      'Label rect approximated from reference photos.',
   },
 
   'cart-nes': {
@@ -45,16 +56,38 @@ export const MEDIA_ARCHETYPES: Record<MediaArchetypeId, MediaArchetype> = {
       'Shell dimensions are collector consensus; NESdev wiki still lists them as TODO. Label size (55x97mm) is from NESdev. offsetXMm shifts the label right of dead-centre to clear the moulded connector-release ridge that runs down the shell\'s left edge — approximate, eyeballed against reference photos rather than a published spec.',
   },
 
-  'cart-sms': {
-    id: 'cart-sms',
-    kind: 'cartridge',
-    label: 'Sega Master System cartridge',
-    dimensions: { width: 110, height: 100, depth: 15 },
-    cornerRadiusMm: 3,
-    cartridgeLabel: { widthMm: 72, heightMm: 66, offsetYMm: 4, precision: 'approximate' },
-    hasBackArt: false,
+  'box-sms': {
+    id: 'box-sms',
+    // Not a bare cartridge — the Master System's actual retail unit is a
+    // printed cardboard box (the cartridge itself ships inside it), edge to
+    // edge box art like a Switch card case rather than a cartridge's small
+    // label sticker on an otherwise plain shell. `kind: 'card'` gets that
+    // construction for free: GameBox.tsx already prints edge to edge and
+    // skips the label-recess plate whenever `cartridgeLabel` is null, which
+    // is exactly this box's contract (see switch-case, the other `card`).
+    kind: 'card',
+    label: 'Sega Master System game box',
+    // 12.9 x 17.8 x 2.6cm, from a dedicated collector measurement pass
+    // (SMS Power forums, "Master System Box / Case / Inlay dimensions",
+    // Bock, 21 Jul 2008) of the export/PAL cardboard box — the format shown
+    // in reference photos (SEGA header, grid-paper background, printed
+    // edge-to-edge box art, no separate label). That same source measured a
+    // further +2.0cm of variance on height ("cardboard boxes tend to squash
+    // and this usually takes more space") — the 178mm below is the base
+    // figure, not the squashed high end.
+    dimensions: { width: 129, height: 178, depth: 26 },
+    // Cardboard folded and glued at the seams, not injection-moulded — a
+    // much crisper edge than a plastic case's rounded corners (switch-case
+    // is 4mm, dvd-keepcase 3mm). Reference photos show a near-square corner
+    // with only a slight softening from the fold itself.
+    cornerRadiusMm: 2,
+    cartridgeLabel: null,
+    hasBackArt: true,
     precision: 'approximate',
-    source: 'Collector consensus — re-measure before Master System ships.',
+    source:
+      'SMS Power forums, "Master System Box / Case / Inlay dimensions" (Bock, 21 Jul 2008): ' +
+      'export/PAL cartridge box 12.9 x 17.8(+2.0) x 2.6cm. Collector-measured, not a manufacturer spec — ' +
+      're-measure against a real box if the chance comes up.',
   },
 
   'cart-genesis': {
@@ -120,12 +153,72 @@ export const MEDIA_ARCHETYPES: Record<MediaArchetypeId, MediaArchetype> = {
     id: 'jewel-cd',
     kind: 'optical',
     label: 'CD jewel case',
-    dimensions: { width: 125, height: 142, depth: 10 },
+    // The standard music-CD-style jewel case: portrait, taller than wide,
+    // used by PlayStation and Saturn's JP/PAL releases. Dreamcast used a
+    // visibly different, squarer case — see `jewel-square` below, not this
+    // one.
+    dimensions: { width: 125, height: 142, depth: 10.4 },
     cornerRadiusMm: 2,
     cartridgeLabel: null,
     hasBackArt: true,
     precision: 'exact',
-    source: 'Industry standard jewel case: 142 x 125 x 10 mm.',
+    source: 'Industry standard jewel case: 142 x 125 x 10.4 mm.',
+  },
+
+  'jewel-square': {
+    id: 'jewel-square',
+    kind: 'optical',
+    label: 'Dreamcast square jewel case',
+    // Dreamcast did NOT use the standard tall jewel-cd shell — collectors
+    // consistently call the Dreamcast case a "square jewel case", distinct
+    // from a taller "rectangular case" used only for two known exceptions
+    // with oversized manuals (Eternal Arcadia, Love Hina: Smile Again —
+    // dreamcast-talk.com, "Official Dreamcast Cases"). Two independent real
+    // box scans confirm this visually: Wikipedia's Sonic Adventure cover art
+    // file (explicitly captioned "the entire cover") is 300x297px, and
+    // Phantasy Star Online's JP cover is 250x247px — both converge on an
+    // essentially 1:1 face, not jewel-cd's 125x142 portrait. Sized off the
+    // shared 125mm case width (the same shell-width convention as jewel-cd)
+    // with height brought down to match that observed near-square ratio,
+    // rather than a manufacturer spec sheet — no such sheet was found.
+    dimensions: { width: 125, height: 126, depth: 10.4 },
+    cornerRadiusMm: 2,
+    cartridgeLabel: null,
+    hasBackArt: true,
+    precision: 'approximate',
+    source:
+      'Derived from two independent real box-art scans (Wikipedia: File:Sonic_Adventure.PNG, 300x297px; ' +
+      'File:Phantasy_Star_Online_cover_art_jp.png, 250x247px) plus collector terminology ' +
+      '("square jewel case" vs. Eternal Arcadia/Love Hina\'s taller "rectangular case", ' +
+      'dreamcast-talk.com "Official Dreamcast Cases") — not a manufacturer spec; re-measure against a ' +
+      'real case if the chance comes up.',
+  },
+
+  'jewel-longbox': {
+    id: 'jewel-longbox',
+    kind: 'optical',
+    label: 'Sega Saturn / Sega CD / PS1 longbox jewel case',
+    // The NA retail case for Saturn (and Sega CD, and early PS1) games was
+    // NOT a standard 142mm jewel case — a Sega Saturn Forum moderator
+    // (segasaturngroup.proboards.com, "US/UK saturn game case sizes")
+    // describes the US case as "much larger, almost twice as thick and
+    // taller" than the UK/PAL jewel case. Two independent acrylic-protector
+    // listings sized to fit the real case agree closely: BSAcrylics' PS1 and
+    // Saturn longbox protectors both list inner clearance "14.7 x 2.5 x
+    // 21.2cm", and Kollector Protector's PS1/Sega CD/Saturn longbox display
+    // case lists interior "5.8w x 1d x 8.3h in (14.8w x 2.4d x 21.0h cm)" —
+    // width and height converge on ~147 x 210mm, and the ~24mm depth matches
+    // "almost twice as thick" against the 10mm standard jewel case below.
+    dimensions: { width: 147, height: 210, depth: 24 },
+    cornerRadiusMm: 2,
+    cartridgeLabel: null,
+    hasBackArt: true,
+    precision: 'approximate',
+    source:
+      'Cross-referenced from segasaturngroup.proboards.com ("US/UK saturn game case sizes") and two ' +
+      'independent longbox acrylic-protector listings (BSAcrylics, Kollector Protector) sized to the real ' +
+      'case — no single manufacturer spec found; re-measure against a real US Saturn case if the chance ' +
+      'comes up.',
   },
 
   'dvd-keepcase': {

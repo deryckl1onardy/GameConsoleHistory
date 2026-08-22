@@ -1,12 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
 import * as THREE from 'three'
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import type { ThreeEvent } from '@react-three/fiber'
 import type { Game, MediaArchetype } from '@/types/console'
-import { LIFT_M, boxProfile, boxSizeMetres, coverAspect, edgeBevelMetres, labelPlane } from './geometry/gameBox'
+import {
+  BOX_FACE,
+  LIFT_M,
+  boxProfile,
+  boxSizeMetres,
+  coverAspect,
+  edgeBevelMetres,
+  labelPlane,
+  printsPerFace,
+  spineAspect,
+} from './geometry/gameBox'
 import { placeholderCover } from './covers'
 import { shellFor } from '@/data/kits/media-shells'
 import { MM } from '@/data/kits/media-archetypes'
-import { coverFor } from '@/data/covers'
+import { backCoverFor, coverFor, spineCoverFor } from '@/data/covers'
 import { CartridgeModel } from './models/CartridgeModel'
 
 const textureLoader = new THREE.TextureLoader()
@@ -15,18 +26,18 @@ const textureLoader = new THREE.TextureLoader()
 const REAL_COVER_CACHE = new Map<string, THREE.Texture>()
 
 /**
- * A real cover if `coverFor` resolves one for this game, applied via
+ * A real texture at `url` if one is given, applied via
  * `texture.repeat`/`offset` so it fills the printed area at the correct
- * aspect rather than stretching. The procedural placeholder always renders
- * FIRST — this only swaps in once (and if) the real art finishes loading, so
- * a box is never blank waiting on a network request.
+ * aspect rather than stretching. Whatever renders without it (the procedural
+ * front placeholder, the flat-colour spine, no back print at all) always
+ * shows FIRST — this only swaps in once (and if) the real art finishes
+ * loading, so a box is never blank waiting on a network request.
+ *
+ * Shared by all three faces — front (`coverFor`), spine (`spineCoverFor`),
+ * back (`backCoverFor`) — each just resolves a different manifest to the
+ * `url` this hook actually loads.
  */
-function useRealCoverTexture(
-  consoleId: string,
-  game: Game,
-  printAspect: number,
-): THREE.Texture | null {
-  const url = coverFor(consoleId, game)
+function useRealCoverTexture(url: string | null, printAspect: number): THREE.Texture | null {
   const [texture, setTexture] = useState<THREE.Texture | null>(() => (url ? REAL_COVER_CACHE.get(url) ?? null : null))
 
   useEffect(() => {
@@ -143,10 +154,44 @@ export type GameBoxProps = {
   onSelect?: (rank: number) => void
 }
 
-/** Rounded-rect extruded shell geometry, centred on the origin. */
+/** Segments RoundedBoxGeometry's curve is built from — enough to read as a
+ * genuine soft edge under the library's close orbit distance, not so many
+ * that a case archetype's small 2-4mm radius spends triangles it can't show. */
+const CASE_BEVEL_SEGMENTS = 3
+
+/**
+ * The shell, in one of two constructions chosen by `printsPerFace`.
+ *
+ * Face-mapped archetypes (boxes and cases) get a RoundedBoxGeometry, for the
+ * two things a texture actually needs and a plain BoxGeometry's razor-sharp
+ * edges cannot give: SIX addressable material groups with clean 0..1 UVs per
+ * face (verified live: RoundedBoxGeometry extends BoxGeometry and keeps the
+ * exact same six equal-sized groups in the exact same order, so BOX_FACE's
+ * indices still apply unchanged), PLUS a real edge bevel with smoothly
+ * interpolated normals. That second part is not cosmetic — a perfectly
+ * sharp 90° edge cannot carry a specular highlight across itself at most
+ * camera angles, which is a real reason a flat BoxGeometry case reads as a
+ * plastic-less block no matter how good the printed texture is; a rounded
+ * edge can, and does. The radius reuses `cornerRadiusMm`, the same field
+ * cartridges already use for their own rounding — one honest measured
+ * number per archetype, not a second guessed one.
+ *
+ * With this, the front/spine/back art IS the geometry — no floating planes
+ * to position, and none of the bugs that come with positioning them.
+ *
+ * Cartridges keep the rounded-rect extrusion: their art is an inset label
+ * plane anyway (see printsPerFace), so the six face slots would go unused,
+ * and the rounded profile is doing real work on a chunky moulded shell that
+ * a plain cuboid renders as a block of wood.
+ */
 function useShellGeometry(archetype: MediaArchetype, depth: number, bevel: number) {
   return useMemo(() => {
     const { w, h, r } = boxProfile(archetype)
+
+    if (printsPerFace(archetype)) {
+      return new RoundedBoxGeometry(w, h, depth, CASE_BEVEL_SEGMENTS, r)
+    }
+
     const x = w / 2
     const y = h / 2
 
@@ -180,6 +225,152 @@ function useShellGeometry(archetype: MediaArchetype, depth: number, bevel: numbe
   }, [archetype, depth, bevel])
 }
 
+/**
+ * One face of a face-mapped shell: the scan if there is one, the bare
+ * material colour if there isn't.
+ *
+ * `attach="material-N"` is what puts it in the right slot of the mesh's
+ * material array — BOX_FACE names those indices, matching the order
+ * BoxGeometry emits its groups in.
+ *
+ * Two details that matter:
+ *  - No `color` alongside a `map`. Three MULTIPLIES the two, so leaving the
+ *    shell colour on would tint every scan by the cardboard or plastic it is
+ *    printed on and quietly dull it. Colour is for the unprinted faces only.
+ *  - The `key` flips with texture presence, so crossing the no-art/art
+ *    boundary builds a fresh material rather than mutating one in place.
+ *    A material compiled without a map needs `needsUpdate` to pick one up
+ *    later; remounting sidesteps that question entirely.
+ */
+function PrintedFace({
+  face,
+  map,
+  shell,
+  color,
+  kind,
+}: {
+  face: number
+  map: THREE.Texture | null
+  shell: ReturnType<typeof shellFor>
+  color: THREE.Color
+  kind: MediaArchetype['kind']
+}) {
+  return (
+    <meshPhysicalMaterial
+      key={map ? 'art' : 'plain'}
+      attach={`material-${face}`}
+      {...(map ? { map } : { color })}
+      roughness={shell.roughness}
+      metalness={0}
+      clearcoat={FINISH[kind].clearcoat}
+      clearcoatRoughness={FINISH[kind].clearcoatRoughness}
+    />
+  )
+}
+
+/** How far inside the outer glass surface an inner print plane sits, in mm.
+ * Purely a z-fighting clearance — real jewel-case inserts sit right against
+ * the inside of the cover, this just needs to be enough that the renderer
+ * never has to decide which surface is in front. */
+const INNER_PRINT_INSET_MM = 1
+
+/**
+ * A jewel case / Switch cartridge case: the shell itself IS clear or
+ * translucent plastic (`shell.transparentShell`, see media-shells.ts for the
+ * researched sources), so there is nothing to bake art onto — the outer
+ * geometry gets ONE uniform transmissive material on every face, and the
+ * front/spine/back scans sit on separate planes floating just inside it,
+ * the way a real printed insert sits behind real glass. The tray (jewel
+ * case only) sits further inside still, in the gap between the front and
+ * back inserts — genuinely visible now, for the first time: it existed as
+ * a field on `ShellStyle` since the very first parametric pass, but every
+ * earlier construction (an opaque extruded shell, then an opaque
+ * face-mapped one) hid it behind a solid front no light could pass.
+ *
+ * One material on a grouped geometry is deliberate, not an oversight: three
+ * ignores `geometry.groups` entirely whenever `mesh.material` is a single
+ * object rather than an array, and applies that one material to the whole
+ * mesh — exactly what a uniformly clear shell needs, with no per-face
+ * bookkeeping.
+ */
+function TransparentCase({
+  geometry,
+  w,
+  h,
+  d,
+  shell,
+  color,
+  cover,
+  spineCover,
+  backCover,
+}: {
+  geometry: THREE.BufferGeometry
+  w: number
+  h: number
+  d: number
+  shell: ReturnType<typeof shellFor>
+  color: THREE.Color
+  cover: THREE.Texture
+  spineCover: THREE.Texture | null
+  backCover: THREE.Texture | null
+}) {
+  const inset = INNER_PRINT_INSET_MM * MM
+
+  return (
+    <>
+      <mesh castShadow receiveShadow geometry={geometry}>
+        <meshPhysicalMaterial
+          color={color}
+          roughness={shell.roughness}
+          metalness={0}
+          transmission={0.92}
+          ior={1.55}
+          thickness={d}
+          attenuationColor={color}
+          attenuationDistance={0.012}
+          clearcoat={0.6}
+          clearcoatRoughness={0.06}
+        />
+      </mesh>
+
+      {/* Front insert — always present, `cover` already falls back to the
+          procedural placeholder so this is never blank. */}
+      <mesh position={[0, 0, d / 2 - inset]}>
+        <planeGeometry args={[w * 0.96, h * 0.96]} />
+        <meshStandardMaterial map={cover} roughness={0.9} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* The tray (or, on a Switch case, empty air over the cartridge nub) —
+          sits in the gap between the two inserts, dead centre. */}
+      {shell.tray && (
+        <mesh position={[0, 0, 0]}>
+          <planeGeometry args={[w * 0.94, h * 0.94]} />
+          <meshStandardMaterial color={shell.tray} roughness={0.7} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+
+      {/* Spine insert — the strip actually read on a shelf. Rotated to face
+          -X outward, same as the opaque construction's spine face did. */}
+      {spineCover && (
+        <mesh position={[-(w / 2 - inset), 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+          <planeGeometry args={[d * 0.9, h * 0.9]} />
+          <meshStandardMaterial map={spineCover} roughness={0.9} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+
+      {/* Back insert — the real "tray card" behind the rear glass. Rotated
+          180° so it reads un-mirrored from behind, same reasoning as the
+          opaque construction's back face. */}
+      {backCover && (
+        <mesh position={[0, 0, -(d / 2 - inset)]} rotation={[0, Math.PI, 0]}>
+          <planeGeometry args={[w * 0.96, h * 0.96]} />
+          <meshStandardMaterial map={backCover} roughness={0.9} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+    </>
+  )
+}
+
 export function GameBox({
   game,
   archetype,
@@ -204,8 +395,15 @@ export function GameBox({
     () => placeholderCover({ game, archetype, shell, aspect }),
     [game, archetype, shell, aspect],
   )
-  const realCover = useRealCoverTexture(consoleId, game, aspect)
+  const realCover = useRealCoverTexture(coverFor(consoleId, game), aspect)
   const cover = realCover ?? placeholder
+
+  // Spine and back are optional, hand-sourced faces (see covers.ts) — unlike
+  // the front, neither has a procedural placeholder to fall back to: `null`
+  // here just means GameBox renders what it always rendered before these
+  // existed (a flat-colour spine, no extra back print at all).
+  const spineCover = useRealCoverTexture(spineCoverFor(consoleId, game), spineAspect(archetype))
+  const backCover = useRealCoverTexture(backCoverFor(consoleId, game), aspect)
 
   /*
     The shell's ACTUAL front face sits at d/2 + bevel, not d/2 — three.js's
@@ -254,7 +452,58 @@ export function GameBox({
     model's `label` mesh instead. The parametric shell is what renders for
     every archetype without a file, which is all of them today.
   */
-  const parametric = (
+  const parametric = printsPerFace(archetype) ? (
+    shell.transparentShell ? (
+      <TransparentCase
+        geometry={shellGeometry}
+        w={w}
+        h={h}
+        d={d}
+        shell={shell}
+        color={shellColor}
+        cover={cover}
+        spineCover={spineCover}
+        backCover={backCover}
+      />
+    ) : (
+      /*
+        Face-mapped, opaque: the artwork IS the shell. Six materials on one
+        RoundedBoxGeometry, indexed by BOX_FACE — the front carries the
+        cover, the LEFT face carries the spine (the side actually read on a
+        shelf), the back carries the back panel, and the three unprinted
+        faces are bare plastic. Correct for a DVD/Blu-ray keepcase (opaque
+        shell, a thin clear window over the printed sleeve — see
+        `clearSleeve`'s own doc comment) or a cardboard box (opaque, no
+        window at all): the print sits directly on the surface either way.
+
+        This replaced three planes floating proud of an extruded shell.
+        Those planes had to be positioned clear of the shell's own bevel or
+        they rendered INSIDE solid geometry and vanished — which is exactly
+        what had happened to the spine: measured on this box, the bevel
+        grows the shell 0.8mm past its authored profile while the spine
+        plane sat only 0.05mm proud, leaving it buried 0.75mm deep.
+        Invisible, and impossible to catch by eye, because a plane painted
+        in `shell.body` is pixel-identical to the shell hiding it. A painted
+        face has no proud-ness to get wrong, so that whole class of bug
+        cannot recur here.
+      */
+      <mesh castShadow receiveShadow geometry={shellGeometry}>
+        <PrintedFace face={BOX_FACE.front} map={cover} shell={shell} color={shellColor} kind={archetype.kind} />
+        <PrintedFace face={BOX_FACE.left} map={spineCover} shell={shell} color={shellColor} kind={archetype.kind} />
+        <PrintedFace face={BOX_FACE.back} map={backCover} shell={shell} color={shellColor} kind={archetype.kind} />
+        <PrintedFace face={BOX_FACE.right} map={null} shell={shell} color={shellColor} kind={archetype.kind} />
+        <PrintedFace face={BOX_FACE.top} map={null} shell={shell} color={shellColor} kind={archetype.kind} />
+        <PrintedFace face={BOX_FACE.bottom} map={null} shell={shell} color={shellColor} kind={archetype.kind} />
+      </mesh>
+    )
+  ) : (
+    /*
+      Cartridge: rounded extruded shell, with the label as its own inset
+      plane. A plane is the right tool HERE and only here — the label is a
+      sticker at its own published size, offset from the face's centre (see
+      printsPerFace), which face-mapped UVs cannot express without baking
+      that inset and offset into every individual game's artwork.
+    */
     <>
       <mesh castShadow receiveShadow geometry={shellGeometry}>
         <meshPhysicalMaterial
@@ -265,16 +514,6 @@ export function GameBox({
           clearcoatRoughness={FINISH[archetype.kind].clearcoatRoughness}
         />
       </mesh>
-
-      {/* The tray behind a clear jewel case front — visible through the shell
-          rather than printed on it, so a jewel case reads as layered plastic
-          rather than a flat coloured box. */}
-      {shell.tray && (
-        <mesh position={[0, 0, -d / 2 + 0.5 * MM]}>
-          <planeGeometry args={[w * 0.94, h * 0.94]} />
-          <meshStandardMaterial color={shell.tray} roughness={0.7} side={THREE.DoubleSide} />
-        </mesh>
-      )}
 
       {/* Cartridge label recess — a slightly larger, slightly darker plate the
           sticker sits on, so the label reads as inset rather than floating. */}
@@ -290,33 +529,13 @@ export function GameBox({
         default, and this box gets viewed from a wide range of orbit angles.
         A print that vanished whenever the camera crossed to the wrong side
         of it read as "missing box art" when the geometry was actually fine.
+
+        A cartridge label is paper, printed and stuck on — matte, no sheen.
       */}
       <mesh position={print.position}>
         <planeGeometry args={[print.width, print.height]} />
-        {archetype.kind === 'cartridge' ? (
-          // A cartridge label is paper, printed and stuck on — matte, no sheen.
-          <meshStandardMaterial map={cover} roughness={0.85} side={THREE.DoubleSide} />
-        ) : (
-          // A case's cover is a printed sleeve held under a clear plastic
-          // front — the clearcoat is that plastic layer catching light over
-          // the print, not the print itself being glossy.
-          <meshPhysicalMaterial
-            map={cover}
-            roughness={0.5}
-            clearcoat={0.6}
-            clearcoatRoughness={0.12}
-            side={THREE.DoubleSide}
-          />
-        )}
+        <meshStandardMaterial map={cover} roughness={0.85} side={THREE.DoubleSide} />
       </mesh>
-
-      {/* Printed spine, on the side that actually gets read on a shelf. */}
-      {archetype.hasBackArt && (
-        <mesh position={[-w / 2 - 0.05 * MM, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
-          <planeGeometry args={[d * 0.9, h * 0.9]} />
-          <meshStandardMaterial color={shell.body} roughness={shell.roughness} side={THREE.DoubleSide} />
-        </mesh>
-      )}
     </>
   )
 

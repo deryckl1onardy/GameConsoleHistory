@@ -28,7 +28,7 @@ export const ps4: ConsoleEntry = {
   msrpUsdAdjusted: 535,
   tagline: 'It won the generation mostly by promising to leave players alone.',
   summary:
-    'Sony spent its PS4 reveal cycle drawing a straight line against Microsoft\'s Xbox One: no requirement to check in online every 24 hours, no restrictions on selling or lending used games, and a $399 price a full hundred dollars under a rival console bundling a camera few people wanted. The pitch worked immediately — a million units sold on North American launch day alone, 250,000 more in the UK within 48 hours — and the lead it opened in November 2013 never meaningfully closed. Across its decade on shelves the PS4 became host to some of the best-reviewed exclusives Sony ever published, Spider-Man and God of War and Horizon Zero Dawn among them, each moving upward of 19 million copies in its own right.',
+    'Sony spent its PS4 reveal cycle drawing a straight line against Microsoft\'s Xbox One: no requirement to check in online every 24 hours, no restrictions on selling or lending used games, and a $399 price a full hundred dollars under a rival console bundling a camera few people wanted. The pitch worked immediately: a million units sold on North American launch day alone, 250,000 more in the UK within 48 hours, and the lead it opened in November 2013 never meaningfully closed. Across its decade on shelves the PS4 became host to some of the best-reviewed exclusives Sony ever published, Spider-Man and God of War and Horizon Zero Dawn among them, each moving upward of 19 million copies in its own right.',
 
   specs: {
     cpu: 'AMD Jaguar (8-core)',
@@ -46,7 +46,7 @@ export const ps4: ConsoleEntry = {
       label: 'Launch-day sales',
       value: '1 million units, North America alone',
       comparison:
-        'Sold out within hours of release in a single region — a pace no prior PlayStation launch had matched.',
+        'Sold out within hours of release in a single region: a pace no prior PlayStation launch had matched.',
     },
     {
       label: 'Price vs. the rival console',
@@ -79,22 +79,22 @@ export const ps4: ConsoleEntry = {
     renderBox: { x: [-0.1556, 0.1556], y: [0, 0.0497], z: [-0.1438, 0.1438] },
     callouts: [
       {
-        label: 'Touch power button — front right',
+        label: 'Touch power button: front right',
         anchor: [0.128, 0.04, 0.121],
         labelOffset: [0.03, 0.035, 0.005],
       },
       {
-        label: 'Eject button — front left',
+        label: 'Eject button: front left',
         anchor: [-0.122, 0.04, 0.121],
         labelOffset: [-0.03, 0.035, 0.005],
       },
       {
-        label: 'USB ports (×2) — front centre',
+        label: 'USB ports (×2): front centre',
         anchor: [0.007, 0.025, 0.119],
         labelOffset: [0.025, 0.035, 0.005],
       },
       {
-        label: 'Disc slot — front left',
+        label: 'Disc slot: front left',
         anchor: [-0.06, 0.028, 0.142],
         labelOffset: [-0.03, 0.035, 0.005],
       },
@@ -120,7 +120,7 @@ export const ps4: ConsoleEntry = {
       // Dimensions.com: 162mm W x 52mm H x 98mm D.
       dimensions: { width: 162, height: 52, depth: 98 },
       innovations: [
-        'A touchpad above the face buttons — clickable, trackable, used for anything from menu navigation to sliding a bomb-defusal wire in specific games.',
+        'A touchpad above the face buttons: clickable, trackable, used for anything from menu navigation to sliding a bomb-defusal wire in specific games.',
         'A light bar on the front edge that identified players in split-screen and, in a handful of titles, changed color to reflect in-game state (health, alerts).',
         'A built-in mono speaker and a 3.5mm headphone jack, giving the pad its own audio output independent of the TV or headset dongle.',
       ],
@@ -151,7 +151,7 @@ export const ps4: ConsoleEntry = {
     {
       id: 'rejected-drm',
       title: 'It won a generation on a policy reversal',
-      body: 'Microsoft floated an always-online check-in requirement and used-game restrictions for the Xbox One before launch. Sony\'s public rejection of both at its own E3 reveal — with no changes needed to match — became one of the most consequential pieces of messaging in console history, and shaped buyer sentiment before either machine had shipped a single unit.',
+      body: 'Microsoft floated an always-online check-in requirement and used-game restrictions for the Xbox One before launch. Sony\'s public rejection of both at its own E3 reveal, with no changes needed to match, became one of the most consequential pieces of messaging in console history, and shaped buyer sentiment before either machine had shipped a single unit.',
     },
     {
       id: 'launch-day-million',
@@ -161,12 +161,12 @@ export const ps4: ConsoleEntry = {
     {
       id: 'best-selling-exclusives',
       title: 'Its exclusives sold like third-party blockbusters',
-      body: 'Spider-Man, God of War and Horizon Zero Dawn each sold north of 19 million copies — first-party exclusives moving at a scale usually reserved for annualized franchises like Call of Duty.',
+      body: 'Spider-Man, God of War and Horizon Zero Dawn each sold north of 19 million copies: first-party exclusives moving at a scale usually reserved for annualized franchises like Call of Duty.',
     },
     {
       id: 'second-best-selling-ever',
       title: 'The second-best-selling console Sony has made',
-      body: 'At over 117 million units, the PS4 trails only the PS2 among every console Sony has ever released — and sits among the handful of best-selling consoles in the industry\'s entire history.',
+      body: 'At over 117 million units, the PS4 trails only the PS2 among every console Sony has ever released, and sits among the handful of best-selling consoles in the industry\'s entire history.',
     },
   ],
 
@@ -174,7 +174,7 @@ export const ps4: ConsoleEntry = {
     {
       id: 'blue-line-of-death',
       name: 'Blue Line of Death',
-      body: 'A GPU or motherboard fault that produces a thin blue horizontal line across the display and prevents the console from booting past its startup screen — the PS4\'s best-known hardware failure.',
+      body: 'A GPU or motherboard fault that produces a thin blue horizontal line across the display and prevents the console from booting past its startup screen: the PS4\'s best-known hardware failure.',
       target: 'power_led',
       effect: 'blink-amber',
     },

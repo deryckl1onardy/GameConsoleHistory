@@ -7,9 +7,25 @@ import process from 'node:process'
 import sharp from 'sharp'
 
 /**
- * Fetches real box/case art from SteamGridDB for the whole roster and writes
- * it into public/covers/, then records the paths in
- * src/data/covers.generated.ts.
+ * Fetches real cover art from SteamGridDB and writes it into public/covers/,
+ * then records the paths in src/data/covers.generated.ts.
+ *
+ * SCOPE: cartridge archetypes only (`cartridgeLabel !== null` — see
+ * printsPerFace in src/three/geometry/gameBox.ts). A SteamGridDB "grid" is
+ * fan-made poster art with no platform branding baked in, which is a fine
+ * stand-in for a cartridge's small printed label (real cart labels rarely
+ * carry big console branding either) but a poor stand-in for a full box or
+ * case face, where the platform's own branding (the black "NINTENDO
+ * GAMECUBE" band, the console logo, the ratings seal) is part of what makes
+ * it read as the real object. Box/case consoles get their front art from
+ * real photographed scans instead — see scripts/fetch-boxart.mjs, which
+ * owns every entry this script does not.
+ *
+ * This split is enforced by construction, not just convention: this script
+ * REBUILDS its half of the manifest from scratch every run (never merges),
+ * so if it touched box/case entries too, an ordinary re-run would silently
+ * overwrite fetch-boxart.mjs's real scans with fan art again. Skipping them
+ * entirely is what keeps the two scripts' outputs from fighting.
  *
  * Deliberately opt-in and reversible:
  *   - public/covers/ and .env are both gitignored — nothing copyrighted
@@ -114,10 +130,25 @@ async function main() {
     pathToFileURL(path.join(ROOT, 'src', 'data', 'kits', 'media-archetypes.ts')).href
   )
 
-  const consoles = onlyConsole ? CONSOLES.filter((c) => c.id === onlyConsole) : CONSOLES
+  // Only cartridge archetypes — see this file's own doc comment for why
+  // box/case consoles are fetch-boxart.mjs's territory, not this script's.
+  const consoles = (onlyConsole ? CONSOLES.filter((c) => c.id === onlyConsole) : CONSOLES).filter(
+    (c) => getArchetype(c.mediaArchetype).cartridgeLabel !== null,
+  )
 
+  // Start from whatever is already on disk, not blank — this file also
+  // holds box/case front art now (see this file's own doc comment), which
+  // this script never fetches and must never erase, and a --console=x run
+  // must not erase every OTHER console's entries either. Only the keys this
+  // run actually resolves below are added or overwritten.
   /** @type {Record<string, string>} */
-  const manifest = {}
+  let manifest = {}
+  try {
+    const existing = await import(pathToFileURL(MANIFEST_PATH).href + `?t=${Date.now()}`)
+    manifest = { ...existing.COVERS }
+  } catch {
+    // No existing manifest yet — starting fresh is correct.
+  }
   const report = []
 
   for (const entry of consoles) {
@@ -174,18 +205,28 @@ async function main() {
     return
   }
 
+  const sorted = Object.fromEntries(Object.entries(manifest).sort(([a], [b]) => a.localeCompare(b)))
   const body =
     `/**\n` +
     ` * GENERATED FILE — do not hand-edit.\n` +
     ` *\n` +
-    ` * Written by \`npm run covers\` (scripts/fetch-covers.mjs), which fetches real\n` +
-    ` * box/case art from SteamGridDB into public/covers/ and records the path\n` +
-    ` * here, keyed \`\${consoleId}:\${rank}\`. public/covers/ itself is gitignored —\n` +
-    ` * this manifest is committed only when the repo owner deliberately chooses\n` +
-    ` * to ship a specific piece of art; everything else falls back to the\n` +
+    ` * Two writers, split by archetype (see printsPerFace in\n` +
+    ` * src/three/geometry/gameBox.ts):\n` +
+    ` *   - Cartridge entries: \`npm run covers\` (this file's script), from\n` +
+    ` *     SteamGridDB, into public/covers/.\n` +
+    ` *   - Box/case entries: \`npm run boxart\` (scripts/fetch-boxart.mjs), from\n` +
+    ` *     real photographed scans on the LaunchBox Games Database, into\n` +
+    ` *     public/covers/ as well — a box's own platform branding is part of\n` +
+    ` *     what makes it read as real, which fan-made SteamGridDB grids don't\n` +
+    ` *     carry (see fetch-boxart.mjs's own doc comment).\n` +
+    ` * Both merge onto whatever is already here rather than rebuilding from\n` +
+    ` * scratch, so running one never erases the other's entries. Keyed\n` +
+    ` * \`\${consoleId}:\${rank}\`. public/covers/ itself is gitignored — this\n` +
+    ` * manifest is committed only when the repo owner deliberately chooses to\n` +
+    ` * ship a specific piece of art; everything else falls back to the\n` +
     ` * procedural label (src/three/covers.ts, src/components/room/MediaFigure.tsx).\n` +
     ` */\n` +
-    `export const COVERS: Record<string, string> = ${JSON.stringify(manifest, null, 2)}\n`
+    `export const COVERS: Record<string, string> = ${JSON.stringify(sorted, null, 2)}\n`
 
   await writeFile(MANIFEST_PATH, body, 'utf8')
   console.log(`\n[fetch-covers] wrote ${Object.keys(manifest).length} entries to ${path.relative(ROOT, MANIFEST_PATH)}`)

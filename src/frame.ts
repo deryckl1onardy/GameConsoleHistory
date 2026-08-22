@@ -28,6 +28,25 @@ import type { OrthographicCamera, PerspectiveCamera } from 'three'
 export type Layout = 'wide' | 'compact'
 
 /**
+ * The REAL, fixed-pixel height of the top chrome in compact layout — the
+ * 56px ConsoleNav header (`h-14`) plus the SectionSwitch tab row beneath it
+ * (`pt-5` 20px + its 28px `leading-none` text), measured live against the
+ * actual DOM (`getBoundingClientRect`), not derived: 56 + 20 + 28 = 104.
+ *
+ * This is deliberately a DIFFERENT number from `ROOM_CHROME.compact.topH`,
+ * which is a vh FRACTION carrying its own safety margin for the camera's
+ * framing ("0.21 ... held with margin", see below) — a fraction is the
+ * wrong tool for "sit this element's edge flush against that one", because
+ * its margin is the whole point of it not being flush. GameList's compact
+ * filmstrip docks against this exact pixel value instead, so "right under
+ * the tabs" means what it says rather than floating in the topH fraction's
+ * built-in slack. Nothing else should need this — everywhere the camera's
+ * OWN framing is concerned, `topHFor`/`ROOM_CHROME` remain the source of
+ * truth, on purpose (their slack is what keeps the 3D subject clear).
+ */
+export const TOP_CHROME_PX = 104
+
+/**
  * Fractions of the viewport the room chrome occupies. `panelH`/`topH` are
  * vertical (bottom panel, top brand/header strip); `titleW` is the left
  * title column's width — kept as the historical width of the sidebar that
@@ -56,8 +75,43 @@ export const ROOM_CHROME = {
     topH: 0.21,
     titleW: 0,
     collapsedPanelH: 0.08,
+    /**
+     * A REAL BUG, fixed by this fraction existing at all: the games
+     * section's GameList used to size itself to the FULL clear band (top
+     * strip to bottom panel) on every layout — fine on wide, where it's a
+     * narrow 264px side rail with the 3D view visible beside it, but on
+     * compact it is full-width (`left-4 right-4`), so "the full clear
+     * band" meant the list covered the ENTIRE area the 3D camera was also
+     * trying to frame the cartridge into. The games section's 3D art was
+     * never visible on a phone — not cropped, not small, entirely hidden
+     * under an opaque list panel every single time.
+     *
+     * The fix: on compact, GameList renders as a short horizontal filmstrip
+     * (cover thumbnails in a row) docked just under the header, instead of
+     * a tall vertical list spanning to the bottom panel. This fraction is
+     * that filmstrip's own height — read by GameList.tsx to size itself,
+     * and by `topHFor`/`frameOffsetFor` below so the camera's clear-band
+     * math knows this extra band exists too and frames the 3D box under
+     * it, not behind it.
+     */
+    gamesStripH: 0.12,
   },
 } as const
+
+/**
+ * The top offset actually in effect for the CAMERA'S clear-band math —
+ * `ROOM_CHROME.topH` on the console section or on wide layout (where
+ * GameList is a side rail, not a horizontal band), plus the compact games
+ * filmstrip's own height when it's actually on screen (compact layout,
+ * games section). One function so GameList's own positioning and the
+ * camera's framing can never read two different answers for "how much top
+ * chrome is there right now".
+ */
+export function topHFor(layout: Layout, inGamesSection: boolean): number {
+  const chrome = layout === 'compact' ? ROOM_CHROME.compact : ROOM_CHROME
+  const filmstrip = layout === 'compact' && inGamesSection ? ROOM_CHROME.compact.gamesStripH : 0
+  return chrome.topH + filmstrip
+}
 
 export type FrameOffset = { dx: number; dy: number }
 export const NO_OFFSET: FrameOffset = { dx: 0, dy: 0 }
@@ -84,6 +138,7 @@ export function frameOffsetFor(
   height: number,
   layout: Layout = 'wide',
   collapsed = false,
+  inGamesSection = false,
 ): FrameOffset {
   if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
     return NO_OFFSET
@@ -95,7 +150,9 @@ export function frameOffsetFor(
   const panelH = collapsed ? chrome.collapsedPanelH : chrome.panelH
   // Centring the console in the CLEAR band between the top strip and the
   // bottom panel means lifting it by half the difference between them.
-  const dy = clamp((panelH - chrome.topH) / 2, 0, MAX_DY)
+  // `topHFor` folds in the compact games filmstrip's own height when it's
+  // actually on screen, so the subject centres in the band BELOW it too.
+  const dy = clamp((panelH - topHFor(layout, inGamesSection)) / 2, 0, MAX_DY)
   // The console stays horizontally centred. The left title column is
   // top-aligned, so the console sits beside (not under) it and needs no
   // horizontal dodge — and the console shot already aims dead-on at the

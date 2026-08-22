@@ -37,12 +37,14 @@ export type MediaKind = 'cartridge' | 'optical' | 'card'
 export type MediaArchetypeId =
   | 'cart-atari-2600'
   | 'cart-nes'
-  | 'cart-sms'
+  | 'box-sms'
   | 'cart-genesis'
   | 'cart-snes-na'
   | 'cart-snes-jp'
   | 'cart-n64'
   | 'jewel-cd'
+  | 'jewel-square'
+  | 'jewel-longbox'
   | 'dvd-keepcase'
   | 'bluray-case'
   | 'switch-case'
@@ -216,6 +218,23 @@ export type GameFact = {
   source: string
 }
 
+/**
+ * One real, sourced review excerpt. `quote` and `score` are each optional,
+ * but at least one must be present — some period magazine reviews survive
+ * today only as a numeric score with no preserved prose, and inventing a
+ * plausible-sounding line to fill that gap would be exactly the kind of
+ * fabrication this file elsewhere refuses to do. `score` is the outlet's own
+ * rating in whatever scale it actually published (a number, a letter grade,
+ * a percentage) — carried as text because outlets don't share one scale,
+ * never normalised into a fake universal number.
+ */
+export type GameCriticQuote = {
+  outlet: string
+  quote?: string
+  score?: string
+  source: string
+}
+
 export type Game = {
   rank: number
   title: string
@@ -230,6 +249,13 @@ export type Game = {
   youtubeId?: string
   blurb: string
   /**
+   * A real synopsis — what the game actually is: genre, setting, what you do
+   * — distinct from `blurb`'s one-line editorial hook. Merged on at runtime
+   * from src/data/game-facts.ts, like `fact` and `editorial`. Absent is a
+   * normal, designed state; the artifact view falls back to `blurb` alone.
+   */
+  description?: string
+  /**
    * Researched fact, merged on at runtime from src/data/game-facts.ts.
    * Absent is a normal, designed state — the artifact view renders the
    * block only when present.
@@ -241,6 +267,12 @@ export type Game = {
    * state: the block only renders when a sourced write-up exists.
    */
   editorial?: { body: string; source: string }
+  /**
+   * Real, sourced review excerpts — never invented or paraphrased from
+   * memory. Absent (or an empty array) is a normal, designed state: the
+   * artifact view omits the whole block when nothing checkable was found.
+   */
+  criticReception?: GameCriticQuote[]
   /** US launch MSRP. Absent whenever no credible source was found. */
   msrpUsd?: number
   /** Inflation-adjusted to 2025 dollars, matching the console data's convention. */

@@ -48,6 +48,17 @@ public/material-evidence/
 # not something to ship without a deliberate choice. See src/data/covers.ts.
 public/covers/
 
+# Spine and back box-art scans, hand-sourced (no fetch script — see each
+# generated manifest's own doc comment) — same opt-in-only reasoning as
+# public/covers/ above. See src/data/covers.ts.
+public/covers-spine/
+public/covers-back/
+
+# Real title-logo graphics fetched from SteamGridDB by scripts/fetch-logos.mjs
+# — same reasoning and the same opt-in-only contract as public/covers/ above.
+# See src/data/logos.ts.
+public/logos/
+
 # API keys for local scripts (e.g. STEAMGRIDDB_KEY for scripts/fetch-covers.mjs).
 .env
 .env.local

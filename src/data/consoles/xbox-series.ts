@@ -27,7 +27,7 @@ export const xboxSeries: ConsoleEntry = {
   msrpUsdAdjusted: 610,
   tagline: 'Power your dreams.',
   summary:
-    'Microsoft launched two consoles on the same day: the Series X, a 30cm black tower built around raw performance, and the Series S, a small white box at $299 with no disc drive, aimed at people who had already stopped buying discs. Both run the same games. The generation\'s real argument, though, was never about the hardware — it was about whether you should buy games at all. Game Pass puts hundreds of titles, including every Microsoft release on the day it launches, behind a monthly fee, and Microsoft spent $69 billion acquiring Activision Blizzard to feed it. The console is fast and quiet and largely uncontroversial; the business model around it is the thing being argued over.',
+    'Microsoft launched two consoles on the same day: the Series X, a 30cm black tower built around raw performance, and the Series S, a small white box at $299 with no disc drive, aimed at people who had already stopped buying discs. Both run the same games. The generation\'s real argument, though, was never about the hardware: it was about whether you should buy games at all. Game Pass puts hundreds of titles, including every Microsoft release on the day it launches, behind a monthly fee, and Microsoft spent $69 billion acquiring Activision Blizzard to feed it. The console is fast and quiet and largely uncontroversial; the business model around it is the thing being argued over.',
 
   specs: {
     cpu: 'AMD Zen 2, eight cores',
@@ -45,7 +45,7 @@ export const xboxSeries: ConsoleEntry = {
       label: 'Storage speed',
       value: '2.4 GB/s',
       comparison:
-        'The custom SSD is roughly forty times faster than the Xbox One\'s hard drive. Loading screens stopped being a design constraint — Quick Resume holds several suspended games at once and returns to any of them in seconds.',
+        'The custom SSD is roughly forty times faster than the Xbox One\'s hard drive. Loading screens stopped being a design constraint: Quick Resume holds several suspended games at once and returns to any of them in seconds.',
     },
     {
       label: 'Two consoles, one library',
@@ -77,22 +77,22 @@ export const xboxSeries: ConsoleEntry = {
   hardwareDiagram: {
     callouts: [
       {
-        label: 'Power button — the Xbox logo, top-left',
+        label: 'Power button: the Xbox logo, top-left',
         anchor: [-0.045, 0.26, 0.076],
         labelOffset: [-0.02, 0.035, 0],
       },
       {
-        label: 'Disc slot — bottom-left, pairing button beside it',
+        label: 'Disc slot: bottom-left, pairing button beside it',
         anchor: [-0.045, 0.05, 0.076],
         labelOffset: [-0.03, 0.03, 0],
       },
       {
-        label: 'USB port — bottom-right of the front',
+        label: 'USB port: bottom-right of the front',
         anchor: [0.045, 0.035, 0.076],
         labelOffset: [0.03, 0.025, 0],
       },
       {
-        label: 'Top fan vent — the chimney',
+        label: 'Top fan vent: the chimney',
         anchor: [0.01, 0.293, 0.01],
         labelOffset: [0, 0.03, 0],
       },
@@ -118,7 +118,7 @@ export const xboxSeries: ConsoleEntry = {
       name: 'Xbox Series S',
       model: '/models/consoles/xbox-series-s.glb',
       mediaArchetype: 'bluray-case',
-      note: 'The all-digital tier: 275 x 151 x 63.5mm, white, with a large black circular vent on one face and no disc drive at all — the first mainline Xbox that cannot play a disc you already own. Same games, about a third of the graphics power, $200 cheaper.',
+      note: 'The all-digital tier: 275 x 151 x 63.5mm, white, with a large black circular vent on one face and no disc drive at all. The first mainline Xbox that cannot play a disc you already own. Same games, about a third of the graphics power, $200 cheaper.',
     },
   ],
 
@@ -132,7 +132,7 @@ export const xboxSeries: ConsoleEntry = {
       // height 60 (thickness), depth 103 (front-to-back).
       dimensions: { width: 151, height: 60, depth: 103 },
       innovations: [
-        'A hybrid d-pad — a dish with eight faceted edges, borrowing the octagonal-gate idea from the GameCube to make diagonals findable by feel.',
+        'A hybrid d-pad: a dish with eight faceted edges, borrowing the octagonal-gate idea from the GameCube to make diagonals findable by feel.',
         'A dedicated Share button, acknowledging that recording and posting play is now a default part of using a console.',
         'Textured grips moulded into the triggers and bumpers rather than applied as a coating that wears off.',
       ],
@@ -161,22 +161,22 @@ export const xboxSeries: ConsoleEntry = {
     {
       id: 'two-consoles-one-launch',
       title: 'Two machines, one library, permanently',
-      body: 'The Series S is not a cost-reduced model released later — it launched the same day as the Series X at $200 less, with no disc drive and roughly a third of the graphics power, and every game must run on both. Developers have to build for the weaker box as a hard requirement, which is the most-argued-about technical constraint of the generation.',
+      body: 'The Series S is not a cost-reduced model released later: it launched the same day as the Series X at $200 less, with no disc drive and roughly a third of the graphics power, and every game must run on both. Developers have to build for the weaker box as a hard requirement, which is the most-argued-about technical constraint of the generation.',
     },
     {
       id: 'quick-resume',
       title: 'Several games suspended at once',
-      body: 'Quick Resume writes a game\'s entire memory state to the SSD and restores it in seconds, for multiple games simultaneously. You can leave one mid-mission, play something else for a week, and come back to the same frame — a feature that only became possible once storage got fast enough to make the console\'s memory disposable.',
+      body: 'Quick Resume writes a game\'s entire memory state to the SSD and restores it in seconds, for multiple games simultaneously. You can leave one mid-mission, play something else for a week, and come back to the same frame: a feature that only became possible once storage got fast enough to make the console\'s memory disposable.',
     },
     {
       id: 'game-pass-bet',
       title: 'A console built to be optional',
-      body: 'Microsoft puts every game it publishes on Game Pass the day it releases, streams the same library to phones, tablets and televisions with no console at all, and sells its games on rival storefronts. The strategy treats the box under the television as one way in rather than the thing being sold — a genuine departure from a hundred million units of console-exclusive thinking.',
+      body: 'Microsoft puts every game it publishes on Game Pass the day it releases, streams the same library to phones, tablets and televisions with no console at all, and sells its games on rival storefronts. The strategy treats the box under the television as one way in rather than the thing being sold: a genuine departure from a hundred million units of console-exclusive thinking.',
     },
     {
       id: 'the-fridge',
       title: 'It looks like a fridge, and Microsoft leaned in',
-      body: 'The Series X\'s monolithic shape drew immediate comparisons to a small refrigerator. Microsoft responded by building an actual Xbox-shaped mini fridge, giving it away in a competition, and then selling it at retail — merchandise made entirely out of a joke at the product\'s expense.',
+      body: 'The Series X\'s monolithic shape drew immediate comparisons to a small refrigerator. Microsoft responded by building an actual Xbox-shaped mini fridge, giving it away in a competition, and then selling it at retail: merchandise made entirely out of a joke at the product\'s expense.',
     },
   ],
 
@@ -184,7 +184,7 @@ export const xboxSeries: ConsoleEntry = {
     {
       id: 'hdmi-handshake',
       name: 'HDMI 2.1 handshake failure',
-      body: 'At 4K and 120 Hz the console and the television have to agree on a mode over HDMI 2.1, and early televisions frequently got it wrong — a black screen, or a picture that drops out every few minutes, fixed only by forcing a lower refresh rate.',
+      body: 'At 4K and 120 Hz the console and the television have to agree on a mode over HDMI 2.1, and early televisions frequently got it wrong: a black screen, or a picture that drops out every few minutes, fixed only by forcing a lower refresh rate.',
       target: 'power_logo',
       effect: 'no-signal',
     },
@@ -240,7 +240,7 @@ export const xboxSeries: ConsoleEntry = {
     { rank: 1, title: 'Call of Duty: Modern Warfare II', year: 2022, unitsSold: 3_200_000, developer: 'Infinity Ward', publisher: 'Activision', blurb: 'Took a billion dollars in ten days across all platforms, the fastest the series has ever managed.' },
     { rank: 2, title: 'Starfield', year: 2023, unitsSold: 2_800_000, developer: 'Bethesda Game Studios', publisher: 'Bethesda Softworks', blurb: 'Bethesda\'s first new universe in twenty-five years, and the biggest test of Microsoft\'s day-one Game Pass strategy.' },
     { rank: 3, title: 'Halo Infinite', year: 2021, unitsSold: 2_400_000, developer: '343 Industries', publisher: 'Xbox Game Studios', blurb: 'Returned Halo to an open landscape, and gave away its multiplayer for free as a separate download.' },
-    { rank: 4, title: 'Forza Horizon 5', year: 2021, unitsSold: 2_200_000, developer: 'Playground Games', publisher: 'Xbox Game Studios', blurb: 'Ten million players in its first week — the biggest launch in Xbox Game Studios history at the time.' },
+    { rank: 4, title: 'Forza Horizon 5', year: 2021, unitsSold: 2_200_000, developer: 'Playground Games', publisher: 'Xbox Game Studios', blurb: 'Ten million players in its first week: the biggest launch in Xbox Game Studios history at the time.' },
     { rank: 5, title: 'Elden Ring', year: 2022, unitsSold: 2_000_000, developer: 'FromSoftware', publisher: 'Bandai Namco', blurb: 'FromSoftware\'s formula in an open world written with George R. R. Martin, and the runaway critical success of the generation.' },
     { rank: 6, title: 'FIFA 23', year: 2022, unitsSold: 1_800_000, developer: 'EA Vancouver', publisher: 'EA Sports', blurb: 'The last game to carry the FIFA name after a thirty-year licensing partnership ended.' },
     { rank: 7, title: 'Diablo IV', year: 2023, unitsSold: 1_500_000, developer: 'Blizzard Entertainment', publisher: 'Blizzard Entertainment', blurb: 'Released weeks before Microsoft\'s acquisition of its publisher finally closed.' },

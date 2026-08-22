@@ -26,7 +26,7 @@ export const switch2: ConsoleEntry = {
   msrpUsdAdjusted: 460,
   tagline: 'The same idea, sharpened.',
   summary:
-    'Nintendo has a history of following a hit with something strange, and it has usually gone badly — the Wii U is the clearest example. The Switch 2 does the opposite: a 7.9-inch 1080p screen instead of a 6.2-inch 720p one, 4K when docked, magnetic Joy-Cons that attach with a satisfying snap instead of sliding down a rail, and a library that runs almost everything from the original console. The one genuinely new idea is mouse mode — set a Joy-Con on its edge on a table and it works as a mouse, which makes strategy games and shooters playable in a way no console pad manages. It sold faster in its first four days than any console in history.',
+    'Nintendo has a history of following a hit with something strange, and it has usually gone badly: the Wii U is the clearest example. The Switch 2 does the opposite: a 7.9-inch 1080p screen instead of a 6.2-inch 720p one, 4K when docked, magnetic Joy-Cons that attach with a satisfying snap instead of sliding down a rail, and a library that runs almost everything from the original console. The one genuinely new idea is mouse mode: set a Joy-Con on its edge on a table and it works as a mouse, which makes strategy games and shooters playable in a way no console pad manages. It sold faster in its first four days than any console in history.',
 
   specs: {
     cpu: 'Custom NVIDIA T239, eight ARM Cortex-A78C cores',
@@ -50,7 +50,7 @@ export const switch2: ConsoleEntry = {
       label: 'The screen',
       value: '7.9in, 1080p, 120 Hz',
       comparison:
-        'Against the original\'s 6.2-inch 720p panel — roughly 62% more area and more than twice the pixels, on a console whose entire premise is that you look at it up close.',
+        'Against the original\'s 6.2-inch 720p panel: roughly 62% more area and more than twice the pixels, on a console whose entire premise is that you look at it up close.',
     },
     {
       label: 'Mouse mode',
@@ -96,7 +96,7 @@ export const switch2: ConsoleEntry = {
       dimensions: { width: 158, height: 62, depth: 108 },
       innovations: [
         'Magnetic attachment: the controllers snap onto the tablet and release with a button rather than sliding down a rail, which was the original\'s most-worn part.',
-        'Mouse mode — an optical sensor on the inner edge, so standing a Joy-Con up on a table turns it into a mouse.',
+        'Mouse mode: an optical sensor on the inner edge, so standing a Joy-Con up on a table turns it into a mouse.',
         'A dedicated C button for GameChat, putting voice and screen sharing with friends into the system rather than a separate app.',
       ],
       buttons: [
@@ -123,17 +123,17 @@ export const switch2: ConsoleEntry = {
     {
       id: 'iteration-not-reinvention',
       title: 'Nintendo chose not to be strange',
-      body: 'Nintendo\'s pattern for thirty years was to answer a hit with something structurally different — and the Wii to Wii U transition cost it 87% of its audience. The Switch 2 is deliberately the same machine with better parts and a name that says so. For a company whose identity is built on doing the unexpected, shipping the obvious sequel was the genuinely unusual decision.',
+      body: 'Nintendo\'s pattern for thirty years was to answer a hit with something structurally different: the Wii to Wii U transition cost it 87% of its audience. The Switch 2 is deliberately the same machine with better parts and a name that says so. For a company whose identity is built on doing the unexpected, shipping the obvious sequel was the genuinely unusual decision.',
     },
     {
       id: 'mouse-mode',
       title: 'The controller is also a mouse',
-      body: 'Each Joy-Con 2 has an optical sensor on the edge that faces inward when attached. Stand the controller on its side on a table and it tracks like a mouse — which finally makes strategy games, shooters and drawing tools work properly on a console, a gap that has existed since the medium moved to living rooms.',
+      body: 'Each Joy-Con 2 has an optical sensor on the edge that faces inward when attached. Stand the controller on its side on a table and it tracks like a mouse, which finally makes strategy games, shooters and drawing tools work properly on a console, a gap that has existed since the medium moved to living rooms.',
     },
     {
       id: 'magnets-not-rails',
       title: 'Magnets, because the rails wore out',
-      body: 'The original Joy-Cons slid onto a rail, and both the rail lock and the sticks inside became the console\'s best-known faults. The Switch 2 attaches its controllers magnetically with a release button, removing the sliding mechanism entirely — a design change that reads as a direct answer to eight years of repair complaints.',
+      body: 'The original Joy-Cons slid onto a rail, and both the rail lock and the sticks inside became the console\'s best-known faults. The Switch 2 attaches its controllers magnetically with a release button, removing the sliding mechanism entirely, a design change that reads as a direct answer to eight years of repair complaints.',
     },
     {
       id: 'fastest-launch',
@@ -153,7 +153,7 @@ export const switch2: ConsoleEntry = {
     {
       id: 'card-key-only',
       name: 'Game-Key Card with no game on it',
-      body: 'Some retail cards are "Game-Key Cards": the cartridge holds a licence rather than the game, and the console must download the rest. Insert one without an internet connection and it will not play at all — a physical copy that is not, in itself, a copy.',
+      body: 'Some retail cards are "Game-Key Cards": the cartridge holds a licence rather than the game, and the console must download the rest. Insert one without an internet connection and it will not play at all: a physical copy that is not, in itself, a copy.',
       target: 'card_slot',
       effect: 'no-signal',
     },
@@ -203,7 +203,7 @@ export const switch2: ConsoleEntry = {
     { rank: 2, title: 'Donkey Kong Bananza', year: 2025, unitsSold: 3_490_000, developer: 'Nintendo EPD', publisher: 'Nintendo', blurb: 'A 3D Donkey Kong built around destroying terrain, from the team behind Super Mario Odyssey.' },
     { rank: 3, title: 'Super Mario Party Jamboree – Nintendo Switch 2 Edition', year: 2025, unitsSold: 1_950_000, developer: 'Nd Cube', publisher: 'Nintendo', blurb: 'Adds minigames built specifically around mouse mode and the console\'s camera support.' },
     { rank: 4, title: 'Kirby and the Forgotten Land – Nintendo Switch 2 Edition', year: 2025, unitsSold: 1_140_000, developer: 'HAL Laboratory', publisher: 'Nintendo', blurb: 'The Switch game rebuilt at higher resolution with a substantial new chapter attached.' },
-    { rank: 5, title: 'The Legend of Zelda: Breath of the Wild – Nintendo Switch 2 Edition', year: 2025, unitsSold: 1_020_000, developer: 'Nintendo EPD', publisher: 'Nintendo', blurb: 'The 2017 game at a steady frame rate and higher resolution — its third console in eight years.' },
+    { rank: 5, title: 'The Legend of Zelda: Breath of the Wild – Nintendo Switch 2 Edition', year: 2025, unitsSold: 1_020_000, developer: 'Nintendo EPD', publisher: 'Nintendo', blurb: 'The 2017 game at a steady frame rate and higher resolution: its third console in eight years.' },
     { rank: 6, title: 'Cyberpunk 2077: Ultimate Edition', year: 2025, unitsSold: 900_000, developer: 'CD Projekt Red', publisher: 'CD Projekt', blurb: 'A launch-day port that served as the evidence the console could hold large third-party games.' },
     { rank: 7, title: 'Split Fiction', year: 2025, unitsSold: 780_000, developer: 'Hazelight Studios', publisher: 'Electronic Arts', blurb: 'Co-op only, with a free pass letting a second player join without buying a copy.' },
     { rank: 8, title: 'Street Fighter 6', year: 2025, unitsSold: 620_000, developer: 'Capcom', publisher: 'Capcom', blurb: 'Shipped with a mode using the Joy-Con\'s mouse sensor for a fighting game, which nobody expected to work.' },

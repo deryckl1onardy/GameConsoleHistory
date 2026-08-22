@@ -28,7 +28,7 @@ export const genesis: ConsoleEntry = {
   msrpUsdAdjusted: 480,
   tagline: 'Genesis does what Nintendon\'t.',
   summary:
-    'Sega had a two-year head start on the SNES and a processor that was, on paper, simply faster — and under Tom Kalinske, Sega of America decided the way to spend that lead was to attack Nintendo directly, by name, in national advertising. "Genesis does what Nintendon\'t" was blunt in a market that had never been blunt before, and it worked: Sega took real market share from a company that had spent most of the decade unchallenged. The console\'s biggest weapon didn\'t exist yet at launch — Sonic the Hedgehog arrived two years in, bundled in place of the pack-in game everyone had been using, and gave the whole marketing campaign a mascot fast enough to make the point without saying a word.',
+    'Sega had a two-year head start on the SNES and a processor that was, on paper, simply faster. Under Tom Kalinske, Sega of America decided the way to spend that lead was to attack Nintendo directly, by name, in national advertising. "Genesis does what Nintendon\'t" was blunt in a market that had never been blunt before, and it worked: Sega took real market share from a company that had spent most of the decade unchallenged. The console\'s biggest weapon didn\'t exist yet at launch: Sonic the Hedgehog arrived two years in, bundled in place of the pack-in game everyone had been using, and gave the whole marketing campaign a mascot fast enough to make the point without saying a word.',
 
   specs: {
     cpu: 'Motorola 68000',
@@ -46,25 +46,25 @@ export const genesis: ConsoleEntry = {
       label: 'CPU clock speed',
       value: '7.6 MHz',
       comparison:
-        'More than twice the SNES\'s 3.58 MHz — the entire "Sega is faster" marketing claim was, on this one number, simply true.',
+        'More than twice the SNES\'s 3.58 MHz: the entire "Sega is faster" marketing claim was, on this one number, simply true.',
     },
     {
       label: 'The tagline',
       value: '"...Nintendon\'t"',
       comparison:
-        'The first time a console maker had named its market leader in an ad, rather than talking around it — an entire genre of confrontational tech marketing traces back to this one campaign.',
+        'The first time a console maker had named its market leader in an ad, rather than talking around it: an entire genre of confrontational tech marketing traces back to this one campaign.',
     },
     {
       label: 'Sonic, the pack-in',
       value: '15M sold',
       comparison:
-        'Bundling a fast platformer instead of a launch-era arcade port doubled as a technology demo — the whole game was built to prove the hardware could keep up with its own mascot.',
+        'Bundling a fast platformer instead of a launch-era arcade port doubled as a technology demo: the whole game was built to prove the hardware could keep up with its own mascot.',
     },
     {
       label: 'FM synthesis chip',
       value: 'Yamaha YM2612',
       comparison:
-        'The same family of chip used in real electronic keyboards of the era — the Genesis sound library is full of tones that were never designed for a game console at all.',
+        'The same family of chip used in real electronic keyboards of the era: the Genesis sound library is full of tones that were never designed for a game console at all.',
     },
   ],
 
@@ -79,22 +79,22 @@ export const genesis: ConsoleEntry = {
     renderBox: { x: [-0.1362, 0.1362], y: [0, 0.0604], z: [-0.1037, 0.1037] },
     callouts: [
       {
-        label: 'Power switch — front left',
+        label: 'Power switch: front left',
         anchor: [-0.1, 0.045, 0.07],
         labelOffset: [-0.035, 0.045, 0.005],
       },
       {
-        label: 'Reset button — front right',
+        label: 'Reset button: front right',
         anchor: [0.1, 0.045, 0.07],
         labelOffset: [0.035, 0.045, 0.005],
       },
       {
-        label: 'Cartridge slot — top, toward the back',
+        label: 'Cartridge slot: top, toward the back',
         anchor: [0, 0.058, -0.05],
         labelOffset: [0, 0.03, -0.01],
       },
       {
-        label: 'Controller ports (×3) — across the front bottom',
+        label: 'Controller ports (×3): across the front bottom',
         anchor: [0, 0.013, 0.102],
         labelOffset: [0, 0.03, 0.01],
       },
@@ -124,7 +124,7 @@ export const genesis: ConsoleEntry = {
       // (thickness, the smallest), depth 98 (front-to-back in the hand).
       dimensions: { width: 165, height: 40.6, depth: 98 },
       innovations: [
-        'Three face buttons in a row (A, B, C) instead of two — built for the arcade-style games Sega\'s own arcade division was already making.',
+        'Three face buttons in a row (A, B, C) instead of two: built for the arcade-style games Sega\'s own arcade division was already making.',
         'A rounded, contoured "wing" grip shape, a real departure from the flat rectangular brick every 8-bit pad before it had used.',
       ],
       buttons: [
@@ -144,17 +144,17 @@ export const genesis: ConsoleEntry = {
     {
       id: 'attack-ads',
       title: 'It said the competitor\'s name on television',
-      body: 'Before "Genesis does what Nintendon\'t," console advertising simply did not name the competition. Tom Kalinske\'s marketing team broke that norm deliberately, and it defined an entire era of tech advertising that followed — attacking a market leader by name became a normal thing to do only after Sega proved it worked.',
+      body: 'Before "Genesis does what Nintendon\'t," console advertising simply did not name the competition. Tom Kalinske\'s marketing team broke that norm deliberately, and it defined an entire era of tech advertising that followed: attacking a market leader by name became a normal thing to do only after Sega proved it worked.',
     },
     {
       id: 'sonic-mid-cycle',
       title: 'The mascot arrived two years late, on purpose',
-      body: 'Sonic the Hedgehog did not launch with the console — it replaced Altered Beast as the pack-in game in 1991, two years into the Genesis\'s life, once Sega had a character built specifically to demonstrate the hardware\'s speed. Swapping the bundled game mid-cycle was itself unusual; doing it to double as a walking tech demo was more unusual still.',
+      body: 'Sonic the Hedgehog did not launch with the console: it replaced Altered Beast as the pack-in game in 1991, two years into the Genesis\'s life, once Sega had a character built specifically to demonstrate the hardware\'s speed. Swapping the bundled game mid-cycle was itself unusual; doing it to double as a walking tech demo was more unusual still.',
     },
     {
       id: 'two-year-head-start',
       title: 'A two-year head start Nintendo had to answer from behind',
-      body: 'The Genesis reached Japan in October 1988 and North America the following August — nearly two full years before the SNES existed anywhere. It is the only console generation in which Nintendo entered as the follower rather than the incumbent.',
+      body: 'The Genesis reached Japan in October 1988 and North America the following August, nearly two full years before the SNES existed anywhere. It is the only console generation in which Nintendo entered as the follower rather than the incumbent.',
     },
     {
       id: 'faster-chip-real-claim',
@@ -167,14 +167,14 @@ export const genesis: ConsoleEntry = {
     {
       id: 'sega-scream-static',
       name: 'Cartridge connector static',
-      body: 'A worn 64-pin cartridge connector produces the same corrupted-graphics symptom nearly every cartridge console of this era shared — flickering, scrambled sprites, or a game that hangs at boot until reseated.',
+      body: 'A worn 64-pin cartridge connector produces the same corrupted-graphics symptom nearly every cartridge console of this era shared: flickering, scrambled sprites, or a game that hangs at boot until reseated.',
       target: 'cart_slot',
       effect: 'screen-garbage',
     },
     {
       id: 'ym2612-drift',
       name: 'Sound chip degradation',
-      body: 'Capacitors around the YM2612 FM synthesis chip age and dry out over decades, and the console\'s music slowly drifts from crisp synthesizer tones toward muffled, distorted or silent audio — a slow failure many owners do not notice until it is already severe.',
+      body: 'Capacitors around the YM2612 FM synthesis chip age and dry out over decades, and the console\'s music slowly drifts from crisp synthesizer tones toward muffled, distorted or silent audio, a slow failure many owners do not notice until it is already severe.',
       target: 'shell',
       effect: 'dim',
     },
@@ -222,9 +222,9 @@ export const genesis: ConsoleEntry = {
 
   games: [
     { rank: 1, title: 'Sonic the Hedgehog', year: 1991, unitsSold: 15_000_000, developer: 'Sonic Team', publisher: 'Sega', blurb: 'Replaced the launch pack-in game two years into the console\'s life, and became the reason most people remember the Genesis at all.' },
-    { rank: 2, title: 'Sonic the Hedgehog 2', year: 1992, unitsSold: 7_550_000, developer: 'Sonic Team', publisher: 'Sega', blurb: 'Added Tails and the spin dash, and shipped alongside a genuinely global simultaneous release event — "Sonic 2sday."' },
+    { rank: 2, title: 'Sonic the Hedgehog 2', year: 1992, unitsSold: 7_550_000, developer: 'Sonic Team', publisher: 'Sega', blurb: 'Added Tails and the spin dash, and shipped alongside a genuinely global simultaneous release event: "Sonic 2sday."' },
     { rank: 3, title: 'Sonic the Hedgehog 3 & Knuckles', year: 1994, unitsSold: 6_000_000, developer: 'Sonic Team', publisher: 'Sega', blurb: 'Originally one game, split in two by disc-cost and deadline pressure, then reunited by a cartridge that could physically lock onto its predecessor.' },
-    { rank: 4, title: 'Mortal Kombat', year: 1993, unitsSold: 4_330_000, developer: 'Probe Entertainment', publisher: 'Acclaim', blurb: 'Sold with its blood intact via a cheat code, while the SNES version shipped censored — a real reason some households picked Sega.' },
+    { rank: 4, title: 'Mortal Kombat', year: 1993, unitsSold: 4_330_000, developer: 'Probe Entertainment', publisher: 'Acclaim', blurb: 'Sold with its blood intact via a cheat code, while the SNES version shipped censored, a real reason some households picked Sega.' },
     { rank: 5, title: 'Disney\'s Aladdin', year: 1993, unitsSold: 4_000_000, developer: 'Virgin Games', publisher: 'Sega', blurb: 'Animated in part by actual Disney animators, and widely considered to have beaten its SNES counterpart on visuals alone.' },
     { rank: 6, title: 'Sonic Spinball', year: 1993, unitsSold: 3_200_000, developer: 'Sega Technical Institute', publisher: 'Sega', blurb: 'A pinball game wearing a platformer\'s mascot, built fast to fill a holiday release gap.' },
     { rank: 7, title: 'Streets of Rage 2', year: 1992, unitsSold: 2_500_000, developer: 'Sega', publisher: 'Sega', blurb: 'A beat-em-up soundtrack so good it is still cited as one of the finest FM-synth scores ever written for a console.' },

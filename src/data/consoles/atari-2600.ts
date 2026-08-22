@@ -33,12 +33,12 @@ export const atari2600: ConsoleEntry = {
   msrpUsdAdjusted: 1010,
   tagline: 'The console that invented the industry, then nearly buried it.',
   summary:
-    'The Atari 2600 has no framebuffer. Its Television Interface Adaptor generates each scanline in real time, racing the electron beam across the tube as it draws — the entire console is, electrically, a chip trying to stay one step ahead of a television. That constraint produced an entire genre of programmer folklore: counting cycles, exploiting the beam\'s own timing, coaxing 128 bytes of RAM into holding a whole game\'s state. It launched in 1977 and was still being sold new in 1992, a fifteen-year run spanning from the year of Star Wars to the year of Sonic 2. In between, it also absorbed the industry\'s first real catastrophe: an oversaturated market of third-party games, a rushed movie tie-in, and a 1983 crash so complete that Atari reportedly buried unsold cartridges in a New Mexico landfill — a story confirmed true by an actual excavation in 2014.',
+    'The Atari 2600 has no framebuffer. Its Television Interface Adaptor generates each scanline in real time, racing the electron beam across the tube as it draws. The entire console is, electrically, a chip trying to stay one step ahead of a television. That constraint produced an entire genre of programmer folklore: counting cycles, exploiting the beam\'s own timing, coaxing 128 bytes of RAM into holding a whole game\'s state. It launched in 1977 and was still being sold new in 1992, a fifteen-year run spanning from the year of Star Wars to the year of Sonic 2. In between, it also absorbed the industry\'s first real catastrophe: an oversaturated market of third-party games, a rushed movie tie-in, and a 1983 crash so complete that Atari reportedly buried unsold cartridges in a New Mexico landfill, a story confirmed true by an actual excavation in 2014.',
 
   specs: {
     cpu: 'MOS Technology 6507',
     cpuClockMhz: 1.19,
-    ram: '128 bytes RAM — no video RAM; every frame is generated live, scanline by scanline',
+    ram: '128 bytes RAM (no video RAM); every frame is generated live, scanline by scanline',
     ramBytes: 128,
     resolution: '160×192 visible (NTSC), 228 lines (PAL)',
     colors: '16 on screen at once (NTSC) from a palette of 128',
@@ -51,7 +51,7 @@ export const atari2600: ConsoleEntry = {
       label: 'Working memory',
       value: '128 bytes',
       comparison:
-        'Not kilobytes — bytes. The paragraph above this one, as plain text, is already larger than the entire RAM of the console that ran it.',
+        'Not kilobytes. Bytes. The paragraph above this one, as plain text, is already larger than the entire RAM of the console that ran it.',
     },
     {
       label: 'No framebuffer',
@@ -84,17 +84,17 @@ export const atari2600: ConsoleEntry = {
     renderBox: { x: [-0.1418, 0.1418], y: [0, 0.1], z: [-0.1257, 0.1257] },
     callouts: [
       {
-        label: 'The toggle switches — power, select, difficulty and reset, in a row',
+        label: 'The toggle switches: power, select, difficulty and reset, in a row',
         anchor: [0, 0.084, -0.04],
         labelOffset: [0, 0.045, -0.015],
       },
       {
-        label: 'Cartridge slot — the bay on top',
+        label: 'Cartridge slot: the bay on top',
         anchor: [0, 0.098, 0.03],
         labelOffset: [0, 0.03, 0.02],
       },
       {
-        label: 'Controller ports (×2) — DB9 sockets on the right side',
+        label: 'Controller ports (×2): DB9 sockets on the right side',
         anchor: [0.14, 0.05, -0.03],
         labelOffset: [0.035, 0.04, 0.01],
       },
@@ -122,7 +122,7 @@ export const atari2600: ConsoleEntry = {
       // the "height" is the stick's own vertical throw, not a resting profile.
       dimensions: { width: 101.6, height: 127, depth: 101.6 },
       innovations: [
-        'The first genuinely cross-platform game controller — its 9-pin connector was copied by Sega, Commodore and MSX for over a decade after the 2600 itself was gone.',
+        'The first genuinely cross-platform game controller. Its 9-pin connector was copied by Sega, Commodore and MSX for over a decade after the 2600 itself was gone.',
         'One digital 8-way stick, one fire button. Every design that followed added to this; nothing before it had settled on it.',
       ],
       // No position/shape data: a vertical stick has no equivalent in this
@@ -138,22 +138,22 @@ export const atari2600: ConsoleEntry = {
     {
       id: 'racing-the-beam',
       title: 'The chip that raced the television',
-      body: 'The 2600 has no framebuffer — no memory chip anywhere on the board holds a finished picture. The Television Interface Adaptor generates video by reacting to the position of the TV\'s own electron beam as it happens, line by line, 60 times a second. Programmers had to write code that finished each scanline\'s work inside the exact number of processor cycles the beam took to cross the screen. Miss the timing and the picture visibly breaks.',
+      body: 'The 2600 has no framebuffer: no memory chip anywhere on the board holds a finished picture. The Television Interface Adaptor generates video by reacting to the position of the TV\'s own electron beam as it happens, line by line, 60 times a second. Programmers had to write code that finished each scanline\'s work inside the exact number of processor cycles the beam took to cross the screen. Miss the timing and the picture visibly breaks.',
     },
     {
       id: 'et-five-weeks',
       title: 'Five weeks to make the most infamous game ever shipped',
-      body: 'Atari paid a reported $20–25 million for the E.T. license and wanted the game in stores for Christmas. Howard Scott Warshaw was given about five weeks to design, program and finish it — a fraction of a normal development cycle even by 1982 standards. The result became the public face of a crash it did not, by itself, cause.',
+      body: 'Atari paid a reported $20–25 million for the E.T. license and wanted the game in stores for Christmas. Howard Scott Warshaw was given about five weeks to design, program and finish it, a fraction of a normal development cycle even by 1982 standards. The result became the public face of a crash it did not, by itself, cause.',
     },
     {
       id: 'landfill-confirmed',
       title: 'The landfill story turned out to be true',
-      body: 'For thirty years it was treated as an urban legend: that Atari, drowning in unsold cartridges after 1983, buried millions of them — E.T. among them — in a landfill in Alamogordo, New Mexico. In 2014 a film crew got permission to actually dig. They found the cartridges.',
+      body: 'For thirty years it was treated as an urban legend: that Atari, drowning in unsold cartridges after 1983, buried millions of them, E.T. among them, in a landfill in Alamogordo, New Mexico. In 2014 a film crew got permission to actually dig. They found the cartridges.',
     },
     {
       id: 'oversaturation-not-et',
       title: 'E.T. got the blame; oversaturation did the damage',
-      body: 'By 1982 anyone could publish a 2600 cartridge with no approval process at all, and the market filled with games built to ship, not to be played. E.T. is remembered as the crash\'s cause because it was the biggest, most visible casualty — but the actual damage was years of third-party flooding and consumer trust collapsing under low-quality software, with or without a licensed alien.',
+      body: 'By 1982 anyone could publish a 2600 cartridge with no approval process at all, and the market filled with games built to ship, not to be played. E.T. is remembered as the crash\'s cause because it was the biggest, most visible casualty, but the actual damage was years of third-party flooding and consumer trust collapsing under low-quality software, with or without a licensed alien.',
     },
   ],
 
@@ -161,14 +161,14 @@ export const atari2600: ConsoleEntry = {
     {
       id: 'rf-drift',
       name: 'RF channel drift',
-      body: 'The 2600 connected to a TV over the antenna input, broadcasting on channel 2 or 3 through an RF modulator. That modulator drifts with age and heat, and the picture degrades into static and rolling snow until the TV is re-tuned by hand — a routine part of owning one, not a fault unique to any single unit.',
+      body: 'The 2600 connected to a TV over the antenna input, broadcasting on channel 2 or 3 through an RF modulator. That modulator drifts with age and heat, and the picture degrades into static and rolling snow until the TV is re-tuned by hand, a routine part of owning one, not a fault unique to any single unit.',
       target: 'shell',
       effect: 'screen-garbage',
     },
     {
       id: 'cartridge-corrosion',
       name: 'Cartridge contact corrosion',
-      body: 'Decades of oxidation on the cartridge\'s edge connector produces a scrambled, flickering title screen or a console that boots to noise — the same failure family as a dirty NES pin, on a slot with no spring-loaded ejector to help clean it.',
+      body: 'Decades of oxidation on the cartridge\'s edge connector produces a scrambled, flickering title screen or a console that boots to noise: the same failure family as a dirty NES pin, on a slot with no spring-loaded ejector to help clean it.',
       target: 'cart_slot',
       effect: 'screen-garbage',
     },
@@ -215,16 +215,16 @@ export const atari2600: ConsoleEntry = {
   },
 
   games: [
-    { rank: 1, title: 'Pac-Man', year: 1982, unitsSold: 8_095_586, developer: 'Tod Frye', publisher: 'Atari, Inc.', blurb: 'A rushed, flickering port of the arcade phenomenon — and still the best-selling game the 2600 ever had, on reputation alone.' },
+    { rank: 1, title: 'Pac-Man', year: 1982, unitsSold: 8_095_586, developer: 'Tod Frye', publisher: 'Atari, Inc.', blurb: 'A rushed, flickering port of the arcade phenomenon, and still the best-selling game the 2600 ever had, on reputation alone.' },
     { rank: 2, title: 'Space Invaders', year: 1980, unitsSold: 6_252_229, developer: 'Rick Maurer', publisher: 'Atari, Inc.', blurb: 'The killer app that quadrupled console sales overnight and proved arcade licenses could sell hardware.' },
-    { rank: 3, title: 'Donkey Kong', year: 1982, unitsSold: 4_000_000, developer: 'Garry Kitchen', publisher: 'Coleco', blurb: 'A Nintendo arcade game, ported by Coleco, selling consoles for a competitor entirely — an early lesson in how licensing actually works.' },
+    { rank: 3, title: 'Donkey Kong', year: 1982, unitsSold: 4_000_000, developer: 'Garry Kitchen', publisher: 'Coleco', blurb: 'A Nintendo arcade game, ported by Coleco, selling consoles for a competitor entirely: an early lesson in how licensing actually works.' },
     { rank: 4, title: 'Pitfall!', year: 1982, unitsSold: 4_000_000, developer: 'David Crane', publisher: 'Activision', blurb: 'Activision\'s answer to "what is a platformer" before the word existed, built by programmers who had just walked out of Atari.' },
     { rank: 5, title: 'Asteroids', year: 1981, unitsSold: 3_832_886, developer: 'Bradley G. Stewart', publisher: 'Atari, Inc.', blurb: 'Vector-arcade physics squeezed onto raster hardware that was never built for it.' },
-    { rank: 6, title: 'Defender', year: 1982, unitsSold: 3_040_684, developer: 'Bob Polaro', publisher: 'Atari, Inc.', blurb: 'Notoriously hard to control on a single-button joystick — a port fighting its own input device.' },
+    { rank: 6, title: 'Defender', year: 1982, unitsSold: 3_040_684, developer: 'Bob Polaro', publisher: 'Atari, Inc.', blurb: 'Notoriously hard to control on a single-button joystick, a port fighting its own input device.' },
     { rank: 7, title: 'E.T. the Extra-Terrestrial', year: 1982, unitsSold: 2_740_232, developer: 'Howard Scott Warshaw', publisher: 'Atari, Inc.', blurb: 'Five weeks of development, a $20+ million license, and the game every history of the industry mentions first.' },
     { rank: 8, title: 'Ms. Pac-Man', year: 1983, unitsSold: 2_311_428, developer: 'Mike Horowitz, Josh Littlefield', publisher: 'Atari, Inc.', blurb: 'A better port than the original, arriving after the market had already begun to collapse.' },
     { rank: 9, title: 'Demon Attack', year: 1982, unitsSold: 2_000_000, developer: 'Rob Fulop', publisher: 'Imagic', blurb: 'One of the third-party wave\'s genuine hits, from a studio of ex-Atari programmers who left over royalties.' },
-    { rank: 10, title: 'Night Driver', year: 1980, unitsSold: 1_990_643, developer: 'Rob Fulop', publisher: 'Atari, Inc.', blurb: 'A first-person racer rendered from a handful of moving dots — an early answer to "how much can this chip fake."' },
+    { rank: 10, title: 'Night Driver', year: 1980, unitsSold: 1_990_643, developer: 'Rob Fulop', publisher: 'Atari, Inc.', blurb: 'A first-person racer rendered from a handful of moving dots, an early answer to "how much can this chip fake."' },
   ],
 
   sources: [

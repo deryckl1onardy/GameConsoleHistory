@@ -39,9 +39,33 @@ describe('media archetypes', () => {
   })
 
   it('uses the industry-standard optical case sizes', () => {
-    expect(archetype('jewel-cd').dimensions).toEqual({ width: 125, height: 142, depth: 10 })
+    expect(archetype('jewel-cd').dimensions).toEqual({ width: 125, height: 142, depth: 10.4 })
     expect(archetype('dvd-keepcase').dimensions).toEqual({ width: 135, height: 190, depth: 14 })
     expect(archetype('bluray-case').dimensions).toEqual({ width: 135, height: 171, depth: 12 })
+  })
+
+  it('keeps the NA Saturn/Sega CD/PS1 longbox case distinctly bigger than a standard jewel case', () => {
+    // The NA case is not a standard jewel case — see the `jewel-longbox`
+    // entry's sourcing comment. It must stay taller AND thicker than
+    // jewel-cd, matching the "almost twice as thick and taller" account.
+    const jewel = archetype('jewel-cd').dimensions
+    const longbox = archetype('jewel-longbox').dimensions
+    expect(longbox.height).toBeGreaterThan(jewel.height)
+    expect(longbox.width).toBeGreaterThan(jewel.width)
+    expect(longbox.depth).toBeGreaterThan(jewel.depth)
+  })
+
+  it('keeps the Dreamcast square jewel case distinctly shorter and squarer than a standard jewel case', () => {
+    // See the `jewel-square` entry's sourcing comment — collectors call
+    // this the "square jewel case", shorter than jewel-cd's tall portrait
+    // shell but sharing the same shell width.
+    const jewel = archetype('jewel-cd').dimensions
+    const square = archetype('jewel-square').dimensions
+    expect(square.width).toBe(jewel.width)
+    expect(square.height).toBeLessThan(jewel.height)
+    // "Square" — width and height within a hair of each other, not a
+    // second tall portrait case under a different name.
+    expect(Math.abs(square.width - square.height)).toBeLessThan(5)
   })
 
   it('converts millimetres to scene metres', () => {
@@ -87,10 +111,11 @@ describe('media archetypes', () => {
       .filter((a) => a.precision === 'approximate')
       .map((a) => a.id)
     expect(approximate).toEqual([
-      'cart-atari-2600',
       'cart-nes',
-      'cart-sms',
+      'box-sms',
       'cart-genesis',
+      'jewel-square',
+      'jewel-longbox',
       'switch-case',
     ])
   })

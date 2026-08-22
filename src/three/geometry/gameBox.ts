@@ -118,12 +118,60 @@ export function labelPlane(a: MediaArchetype): LabelPlane | null {
 
 /**
  * Aspect ratio the cover artwork should be authored at for this archetype —
- * the label for cartridges, the whole front face for cases.
+ * the label for cartridges, the whole front face for cases. Also the aspect
+ * the BACK cover should be authored at: real game boxes print the back panel
+ * at the same footprint as the front, so there is no separate `backAspect`.
  */
 export function coverAspect(a: MediaArchetype): number {
   const l = a.cartridgeLabel
   if (l) return l.widthMm / l.heightMm
   return a.dimensions.width / a.dimensions.height
+}
+
+/**
+ * Aspect ratio the SPINE artwork should be authored at — the narrow strip
+ * read on a shelf, depth (width, once turned 90°) by height. Only meaningful
+ * for archetypes with `hasBackArt` (cartridges have no spine print at all,
+ * just the shell's own bare edge). Cartridges are allowed through this
+ * function anyway rather than throwing — a caller gates on `hasBackArt`
+ * before ever using the result, same convention as `labelPlane` returning
+ * `null` rather than every caller needing its own cartridge/case branch.
+ */
+export function spineAspect(a: MediaArchetype): number {
+  return a.dimensions.depth / a.dimensions.height
+}
+
+/**
+ * Whether this archetype's artwork is mapped straight onto the shell's own
+ * six faces (true) or printed on separate planes floating proud of it
+ * (false). The single switch behind two different constructions in
+ * GameBox.tsx — see `useShellGeometry` there for the geometry each one gets.
+ *
+ * The test is "does this archetype need an inset label", not the `kind`
+ * string, because that is the actual functional requirement. A cartridge's
+ * art is a sticker at its own real published size, offset from the face's
+ * centre — an NES label is 55x97mm on a 120x134mm shell, shifted right to
+ * clear the connector ridge. Face-mapped UVs cannot express that without
+ * baking the inset and the offset into every individual game's image, so
+ * cartridges keep the separate label plane, which is exactly the case that
+ * plane was invented for.
+ *
+ * Everything else — cardboard boxes, keepcases, jewel cases — prints
+ * full-bleed to the edges, where a floating plane buys nothing and costs
+ * real bugs: a plane must be positioned clear of the shell's own bevel or
+ * it renders INSIDE the solid geometry and vanishes (see GameBox.tsx's
+ * spine comment for the measured version of that failure). Painting the
+ * face itself makes that class of bug structurally impossible.
+ *
+ * The trade is corner rounding: the face-mapped path is a BoxGeometry, so
+ * `cornerRadiusMm` is not expressed for these archetypes. That is arguably
+ * more accurate for a printed cardboard carton, which really does have
+ * square corners, and a small loss for a moulded plastic case, which does
+ * not. Keyed on one predicate so that judgement can be revisited in one
+ * place rather than hunted through the renderer.
+ */
+export function printsPerFace(a: MediaArchetype): boolean {
+  return a.cartridgeLabel === null
 }
 
 /* ------------------------------------------------------------------ */

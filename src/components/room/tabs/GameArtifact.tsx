@@ -1,9 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Game } from '@/types/console'
 import { useActiveArchetypeId, useActiveConsole, useSelectedGame } from '@/store/scene'
 import { enrichGame } from '@/data/game-facts'
 import { attachRate, firstReleaseYear, yearsAfterLaunch } from '@/data/game-metrics'
 import { archetype as getArchetype } from '@/data/kits/media-archetypes'
+import { logoFor } from '@/data/logos'
 import { formatUnits } from '@/components/format'
 import { GlobeIcon } from '@/components/icons'
 import { COPY } from '../panel-copy'
@@ -12,11 +13,11 @@ import { COPY } from '../panel-copy'
  * The Game Artifact view: clicking one game in the Games section opens its
  * own detail, mirroring the console's panel rather than inventing a new one.
  *
- * DetailPanel owns the three-column grid; this file supplies the pieces that
- * fill it. The console section shows PanelSummary | tabbed body | FunFactCard;
- * the artifact shows GameArtifactSummary | GameArtifactBody | GameArtifactFact
- * in the same three regions, and `GameArtifact` stacks all three for the
- * compact single-scroll layout.
+ * DetailPanel owns the layout grid; this file supplies the games section's
+ * three columns — GameArtifactSummary | GameArtifactBody | GameArtifactFact
+ * (the console section is a single tab column instead; its own hero stats
+ * live inside OverviewTab now, not a sibling column here), and `GameArtifact`
+ * stacks all three for the compact single-scroll layout.
  *
  * Every researched block (fun fact, launch price) renders only when present.
  * Absence is a normal, designed state — the shell simply omits the block,
@@ -68,9 +69,8 @@ function ArtifactStat({
  * Left column: the game's hero stat (units sold), then the two derived
  * numbers — attach rate (share of the console's install base that bought it,
  * dropped when it exceeds 1.0) and how long after the console's first release
- * the game arrived — then the developer and publisher. Mirrors PanelSummary's
- * shape: numbers first, shrink-0, so they never scroll out of view in the
- * short panel.
+ * the game arrived — then the developer and publisher. Numbers come first
+ * and stay shrink-0, so they never scroll out of view in the short panel.
  */
 export function GameArtifactSummary({ compact = false }: { compact?: boolean }) {
   const entry = useActiveConsole()
@@ -125,6 +125,37 @@ export function GameArtifactSummary({ compact = false }: { compact?: boolean }) 
 }
 
 /**
+ * The game's title, as its real logo graphic (the stylised wordmark
+ * SteamGridDB's `/logos` endpoint returns — e.g. the "PAC-MAN" logotype)
+ * when `scripts/fetch-logos.mjs` found one, falling back to the plain-text
+ * heading otherwise. A game's name is never left blank waiting on a file.
+ *
+ * Also falls back on a load failure (`onError`), not just a missing manifest
+ * entry — the same posture as the cover art / cartridge label pipeline: a
+ * stale or bad path degrades to text instead of a broken-image icon.
+ * `key={src}` forces a fresh `<img>` per game so a previous game's error
+ * state can never leak onto the next one when only the src prop changes.
+ */
+function TitleGraphic({ consoleId, game }: { consoleId: string; game: Game }) {
+  const src = logoFor(consoleId, game)
+  const [failed, setFailed] = useState(false)
+
+  if (!src || failed) {
+    return <h3 className="font-display text-[26px] leading-tight text-ink">{game.title}</h3>
+  }
+
+  return (
+    <img
+      key={src}
+      src={src}
+      alt={game.title}
+      className="h-[46px] max-w-full object-contain object-left"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
+/**
  * Middle column: the game's editorial story. The cover figure is gone — the
  * 3D subject on stage and the floating list's thumbnails already carry the
  * box, so the panel spends its width on words instead: the title as an
@@ -139,6 +170,7 @@ export function GameArtifactSummary({ compact = false }: { compact?: boolean }) 
  * game from the list flies the camera to it, so there is no "back" to go to.
  */
 export function GameArtifactBody() {
+  const entry = useActiveConsole()
   const archetypeId = useActiveArchetypeId()
   const game = useEnrichedGame()
 
@@ -148,16 +180,48 @@ export function GameArtifactBody() {
 
   return (
     <div>
-      <h3 className="font-display text-[26px] leading-tight text-ink">{game.title}</h3>
+      <TitleGraphic consoleId={entry.id} game={game} />
       <p className="mt-1 text-[12px] text-ink/50">{game.year}</p>
 
-      {/* The lede — the game's own one-line story, leading into the editorial. */}
+      {/* The lede — the game's own one-line story, leading into the fuller synopsis. */}
       <p className="mt-4 text-[13px] leading-relaxed text-ink/70">{game.blurb}</p>
+
+      {game.description && (
+        <div className="mt-5 border-t border-ink/10 pt-4">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-amber/80">{COPY.gameDescription}</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-ink/75">{game.description}</p>
+        </div>
+      )}
 
       {game.editorial && (
         <div className="mt-5 border-t border-ink/10 pt-4" title={game.editorial.source}>
           <p className="text-[10px] uppercase tracking-[0.22em] text-amber/80">{COPY.gameEditorial}</p>
           <p className="mt-2 text-[13px] leading-relaxed text-ink/75">{game.editorial.body}</p>
+        </div>
+      )}
+
+      {game.criticReception && game.criticReception.length > 0 && (
+        <div className="mt-5 border-t border-ink/10 pt-4">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-amber/80">
+            {COPY.gameCriticReception}
+          </p>
+          <div className="mt-2 flex flex-col gap-3">
+            {game.criticReception.map((c) => (
+              <div key={c.outlet} title={c.source}>
+                {c.quote ? (
+                  <p className="text-[13px] leading-relaxed text-ink/75">
+                    &ldquo;{c.quote}&rdquo;
+                    {c.score && <span className="text-ink/45"> · {c.score}</span>}
+                  </p>
+                ) : (
+                  <p className="text-[13px] leading-relaxed text-ink/75">
+                    Scored <span className="tabular-nums">{c.score}</span>
+                  </p>
+                )}
+                <p className="mt-1 text-[11px] text-ink/45">{c.outlet}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

@@ -3,7 +3,6 @@ import { ROOM_CHROME } from '@/frame'
 import { useActiveConsole, useScene } from '@/store/scene'
 import { enrichmentFor } from '@/data/game-facts'
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/icons'
-import { PanelSummary } from './PanelSummary'
 import { FunFactCard } from './FunFactCard'
 import { COPY, ROOM_TABS } from './panel-copy'
 import { OverviewTab } from './tabs/OverviewTab'
@@ -24,24 +23,34 @@ import { GameArtifact, GameArtifactBody, GameArtifactFact, GameArtifactSummary }
  * COLUMNS on a desktop does not — side by side, each is legibly its own
  * pane; stacked, it looks like the page failed to load the rest of itself.
  *
- *   Wide: three columns — the lead summary, the tabbed column, and the fun
- *   fact as a genuine third region — each with its OWN scroll, since they
- *   sit beside each other and scrolling one has no bearing on the others.
+ *   Wide: the console section is a tab column (nav + active tab body) beside
+ *   the fun fact as a genuine second region, each with its OWN scroll. The
+ *   games section keeps its own three columns (summary | body | fun fact),
+ *   since a game's summary stays relevant no matter what you're looking at
+ *   in the same way the console's own numbers used to — see below.
  *
- *   Compact: ONE scroll for the whole body. The summary, the tab nav (kept
- *   sticky so switching tabs never needs a scroll back to the top) and the
- *   active tab's content all flow down a single column, in a single
- *   overflow-y-auto — never two. The fun fact has nowhere to go at this
- *   width and is left out, same as before.
+ *   Compact: ONE scroll for the whole body. The tab nav (kept sticky so
+ *   switching tabs never needs a scroll back to the top) and the active
+ *   tab's content flow down a single column, in a single overflow-y-auto —
+ *   never two. The fun fact has nowhere to go at this width and is left
+ *   out, same as before.
+ *
+ * The console section's hero stats (units sold, price, CPU clock) and its
+ * summary paragraph used to live in a persistent left column here —
+ * PanelSummary — beside the tab nav, on screen no matter which tab was
+ * active. That read as two boxes glued together by a divider, and the stats
+ * added nothing while looking at Hardware or History. They now live inside
+ * OverviewTab itself, as the first thing Overview shows — so the tab column
+ * is the ONLY console-section region in the wide layout, no divider needed.
  *
  * The panel now serves BOTH sections. The console section keeps its three
  * tabs (Overview / Hardware / History — Games left to become a Section) and
- * the summary + fun fact. The games section shows the selected game's
- * artifact in the same three regions (summary | body | fun fact); the game
- * list itself is no longer panel content — it is the floating GameList,
- * hung beside the sidebar (see GameList.tsx), and the panel is always the
- * artifact of the picked game. The shell is never reshaped — only the
- * content that fills it changes.
+ * the fun fact. The games section shows the selected game's artifact in its
+ * own three regions (summary | body | fun fact); the game list itself is no
+ * longer panel content — it is the floating GameList, hung beside the
+ * sidebar (see GameList.tsx), and the panel is always the artifact of the
+ * picked game. The shell is never reshaped — only the content that fills it
+ * changes.
  *
  * The chevron at the bottom-centre collapses the panel to its slim bar.
  * `panelOpen` is expanded-vs-collapsed (the old side-rail open/close is gone
@@ -134,9 +143,6 @@ export function DetailPanel() {
         <div className="min-h-0 flex-1 overflow-y-auto">
           {inConsoleSection ? (
             <>
-              <div className="px-5 pt-4">
-                <PanelSummary compact />
-              </div>
               {/* Sticky so a scroll deep into a tab's content never strands the
                   nav above the fold — switching tabs stays a zero-scroll action. */}
               <div className="sticky top-0 z-10 bg-paper/95 backdrop-blur-xl">{tabNav}</div>
@@ -152,6 +158,31 @@ export function DetailPanel() {
             </div>
           )}
         </div>
+      ) : inConsoleSection ? (
+        // The console section is a single tab column, plus the fun fact as
+        // a second region when there is one — no more persistent left
+        // "summary" column glued on beside it (see the file header).
+        <div
+          className="min-h-0 flex-1"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: showAside ? 'minmax(0, 1fr) minmax(0, 300px)' : 'minmax(0, 1fr)',
+            gridTemplateRows: '1fr',
+          }}
+        >
+          <div
+            className={['flex min-h-0 flex-col', showAside ? 'border-r border-ink/10' : ''].join(' ')}
+          >
+            {tabNav}
+            <div className="min-h-0 flex-1 overflow-y-auto px-7 py-5">{tabBody}</div>
+          </div>
+
+          {showAside && (
+            <div className="min-h-0 overflow-y-auto px-6 py-5">
+              <FunFactCard />
+            </div>
+          )}
+        </div>
       ) : (
         <div
           className="min-h-0 flex-1"
@@ -164,7 +195,7 @@ export function DetailPanel() {
           }}
         >
           <div className="min-h-0 overflow-y-auto border-r border-ink/10 px-7 py-5">
-            {inConsoleSection ? <PanelSummary /> : game ? <GameArtifactSummary /> : <GameListHint />}
+            {game ? <GameArtifactSummary /> : <GameListHint />}
           </div>
 
           <div
@@ -173,15 +204,14 @@ export function DetailPanel() {
               showAside ? 'border-r border-ink/10' : '',
             ].join(' ')}
           >
-            {inConsoleSection && tabNav}
             <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-              {inConsoleSection ? tabBody : game ? <GameArtifactBody /> : <GameListHint />}
+              {game ? <GameArtifactBody /> : <GameListHint />}
             </div>
           </div>
 
           {showAside && (
             <div className="min-h-0 overflow-y-auto px-6 py-5">
-              {game ? <GameArtifactFact /> : <FunFactCard />}
+              {game ? <GameArtifactFact /> : null}
             </div>
           )}
         </div>

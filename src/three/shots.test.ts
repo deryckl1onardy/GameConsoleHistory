@@ -4,7 +4,7 @@ import { snes } from '@/data/consoles/snes'
 import { genesis } from '@/data/consoles/genesis'
 import { ps2 } from '@/data/consoles/ps2'
 import { LIFT_M, MEDIA_SPREAD_RANKS, layoutSpread, mediaAnchor } from './geometry/gameBox'
-import { MM, archetype } from '@/data/kits/media-archetypes'
+import { archetype } from '@/data/kits/media-archetypes'
 import type { DioramaSpec } from '@/types/console'
 
 /**
@@ -198,11 +198,15 @@ describe('artifact shot', () => {
 
     expect(shot.target[0]).toBeCloseTo(anchor[0] + slot.position[0], 6)
     // The selected box is LIFTED off the floor (LIFT_M), and the camera aims
-    // at the box's MIDDLE (half its real height), not its base — the same
-    // convention the console shot uses — so the orbit pivot stays on the box
-    // at every zoom distance, not pinned to the floor beneath it.
-    const halfHeight = (archetype(snes.mediaArchetype).dimensions.height * MM) / 2
-    expect(shot.target[1]).toBeCloseTo(anchor[1] + slot.position[1] + LIFT_M + halfHeight, 6)
+    // at the box's MIDDLE, not its base — the same convention the console
+    // shot uses — so the orbit pivot stays on the box at every zoom
+    // distance, not pinned to the floor beneath it. `slot.position[1]` IS
+    // already that middle (layoutSpread sets it to `boxH / 2`, since
+    // GameBox renders each box centred on its group position) — adding
+    // another `halfHeight` on top of it was a real bug (aimed at the box's
+    // TOP edge instead of its middle) fixed in shots.ts; this test used to
+    // assert that bug as correct.
+    expect(shot.target[1]).toBeCloseTo(anchor[1] + slot.position[1] + LIFT_M, 6)
     expect(shot.target[2]).toBeCloseTo(anchor[2] + slot.position[2], 6)
   })
 

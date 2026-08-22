@@ -29,7 +29,7 @@ export const nes: ConsoleEntry = {
   msrpUsdAdjusted: 540,
   tagline: 'A robot and a light gun, so nobody had to call it a video game.',
   summary:
-    'Nintendo brought the NES to America a year after the industry\'s biggest retailers had watched the video game business collapse. Their solution was not a better pitch — it was to stop selling a video game console at all. The box said "Control Deck." It came with R.O.B., a plastic robot that reacted to on-screen flashes, and the Zapper, a light gun, so retailers could stock it in the toy aisle instead of the section everyone had just stopped trusting. Underneath the theater was real hardware: the 10NES lockout chip that let Nintendo control which cartridges could be published at all, a licensing model the entire industry still uses in some form. Nintendo tested the whole strategy in New York first, with a full buy-back guarantee for any store that didn\'t sell through — it worked, and the console that "wasn\'t a video game" went on to outsell every console before it.',
+    'Nintendo brought the NES to America a year after the industry\'s biggest retailers had watched the video game business collapse. Their solution was not a better pitch: it was to stop selling a video game console at all. The box said "Control Deck." It came with R.O.B., a plastic robot that reacted to on-screen flashes, and the Zapper, a light gun, so retailers could stock it in the toy aisle instead of the section everyone had just stopped trusting. Underneath the theater was real hardware: the 10NES lockout chip that let Nintendo control which cartridges could be published at all, a licensing model the entire industry still uses in some form. Nintendo tested the whole strategy in New York first, with a full buy-back guarantee for any store that didn\'t sell through. It worked, and the console that "wasn\'t a video game" went on to outsell every console before it.',
 
   specs: {
     cpu: 'Ricoh 2A03',
@@ -53,7 +53,7 @@ export const nes: ConsoleEntry = {
       label: 'The lockout chip',
       value: '10NES',
       comparison:
-        'A single chip decided which cartridges were allowed to exist — the direct ancestor of every "certified accessory" and platform approval process still used in games and phones today.',
+        'A single chip decided which cartridges were allowed to exist: the direct ancestor of every "certified accessory" and platform approval process still used in games and phones today.',
     },
     {
       label: 'Duck Hunt, the pack-in',
@@ -81,22 +81,22 @@ export const nes: ConsoleEntry = {
     renderBox: { x: [-0.1254, 0.1254], y: [0, 0.0874], z: [-0.2304, 0.2304] },
     callouts: [
       {
-        label: 'Power switch — front left',
+        label: 'Power switch: front left',
         anchor: [-0.06, 0.035, -0.017],
         labelOffset: [-0.035, 0.045, 0.01],
       },
       {
-        label: 'Reset switch — front right',
+        label: 'Reset switch: front right',
         anchor: [0.06, 0.035, -0.017],
         labelOffset: [0.035, 0.045, 0.01],
       },
       {
-        label: 'Cartridge door — the whole top flips open',
+        label: 'Cartridge door: the whole top flips open',
         anchor: [0, 0.086, -0.13],
         labelOffset: [0, 0.035, -0.01],
       },
       {
-        label: 'Controller ports (×2) — front right',
+        label: 'Controller ports (×2): front right',
         anchor: [0.1, 0.028, -0.016],
         labelOffset: [0.03, 0.04, 0.01],
       },
@@ -127,7 +127,7 @@ export const nes: ConsoleEntry = {
       // depth 53.2 (front-to-back in the hand).
       dimensions: { width: 123.4, height: 17.5, depth: 53.2 },
       innovations: [
-        'The D-pad — Gunpei Yokoi adapted it from the Game & Watch handhelds, replacing a joystick with a thumb-sized cross that has been the default directional input on nearly every controller since.',
+        'The D-pad: Gunpei Yokoi adapted it from the Game & Watch handhelds, replacing a joystick with a thumb-sized cross that has been the default directional input on nearly every controller since.',
         'The first rectangular "brick" gamepad shape, small enough for a child\'s hands, that most competitors would spend the next decade converging back toward.',
       ],
       // Approximate layout, not measured from a reference photo — see the
@@ -152,17 +152,17 @@ export const nes: ConsoleEntry = {
     {
       id: 'toy-not-console',
       title: 'It was sold as a toy on purpose',
-      body: 'Every major US retailer had just been burned by the 1983 crash and did not want "video games" on their shelves. Nintendo\'s answer was R.O.B., a robot accessory that reacted to on-screen flashes, and the Zapper light gun — props that let the whole system be pitched, and stocked, as a toy rather than the thing that had just failed.',
+      body: 'Every major US retailer had just been burned by the 1983 crash and did not want "video games" on their shelves. Nintendo\'s answer was R.O.B., a robot accessory that reacted to on-screen flashes, and the Zapper light gun: props that let the whole system be pitched, and stocked, as a toy rather than the thing that had just failed.',
     },
     {
       id: 'lockout-chip',
       title: 'One chip controlled the entire library',
-      body: 'The 10NES lockout chip checked every cartridge on boot and refused to run anything it did not recognise. It is the reason Nintendo could require its "Seal of Quality," cap how many games a publisher released per year, and take a cut of every cartridge manufactured — the first real version of a licensing model every console maker since has used in some form.',
+      body: 'The 10NES lockout chip checked every cartridge on boot and refused to run anything it did not recognise. It is the reason Nintendo could require its "Seal of Quality," cap how many games a publisher released per year, and take a cut of every cartridge manufactured: the first real version of a licensing model every console maker since has used in some form.',
     },
     {
       id: 'duck-hunt-pack-in',
       title: 'The pack-in game nearly outsold Mario',
-      body: 'Duck Hunt shipped free with most NES bundles and still sold 28.3 million copies — a number stand-alone software almost never reaches. It is a reminder that "best-selling game" charts are really measuring what was in the box, not what people chose.',
+      body: 'Duck Hunt shipped free with most NES bundles and still sold 28.3 million copies, a number stand-alone software almost never reaches. It is a reminder that "best-selling game" charts are really measuring what was in the box, not what people chose.',
     },
     {
       id: 'nyc-test-market',
@@ -175,14 +175,14 @@ export const nes: ConsoleEntry = {
     {
       id: 'blinking-red-light',
       name: 'The blinking red light',
-      body: 'A worn or bent 72-pin connector loses contact with the cartridge, and the console\'s power light blinks steadily instead of holding steady — with no picture at all. The famous "fix" of blowing into the cartridge did not repair anything; it just briefly disturbed the dust and oxidation enough for the pins to reconnect.',
+      body: 'A worn or bent 72-pin connector loses contact with the cartridge, and the console\'s power light blinks steadily instead of holding steady, with no picture at all. The famous "fix" of blowing into the cartridge did not repair anything; it just briefly disturbed the dust and oxidation enough for the pins to reconnect.',
       target: 'power_led',
       effect: 'blink-red',
     },
     {
       id: 'zif-wear',
       name: 'Zero-insertion-force connector wear',
-      body: 'The front-loading tray pushes the cartridge down onto a 72-pin connector every time it is used, and that connector\'s spring tension degrades with thousands of insertions — the mechanical reason so many original units eventually need the cartridge wiggled, reseated, or the connector replaced outright.',
+      body: 'The front-loading tray pushes the cartridge down onto a 72-pin connector every time it is used, and that connector\'s spring tension degrades with thousands of insertions: the mechanical reason so many original units eventually need the cartridge wiggled, reseated, or the connector replaced outright.',
       target: 'cart_slot',
       effect: 'screen-garbage',
     },

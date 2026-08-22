@@ -2,6 +2,7 @@ import type { ConsoleEntry, DioramaSpec } from '@/types/console'
 import { MM } from '@/data/kits/media-archetypes'
 import { archetype } from '@/data/kits/media-archetypes'
 import { LIFT_M, layoutSpread, mediaAnchor, MEDIA_SPREAD_RANKS, spreadExtent } from './geometry/gameBox'
+import { ROOM_CHROME, topHFor, type Layout } from '@/frame'
 
 /**
  * Named camera shots.
@@ -205,7 +206,12 @@ export function shotsFor(entry: ConsoleEntry, spec: DioramaSpec): Record<RoomSho
  * math the library shot uses, so a short cartridge frames tighter than a
  * tall DVD keepcase.
  */
-export function artifactShotFor(entry: ConsoleEntry, spec: DioramaSpec, rank: number): Shot {
+export function artifactShotFor(
+  entry: ConsoleEntry,
+  spec: DioramaSpec,
+  rank: number,
+  layout: Layout = 'wide',
+): Shot {
   const media = archetype(entry.mediaArchetype)
   const halfHeight = (media.dimensions.height * MM) / 2
   const slots = layoutSpread({ archetype: media, count: entry.games.length, ranks: MEDIA_SPREAD_RANKS })
@@ -216,19 +222,78 @@ export function artifactShotFor(entry: ConsoleEntry, spec: DioramaSpec, rank: nu
   // A missing slot means the rank is not in the spread (stale selection);
   // fall back to framing the spread's own anchor so the camera still lands
   // somewhere sane instead of NaN-ing.
+  // A REAL BUG, caught and fixed here: this used to add `halfHeight` a
+  // SECOND time on top of `slot.position[1]`. `layoutSpread` already sets
+  // each slot's Y to `boxH / 2` (see geometry/gameBox.ts) — the box's own
+  // CENTRE, not its floor — because GameBox renders each box centred on its
+  // group position, the same convention this doc comment already describes
+  // ("The target is the box's MIDDLE"). Adding halfHeight again moved the
+  // look-at point a full halfHeight ABOVE the box's true centre, landing it
+  // almost exactly on the box's TOP edge instead. Confirmed live: for the
+  // Atari 2600 archetype (halfHeight 49mm), the box's measured screen-space
+  // top sat within 2px of the target's projected position — the aim point
+  // WAS the top edge, not the middle. Small cartridges hid this (the error
+  // was a few pixels); Atari 2600's corrected 98mm-tall archetype made the
+  // resulting "camera aims too high, box hangs low in frame" error large
+  // enough to visibly overlap the bottom panel even at the resting shot.
   const target: [number, number, number] = slot
     ? [
         anchor[0] + slot.position[0],
-        anchor[1] + slot.position[1] + LIFT_M + halfHeight,
+        anchor[1] + slot.position[1] + LIFT_M,
         anchor[2] + slot.position[2],
       ]
     : [anchor[0], anchor[1] + LIFT_M + halfHeight, anchor[2]]
 
   const vHalf = (CAMERA_FOV_DEG * Math.PI) / 180 / 2
-  // Padding over the box's height — closer than the library shot's 1.18
-  // because a single box is all that needs to fit.
-  const artifactPadding = 1.4
-  const distance = Math.max(0.35, (media.dimensions.height * MM / 2 / Math.tan(vHalf)) * artifactPadding)
+
+  // Padding over the box's height, derived from the CLEAR band the room
+  // chrome actually leaves — not a bare constant — because the target is
+  // centred in the FULL frame (see `target` above) while frame.ts's `dy`
+  // offset only ever SHIFTS which part of that frame is visible; it cannot
+  // shrink the box. A box sized to fill more of the full frame than the
+  // clear band leaves is guaranteed to bleed into the top strip or the
+  // bottom panel no matter how it's shifted.
+  //
+  // TWO real bugs lived here, fixed together:
+  //
+  // 1. This padding used to be a bare 1.4 (targeting ~71% of the FULL
+  //    frame height) with a distance floor of 0.35. For most cartridges the
+  //    floor silently pulled the camera back FURTHER than 1.4 alone would
+  //    have, which incidentally kept them inside the ~53% clear band
+  //    ('wide' layout: 1 - panelH 0.32 - topH 0.15) — bug #2 below made
+  //    that floor identical across archetypes, which is what actually hid
+  //    this one. Lowering the floor (to fix #2) let several archetypes'
+  //    raw 1.4-padded distance stand on its own — and 71% of the full frame
+  //    does not fit in a 53% clear band. Confirmed live: the Atari 2600 cart
+  //    (corrected to a taller 98mm archetype) rendered cropped by both the
+  //    top strip and the bottom panel at the old padding once its own
+  //    distance (0.32) replaced the shared floor.
+  //
+  // 2. The floor was a flat 0.35, well above the height-derived distance
+  //    for every cartridge archetype (SNES 0.29, master-system 0.33,
+  //    genesis/n64 lower) — so almost every cartridge rested at the SAME
+  //    clamped 0.35 regardless of its real size. Invisible while every
+  //    cartridge had a similar footprint; the Atari 2600's corrected
+  //    portrait dimensions (83 x 98mm, was a wrong 102 x 70mm landscape)
+  //    made it noticeably narrower than SNES (136mm) while sharing that
+  //    identical clamped distance, so it read smaller on screen despite
+  //    being roughly as tall.
+  //
+  // The fix for both: derive padding from the room's own clear-band
+  // fraction (frame.ts's single source of truth, shared with the chrome
+  // that actually draws the panel), with a safety margin for the box's own
+  // diagonal footprint at this shot's oblique angle — a box rotated toward
+  // camera reads taller on screen than its raw height alone — and floor the
+  // distance a hair above minDistance, not at an arbitrary constant.
+  // `artifactShotFor` only ever runs for a selected game (mode 'artifact'),
+  // which only exists inside the games section — so `topHFor` always gets
+  // told it's in the games section, folding in the compact filmstrip's
+  // height (GameList.tsx) on top of the ordinary top chrome.
+  const chrome = layout === 'compact' ? ROOM_CHROME.compact : ROOM_CHROME
+  const clearBandFraction = 1 - chrome.panelH - topHFor(layout, true)
+  const diagonalSafetyMargin = 0.82
+  const artifactPadding = 1 / (clearBandFraction * diagonalSafetyMargin)
+  const distance = Math.max(0.25, (media.dimensions.height * MM / 2 / Math.tan(vHalf)) * artifactPadding)
 
   return {
     id: 'artifact',

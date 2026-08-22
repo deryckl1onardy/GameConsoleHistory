@@ -27,7 +27,7 @@ export const snes: ConsoleEntry = {
   msrpUsdAdjusted: 465,
   tagline: 'The machine that won a war it started two years late.',
   summary:
-    'Nintendo arrived to the 16-bit generation second. The Genesis had a two-year head start, a faster processor and an advertising campaign built entirely around mocking them. The SNES answered with a slower CPU and better everything else — a colour palette four times deeper, a sound chip designed by Sony, and hardware that could scale and rotate a whole layer of the screen at once. It is also the console that accidentally created its own successor: a shelved CD add-on, built with Sony, walked out of the building and came back as the PlayStation.',
+    'Nintendo arrived to the 16-bit generation second. The Genesis had a two-year head start, a faster processor and an advertising campaign built entirely around mocking them. The SNES answered with a slower CPU and better everything else: a colour palette four times deeper, a sound chip designed by Sony, and hardware that could scale and rotate a whole layer of the screen at once. It is also the console that accidentally created its own successor: a shelved CD add-on, built with Sony, walked out of the building and came back as the PlayStation.',
 
   specs: {
     cpu: 'Ricoh 5A22 (65816 core)',
@@ -57,7 +57,7 @@ export const snes: ConsoleEntry = {
       label: 'Processor speed',
       value: '3.58 MHz',
       comparison:
-        'A phone in 2026 runs roughly a thousand times faster per core — and does far more work in each of those cycles.',
+        'A phone in 2026 runs roughly a thousand times faster per core, and does far more work in each of those cycles.',
     },
     {
       label: 'Colours on screen',
@@ -99,27 +99,27 @@ export const snes: ConsoleEntry = {
   hardwareDiagram: {
     callouts: [
       {
-        label: 'Power switch — flat on the top deck, not the front face',
+        label: 'Power switch: flat on the top deck, not the front face',
         anchor: [-0.0423, 0.047, 0.0514],
         labelOffset: [-0.025, 0.05, 0.01],
       },
       {
-        label: 'Reset button — flat on the top deck, not the front face',
+        label: 'Reset button: flat on the top deck, not the front face',
         anchor: [0.0231, 0.0467, -0.0173],
         labelOffset: [0.025, 0.05, 0.01],
       },
       {
-        label: 'Eject lever — the narrower column between the two blocks',
+        label: 'Eject lever: the narrower column between the two blocks',
         anchor: [0.0002, 0.0538, 0.0357],
         labelOffset: [0, 0.065, 0.02],
       },
       {
-        label: 'Controller ports (×2) — 7-pin, same as the NES',
+        label: 'Controller ports (×2): 7-pin, same as the NES',
         anchor: [-0.035, 0.0097, 0.0474],
         labelOffset: [-0.015, 0.045, 0.02],
       },
       {
-        label: 'Cartridge slot — the Game Pak slides in from the top',
+        label: 'Cartridge slot: the Game Pak slides in from the top',
         anchor: [-0.0203, 0.0881, 0.0152],
         labelOffset: [0, 0.035, 0.01],
       },
@@ -154,7 +154,7 @@ export const snes: ConsoleEntry = {
           backdrop: '#eeeeea',
         },
       },
-      note: 'The Japanese cartridge is a different physical shape — rounder, slightly smaller, with different notches. That was deliberate: the shells were designed so imported games would not fit, region-locking the hardware by geometry alone. It is the reason this atlas needs two cartridge archetypes for one console.',
+      note: 'The Japanese cartridge is a different physical shape: rounder, slightly smaller, with different notches. That was deliberate: the shells were designed so imported games would not fit, region-locking the hardware by geometry alone. It is the reason this atlas needs two cartridge archetypes for one console.',
     },
   ],
 
@@ -167,7 +167,7 @@ export const snes: ConsoleEntry = {
       // in this schema, including here: 148mm wide, 25mm thick, 60mm deep.
       dimensions: { width: 148, height: 25, depth: 60 },
       innovations: [
-        'Shoulder buttons — the first pad to put inputs on the far edge, where your index fingers already rested.',
+        'Shoulder buttons: the first pad to put inputs on the far edge, where your index fingers already rested.',
         'Four face buttons in a diamond, replacing the NES pair. A and B convex, X and Y concave, so your thumb could tell them apart without looking.',
         'The rounded "dog bone" shape, the first controller designed to be held for hours rather than gripped.',
       ],
@@ -212,12 +212,12 @@ export const snes: ConsoleEntry = {
     {
       id: 'sony-deal',
       title: 'The add-on that became the competition',
-      body: 'Nintendo hired Sony to build a CD drive for the SNES, then announced a deal with Philips instead — at a trade show, without warning Sony first. Sony finished the hardware anyway. It shipped in 1994 as the PlayStation, and it ended Nintendo\'s dominance of the industry within a single generation.',
+      body: 'Nintendo hired Sony to build a CD drive for the SNES, then announced a deal with Philips instead, at a trade show, without warning Sony first. Sony finished the hardware anyway. It shipped in 1994 as the PlayStation, and it ended Nintendo\'s dominance of the industry within a single generation.',
     },
     {
       id: 'console-war',
       title: '"Genesis does what Nintendon\'t"',
-      body: 'Sega had two years, a faster processor and the first genuinely aggressive advertising in the industry. Nintendo could not answer on speed, so it answered on everything else — colour depth, sound, and a library. The SNES finished the generation ahead, but it is the only console war Nintendo ever had to fight from behind.',
+      body: 'Sega had two years, a faster processor and the first genuinely aggressive advertising in the industry. Nintendo could not answer on speed, so it answered on everything else: colour depth, sound, and a library. The SNES finished the generation ahead, but it is the only console war Nintendo ever had to fight from behind.',
     },
   ],
 
@@ -232,7 +232,7 @@ export const snes: ConsoleEntry = {
     {
       id: 'blowing',
       name: 'Blowing on the cartridge',
-      body: 'It never worked. The contacts failed from oxidation and dust, and moist breath accelerated the corrosion — every puff made the next failure more likely. What actually fixed it was reseating the cartridge, which is what you did immediately afterward, which is why a whole generation believes in it.',
+      body: 'It never worked. The contacts failed from oxidation and dust, and moist breath accelerated the corrosion: every puff made the next failure more likely. What actually fixed it was reseating the cartridge, which is what you did immediately afterward, which is why a whole generation believes in it.',
       target: 'cart_slot',
       effect: 'screen-garbage',
     },
@@ -308,7 +308,7 @@ export const snes: ConsoleEntry = {
       developer: 'Nintendo EAD',
       publisher: 'Nintendo',
       blurb:
-        'Four NES Mario games rebuilt with 16-bit graphics and save files — including the one Japan never got. An early argument that back catalogues were worth money.',
+        'Four NES Mario games rebuilt with 16-bit graphics and save files, including the one Japan never got. An early argument that back catalogues were worth money.',
     },
     {
       rank: 3,
@@ -368,7 +368,7 @@ export const snes: ConsoleEntry = {
       developer: 'Nintendo EAD',
       publisher: 'Nintendo',
       blurb:
-        'Nintendo answered pre-rendered 3D by going the other way entirely — crayon textures and hand-drawn lines, powered by yet another chip hidden in the cartridge.',
+        'Nintendo answered pre-rendered 3D by going the other way entirely: crayon textures and hand-drawn lines, powered by yet another chip hidden in the cartridge.',
     },
     {
       rank: 9,
@@ -378,7 +378,7 @@ export const snes: ConsoleEntry = {
       developer: 'Capcom',
       publisher: 'Capcom',
       blurb:
-        'The same game, faster, sold again — and bought again, in numbers that established the yearly fighting-game update as a business model.',
+        'The same game, faster, sold again, and bought again, in numbers that established the yearly fighting-game update as a business model.',
     },
     {
       rank: 10,

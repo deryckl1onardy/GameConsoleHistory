@@ -171,7 +171,7 @@ The shape-bearing cartridges, in order of payoff:
 | `cart-n64` | notched corners, grip ridge, taller profile | 82×50 | plentiful |
 | `cart-genesis` | matte black, grip ridges | 72×46 | plentiful |
 | `cart-sms` | squat wedge | 72×66 | moderate |
-| `cart-atari-2600` | nearly a flat box — **lowest ROI** | 64×44 | moderate |
+| `cart-atari-2600` | nearly a flat box — **lowest ROI**; parametric shell only, corrected to real portrait 83×98×19mm | 72×88 | moderate |
 
 `cart-snes-na` and `cart-nes` are done — both shipped as the user-supplied
 Sketchfab exports (`snes_cartridge.glb`, `nes__cartridge__battletoads.glb`)
@@ -199,7 +199,29 @@ plane as the real `label` mesh, leaving the original mesh (renamed
 `shell-front-lower`) with its real baked ridge/screw/connector texture
 intact. `stripShellTexture` is off for this archetype as a result — it isn't
 needed once the label is properly isolated, and turning it back on would
-throw away that real detail again.
+throw away that real detail again. `.img2threejs/cart/flip-snes-label-v.mjs`
+flipped the decal's V coordinate after the first pass rendered every game's
+cover art upside down — a one-line fix, kept as its own script since it only
+ever needs to touch those 4 UV floats.
+
+**A second real bug, in the loader, not the file**: after the decal fix the
+model still rendered as what looked like 3 separate floating pieces. The
+cause was `CartridgeModel.tsx`'s `rotationX` handling, which used to bake the
+rotation into each MESH's own geometry individually. That's only equivalent
+to "rotate the model" when every mesh shares one local orientation — this
+GLB's "back shell" piece is parented under a node that already carries its
+own 180° rotation (correctly, mirroring the front shell to close the case).
+Baking the SAME extra rotation into each mesh's own local space, ahead of
+each mesh's own differing ancestor rotation, doesn't commute: the two shell
+halves ended up rotated by different effective amounts in world space and
+no longer met at the seam their authored positions were built for. The fix
+(now in `CartridgeModel.tsx`) wraps the whole cloned hierarchy's children in
+one Group and rotates that — a single rigid transform of the whole assembly,
+applied after every piece's own relative position is already resolved by the
+normal scene graph, still sitting below `floorAlignOffset`'s blind spot on
+`scene`'s own transform. This is a loader-level fix, not per-archetype: any
+future cartridge whose source file parents pieces under differently-rotated
+nodes gets it for free.
 
 The next shape-bearing cart is `cart-snes-jp` or `cart-n64` (notched corners,
 grip ridge).

@@ -28,7 +28,7 @@ export const xbox360: ConsoleEntry = {
   msrpUsdAdjusted: 490,
   tagline: 'Jump in.',
   summary:
-    'Microsoft launched a full year before Sony and spent that year building the things the generation would be remembered for: achievements attached to every game as a platform-wide system, a digital storefront that made small downloadable games a real business, and an online service that had already been running for three years while its competitors were still building theirs. It also failed, constantly. Early consoles overheated until the motherboard flexed and the solder joints cracked, and the three red lights that resulted became the best-known error message in console history. Microsoft took a $1.15 billion charge to repair them all and kept going — and the 360 finished the generation having sold 84 million units, three and a half times the original Xbox.',
+    'Microsoft launched a full year before Sony and spent that year building the things the generation would be remembered for: achievements attached to every game as a platform-wide system, a digital storefront that made small downloadable games a real business, and an online service that had already been running for three years while its competitors were still building theirs. It also failed, constantly. Early consoles overheated until the motherboard flexed and the solder joints cracked, and the three red lights that resulted became the best-known error message in console history. Microsoft took a $1.15 billion charge to repair them all and kept going: the 360 finished the generation having sold 84 million units, three and a half times the original Xbox.',
 
   specs: {
     cpu: 'IBM PowerPC "Xenon", three cores',
@@ -82,22 +82,22 @@ export const xbox360: ConsoleEntry = {
     renderBox: { x: [-0.129, 0.129], y: [0, 0.311], z: [-0.048, 0.048] },
     callouts: [
       {
-        label: 'Power button — the ring of light',
+        label: 'Power button: the ring of light',
         anchor: [0.01, 0.03, -0.047],
         labelOffset: [0.02, 0.04, 0],
       },
       {
-        label: 'Disc tray — the upper third of the front',
+        label: 'Disc tray: the upper third of the front',
         anchor: [0, 0.22, -0.047],
         labelOffset: [0.02, 0.03, 0],
       },
       {
-        label: 'USB ports and sync button — the recessed panel at the left edge',
+        label: 'USB ports and sync button: the recessed panel at the left edge',
         anchor: [-0.1, 0.1, -0.037],
         labelOffset: [-0.03, 0.03, 0],
       },
       {
-        label: 'Vents — the front exhales top and bottom',
+        label: 'Vents: the front exhales top and bottom',
         anchor: [0, 0.28, -0.047],
         labelOffset: [0.02, 0.03, 0],
       },
@@ -128,7 +128,7 @@ export const xbox360: ConsoleEntry = {
       // height 62 (thickness), depth 105 (front-to-back).
       dimensions: { width: 155, height: 62, depth: 105 },
       innovations: [
-        'The offset stick layout — left stick high, right stick low — which became the standard arrangement for third-person and shooter controls.',
+        'The offset stick layout, left stick high, right stick low, which became the standard arrangement for third-person and shooter controls.',
         'A ring of four quadrant lights showing which player you are, so a wireless pad could still tell you where it belonged.',
         'Rechargeable battery packs that clip on rather than seal in, so a dead pad is swapped in seconds rather than tethered to a cable.',
       ],
@@ -156,12 +156,12 @@ export const xbox360: ConsoleEntry = {
     {
       id: 'red-ring',
       title: 'Three red lights',
-      body: 'Early 360s ran hot enough that the motherboard warped, cracking the solder beneath the graphics chip. The console then lit three quadrants of its power ring red — a "general hardware failure" so common it got a nickname, a folklore of temporary fixes, and eventually an unlimited three-year warranty. Failure rates were never officially published; retailer estimates at the time ran as high as one console in three.',
+      body: 'Early 360s ran hot enough that the motherboard warped, cracking the solder beneath the graphics chip. The console then lit three quadrants of its power ring red: a "general hardware failure" so common it got a nickname, a folklore of temporary fixes, and eventually an unlimited three-year warranty. Failure rates were never officially published; retailer estimates at the time ran as high as one console in three.',
     },
     {
       id: 'achievements',
       title: 'The score that follows you between games',
-      body: 'Microsoft made achievements mandatory: every 360 game had to award points into one permanent, public total attached to your account rather than your save file. It changed how people finish games — and turned completion into something visible to other players, which is why every platform since has shipped its own version.',
+      body: 'Microsoft made achievements mandatory: every 360 game had to award points into one permanent, public total attached to your account rather than your save file. It changed how people finish games, and turned completion into something visible to other players, which is why every platform since has shipped its own version.',
     },
     {
       id: 'arcade-storefront',
@@ -171,7 +171,7 @@ export const xbox360: ConsoleEntry = {
     {
       id: 'kinect-fastest',
       title: 'The fastest-selling consumer electronics device ever, briefly',
-      body: 'Kinect, the camera that removed the controller entirely, sold eight million units in its first sixty days in 2010 — fast enough to take a Guinness World Record. Its bundled title, Kinect Adventures, became the best-selling 360 game of all time almost entirely by being in the box.',
+      body: 'Kinect, the camera that removed the controller entirely, sold eight million units in its first sixty days in 2010, fast enough to take a Guinness World Record. Its bundled title, Kinect Adventures, became the best-selling 360 game of all time almost entirely by being in the box.',
     },
   ],
 
@@ -238,7 +238,7 @@ export const xbox360: ConsoleEntry = {
   games: [
     { rank: 1, title: 'Kinect Adventures!', year: 2010, unitsSold: 24_000_000, developer: 'Good Science Studio', publisher: 'Microsoft Game Studios', blurb: 'The best-selling 360 game, and almost entirely because it came in the box with every Kinect sensor sold.' },
     { rank: 2, title: 'Grand Theft Auto V', year: 2013, unitsSold: 16_400_000, developer: 'Rockstar North', publisher: 'Rockstar Games', blurb: 'Arrived at the very end of the console\'s life and still outsold nearly everything released in its prime.' },
-    { rank: 3, title: 'Call of Duty: Modern Warfare 3', year: 2011, unitsSold: 14_700_000, developer: 'Infinity Ward', publisher: 'Activision', blurb: 'Took a billion dollars in sixteen days — the point at which annual shooters became the industry\'s biggest business.' },
+    { rank: 3, title: 'Call of Duty: Modern Warfare 3', year: 2011, unitsSold: 14_700_000, developer: 'Infinity Ward', publisher: 'Activision', blurb: 'Took a billion dollars in sixteen days: the point at which annual shooters became the industry\'s biggest business.' },
     { rank: 4, title: 'Call of Duty: Black Ops', year: 2010, unitsSold: 14_700_000, developer: 'Treyarch', publisher: 'Activision', blurb: 'Cold War conspiracy plotting plus the Zombies mode that turned a side attraction into a franchise of its own.' },
     { rank: 5, title: 'Halo 3', year: 2007, unitsSold: 14_500_000, developer: 'Bungie', publisher: 'Microsoft Game Studios', blurb: 'Marketed as the end of the fight, and the game that made the 360 the default console of its generation in North America.' },
     { rank: 6, title: 'Call of Duty: Black Ops II', year: 2012, unitsSold: 13_600_000, developer: 'Treyarch', publisher: 'Activision', blurb: 'Branching missions and a near-future setting, unusual structural ambition for a series selling at this scale.' },

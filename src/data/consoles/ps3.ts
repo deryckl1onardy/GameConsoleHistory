@@ -26,9 +26,9 @@ export const ps3: ConsoleEntry = {
   unitsSold: 87_400_000,
   msrpUsd: 599.99,
   msrpUsdAdjusted: 900,
-  tagline: 'The most expensive console launch Sony ever ran — and the one that took the longest to win back.',
+  tagline: 'The most expensive console launch Sony ever ran, and the one that took the longest to win back.',
   summary:
-    'A $499 base model and a $599 flagship model made the PlayStation 3 the most expensive console launch of its generation, at a moment Sony itself admitted it was losing money on every unit sold. The Cell Broadband Engine inside it was a genuinely unusual piece of silicon, co-developed with IBM and Toshiba, and it took years before most studios learned to extract its real performance. Early sales trailed the Xbox 360 badly. By the time Sony had cut the price twice and shipped a slimmer, cheaper redesign, exclusives like Uncharted, The Last of Us and Metal Gear Solid 4 had turned the reputation around — the console closed out its eleven-year run essentially even with the generation it opened behind in.',
+    'A $499 base model and a $599 flagship model made the PlayStation 3 the most expensive console launch of its generation, at a moment Sony itself admitted it was losing money on every unit sold. The Cell Broadband Engine inside it was a genuinely unusual piece of silicon, co-developed with IBM and Toshiba, and it took years before most studios learned to extract its real performance. Early sales trailed the Xbox 360 badly. By the time Sony had cut the price twice and shipped a slimmer, cheaper redesign, exclusives like Uncharted, The Last of Us and Metal Gear Solid 4 had turned the reputation around: the console closed out its eleven-year run essentially even with the generation it opened behind in.',
 
   specs: {
     cpu: 'Cell Broadband Engine',
@@ -46,13 +46,13 @@ export const ps3: ConsoleEntry = {
       label: 'Launch price',
       value: '$499 / $599',
       comparison:
-        'The most expensive console launch of its generation — Sony has said it lost money on every unit sold at that price, betting the loss back on software and the Blu-ray format.',
+        'The most expensive console launch of its generation: Sony has said it lost money on every unit sold at that price, betting the loss back on software and the Blu-ray format.',
     },
     {
       label: 'Cell processor',
       value: 'Co-developed with IBM and Toshiba',
       comparison:
-        'An architecture unlike anything in a home console before or since — powerful on paper, but so unusual that most studios took years to figure out how to use it well.',
+        'An architecture unlike anything in a home console before or since: powerful on paper, but so unusual that most studios took years to figure out how to use it well.',
     },
     {
       label: 'Built-in Blu-ray player',
@@ -64,7 +64,7 @@ export const ps3: ConsoleEntry = {
       label: 'Eleven-year production run',
       value: '2006 to 2017',
       comparison:
-        'Sony kept making PS3 units for over a decade — long enough to open the generation behind and still close it out selling in the same range as its rival.',
+        'Sony kept making PS3 units for over a decade: long enough to open the generation behind and still close it out selling in the same range as its rival.',
     },
   ],
 
@@ -78,22 +78,22 @@ export const ps3: ConsoleEntry = {
     renderBox: { x: [-0.139, 0.139], y: [0, 0.096], z: [-0.1635, 0.1635] },
     callouts: [
       {
-        label: 'Disc slot — front, right of centre',
+        label: 'Disc slot: front, right of centre',
         anchor: [0.03, 0.055, 0.162],
         labelOffset: [0.035, 0.04, 0.005],
       },
       {
-        label: 'USB + memory card slots — front left',
+        label: 'USB + memory card slots: front left',
         anchor: [-0.09, 0.03, 0.162],
         labelOffset: [-0.035, 0.04, 0.005],
       },
       {
-        label: 'Touch power button — front right',
+        label: 'Touch power button: front right',
         anchor: [0.12, 0.078, 0.162],
         labelOffset: [0.03, 0.035, 0.005],
       },
       {
-        label: 'Eject — below the power button',
+        label: 'Eject: below the power button',
         anchor: [0.12, 0.05, 0.162],
         labelOffset: [0.03, 0.04, 0.005],
       },
@@ -119,7 +119,7 @@ export const ps3: ConsoleEntry = {
       // Dimensions.com: 160mm W x 97mm H x 55mm D.
       dimensions: { width: 160, height: 55, depth: 97 },
       innovations: [
-        'Sixaxis motion sensing built into the same shell — the first PlayStation pad that could read tilt and rotation, not just button presses.',
+        'Sixaxis motion sensing built into the same shell: the first PlayStation pad that could read tilt and rotation, not just button presses.',
         'Rumble returned after a one-year absence (dropped from the launch Sixaxis pad over a patent dispute with Immersion), restoring force feedback without giving up the motion sensor.',
       ],
       buttons: [
@@ -148,17 +148,17 @@ export const ps3: ConsoleEntry = {
     {
       id: 'losing-money-per-unit',
       title: 'Sony lost money on every console sold',
-      body: 'The $499 and $599 launch prices didn\'t cover manufacturing cost — Sony has publicly acknowledged taking a loss on PS3 hardware for years after launch, betting it back on software sales and licensing.',
+      body: 'The $499 and $599 launch prices didn\'t cover manufacturing cost: Sony has publicly acknowledged taking a loss on PS3 hardware for years after launch, betting it back on software sales and licensing.',
     },
     {
       id: 'cell-processor',
       title: 'A processor built with IBM and Toshiba',
-      body: 'The Cell Broadband Engine was co-developed across three companies and used an architecture unlike any prior console chip — one general-purpose core plus eight specialized "synergistic" cores. It was powerful in the right hands, but so unusual that many studios spent years learning to use it well.',
+      body: 'The Cell Broadband Engine was co-developed across three companies and used an architecture unlike any prior console chip: one general-purpose core plus eight specialized "synergistic" cores. It was powerful in the right hands, but so unusual that many studios spent years learning to use it well.',
     },
     {
       id: 'blu-ray-format-war',
       title: 'It helped decide the Blu-ray vs. HD DVD war',
-      body: 'Bundling a Blu-ray player into every console at a price cheaper than most standalone players put Blu-ray players in millions of living rooms almost overnight — widely credited as a deciding factor in Blu-ray winning the format war against HD DVD.',
+      body: 'Bundling a Blu-ray player into every console at a price cheaper than most standalone players put Blu-ray players in millions of living rooms almost overnight, widely credited as a deciding factor in Blu-ray winning the format war against HD DVD.',
     },
     {
       id: 'rumble-came-back',
@@ -171,14 +171,14 @@ export const ps3: ConsoleEntry = {
     {
       id: 'yellow-light-of-death',
       name: 'Yellow Light of Death',
-      body: 'A hardware fault — commonly traced to solder joints cracking under heat cycling on early "fat" models — that flashes the power LED yellow before the console refuses to boot, PS3\'s equivalent of the Xbox 360\'s Red Ring of Death.',
+      body: 'A hardware fault (commonly traced to solder joints cracking under heat cycling on early "fat" models) that flashes the power LED yellow before the console refuses to boot, PS3\'s equivalent of the Xbox 360\'s Red Ring of Death.',
       target: 'power_led',
       effect: 'blink-amber',
     },
     {
       id: 'bluray-laser-wear',
       name: 'Blu-ray laser wear',
-      body: 'The optical laser assembly degrades with age and heavy use, producing longer load times and eventual disc read failures — a wear pattern shared with every optical-drive console before it.',
+      body: 'The optical laser assembly degrades with age and heavy use, producing longer load times and eventual disc read failures, a wear pattern shared with every optical-drive console before it.',
       target: 'lid',
       effect: 'no-signal',
     },

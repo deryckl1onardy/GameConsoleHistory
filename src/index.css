@@ -30,6 +30,19 @@
   font-display: swap;
 }
 
+/*
+ * Bebas Neue (Google Fonts / Dharma Type, OFL, self-hosted below) — a tall,
+ * condensed all-caps display face, swapped in for Sentient as `--font-display`
+ * at the user's explicit direction. Single weight (400) is all it ships.
+ */
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('/fonts/bebas-neue-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   /* Warm museum-meets-CRT palette. Neutral base so the diorama carries the colour. */
   --color-ink: #12100e;
@@ -50,7 +63,7 @@
    */
   --color-paper: #fbfbf9;
 
-  --font-display: 'Sentient', ui-serif, Georgia, serif;
+  --font-display: 'Bebas Neue', ui-sans-serif, system-ui, sans-serif;
   /*
    * No brand-name sans is declared here on purpose. 'Inter' was named before
    * but never loaded — it silently fell back to system-ui the whole time,

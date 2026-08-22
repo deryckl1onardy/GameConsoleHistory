@@ -28,7 +28,7 @@ export const saturn: ConsoleEntry = {
   msrpUsdAdjusted: 830,
   tagline: 'It won the surprise launch and lost the room.',
   summary:
-    'Sega tried to steal a march on Sony by quietly shipping the Saturn to a handful of retailers and then announcing, on stage at E3 1995, that it was already on shelves — four months ahead of the date every other store had been told to expect. It should have been a coup. Instead Sony walked on stage immediately afterward and simply said the PlayStation\'s price: $299, a hundred dollars under the Saturn, delivered in nine words and no slide. Retailers left out of the surprise launch were furious, and the console never fully recovered the relationship. Underneath the marketing disaster sat genuinely strange hardware — two CPUs and a total of eight processors, extraordinary at 2D and famously difficult to program for 3D, at the exact moment the industry turned toward 3D. It is remembered as Sega\'s failure. It is also the console Virtua Fighter, Panzer Dragoon and Nights into Dreams called home.',
+    'Sega tried to steal a march on Sony by quietly shipping the Saturn to a handful of retailers and then announcing, on stage at E3 1995, that it was already on shelves, four months ahead of the date every other store had been told to expect. It should have been a coup. Instead Sony walked on stage immediately afterward and simply said the PlayStation\'s price: $299, a hundred dollars under the Saturn, delivered in nine words and no slide. Retailers left out of the surprise launch were furious, and the console never fully recovered the relationship. Underneath the marketing disaster sat genuinely strange hardware: two CPUs and a total of eight processors, extraordinary at 2D and famously difficult to program for 3D, at the exact moment the industry turned toward 3D. It is remembered as Sega\'s failure. It is also the console Virtua Fighter, Panzer Dragoon and Nights into Dreams called home.',
 
   specs: {
     cpu: 'Two Hitachi SH-2',
@@ -46,30 +46,33 @@ export const saturn: ConsoleEntry = {
       label: 'Total processors',
       value: '8',
       comparison:
-        'Two main CPUs, a sound chip, two video processors and more besides — coordinating all of them at once was exactly what made the Saturn so hard to develop 3D games for.',
+        'Two main CPUs, a sound chip, two video processors and more besides: coordinating all of them at once was exactly what made the Saturn so hard to develop 3D games for.',
     },
     {
       label: 'Surprise launch window',
       value: '4 months early',
       comparison:
-        'Sega shipped the console to select stores and announced it live on stage — the same trick a modern company might call a "stealth drop," except retailers who were not in on it found out from the news.',
+        'Sega shipped the console to select stores and announced it live on stage: the same trick a modern company might call a "stealth drop," except retailers who were not in on it found out from the news.',
     },
     {
       label: 'Sony\'s reply',
       value: '9 spoken words',
       comparison:
-        'Sony\'s entire response to the surprise launch was announcing the PlayStation\'s price on the same stage, minutes later — no slide, no video, just a number a hundred dollars lower.',
+        'Sony\'s entire response to the surprise launch was announcing the PlayStation\'s price on the same stage, minutes later: no slide, no video, just a number a hundred dollars lower.',
     },
     {
       label: 'Colour depth',
       value: '16.78 million',
       comparison:
-        'True 24-bit colour, the same depth a modern image editor works in — on a console whose library is still remembered mostly for 2D sprite work.',
+        'True 24-bit colour, the same depth a modern image editor works in: on a console whose library is still remembered mostly for 2D sprite work.',
     },
   ],
 
   mediaKind: 'optical',
-  mediaArchetype: 'jewel-cd',
+  // Not a standard 142mm jewel case — NA Saturn (and Sega CD, and early PS1)
+  // games shipped in a taller, thicker longbox jewel case. See the
+  // `jewel-longbox` archetype in media-archetypes.ts for the size sourcing.
+  mediaArchetype: 'jewel-longbox',
   model: '/models/consoles/saturn.glb',
   // Measured against the actual rendered GLB — see snes.ts's hardwareDiagram
   // comment for the method. The model names its disc-lid cover mesh
@@ -78,22 +81,22 @@ export const saturn: ConsoleEntry = {
     renderBox: { x: [-0.1461, 0.1461], y: [0, 0.0771], z: [-0.1102, 0.1102] },
     callouts: [
       {
-        label: 'Disc lid — the whole top lifts open',
+        label: 'Disc lid: the whole top lifts open',
         anchor: [0, 0.075, 0.01],
         labelOffset: [0, 0.03, 0.015],
       },
       {
-        label: 'Power button — front left',
+        label: 'Power button: front left',
         anchor: [-0.1, 0.045, 0.108],
         labelOffset: [-0.035, 0.045, 0.005],
       },
       {
-        label: 'Open button — front, beside power',
+        label: 'Open button: front, beside power',
         anchor: [-0.01, 0.045, 0.108],
         labelOffset: [-0.03, 0.05, 0.005],
       },
       {
-        label: 'Controller ports (×2) — front right',
+        label: 'Controller ports (×2): front right',
         anchor: [0.09, 0.025, 0.108],
         labelOffset: [0.035, 0.04, 0.005],
       },
@@ -120,8 +123,8 @@ export const saturn: ConsoleEntry = {
       // (L-R), height 45.7 (thickness), depth 86 (front-to-back).
       dimensions: { width: 155, height: 45.7, depth: 86 },
       innovations: [
-        'Six face buttons in two rows of three (ABC over XYZ), inherited from the Genesis\'s own six-button pad — built for the fighting games the Saturn leaned on hardest.',
-        'Widely regarded, then and since, as one of the best D-pads ever shipped on a console controller — precise enough that fighting-game players sought the pad out long after the console itself was gone.',
+        'Six face buttons in two rows of three (ABC over XYZ), inherited from the Genesis\'s own six-button pad: built for the fighting games the Saturn leaned on hardest.',
+        'Widely regarded, then and since, as one of the best D-pads ever shipped on a console controller: precise enough that fighting-game players sought the pad out long after the console itself was gone.',
       ],
       buttons: [
         { id: 'dpad-up', mesh: 'dpad', label: 'D-pad Up', key: 'ArrowUp', travel: [0, -0.0008, 0], position: [-44, 0], shape: 'cross', sizeMm: 26 },
@@ -145,17 +148,17 @@ export const saturn: ConsoleEntry = {
     {
       id: 'ambush-launch',
       title: 'The launch that ambushed its own retailers',
-      body: 'Sega quietly shipped Saturn units to a handful of retailers and then announced, live on the E3 1995 keynote stage, that it was already on sale — four months before the date every other store had been told to prepare for. Chains left out of the early shipment, including Kmart and Best Buy, were reportedly furious enough to scale back their support for the console entirely.',
+      body: 'Sega quietly shipped Saturn units to a handful of retailers and then announced, live on the E3 1995 keynote stage, that it was already on sale, four months before the date every other store had been told to prepare for. Chains left out of the early shipment, including Kmart and Best Buy, were reportedly furious enough to scale back their support for the console entirely.',
     },
     {
       id: 'sony-nine-words',
       title: 'Sony\'s entire reply was one sentence',
-      body: 'Minutes after Sega\'s surprise announcement, Sony\'s Steve Race walked on stage, said "299" and walked off. No slide, no explanation needed — the PlayStation undercut the Saturn by a hundred dollars, announced in the shortest keynote moment in console history.',
+      body: 'Minutes after Sega\'s surprise announcement, Sony\'s Steve Race walked on stage, said "299" and walked off. No slide, no explanation needed: the PlayStation undercut the Saturn by a hundred dollars, announced in the shortest keynote moment in console history.',
     },
     {
       id: 'eight-processors',
       title: 'Eight processors, and famously hard to use them all',
-      body: 'Two Hitachi SH-2 CPUs, two video display processors, a sound chip and more besides made the Saturn extraordinarily capable at 2D sprite work and genuinely difficult to program for the 3D graphics the industry was pivoting toward — a hardware philosophy built for the generation that was ending, arriving right as the next one began.',
+      body: 'Two Hitachi SH-2 CPUs, two video display processors, a sound chip and more besides made the Saturn extraordinarily capable at 2D sprite work and genuinely difficult to program for the 3D graphics the industry was pivoting toward: a hardware philosophy built for the generation that was ending, arriving right as the next one began.',
     },
     {
       id: 'sonic-xtreme-cancelled',
@@ -168,14 +171,14 @@ export const saturn: ConsoleEntry = {
     {
       id: 'laser-lens-wear',
       name: 'CD laser lens wear',
-      body: 'The optical pickup\'s laser diode weakens with age, and discs that once read instantly begin skipping, refusing to spin up, or triggering a repeated tray-open error — the same slow failure every CD-based console of this era eventually develops.',
+      body: 'The optical pickup\'s laser diode weakens with age, and discs that once read instantly begin skipping, refusing to spin up, or triggering a repeated tray-open error: the same slow failure every CD-based console of this era eventually develops.',
       target: 'lid',
       effect: 'no-signal',
     },
     {
       id: 'battery-backup-death',
       name: 'Backup battery leak',
-      body: 'The internal battery that preserves save data and the clock corrodes and leaks after enough years, sometimes damaging the board around it — a quiet failure that erases save files long before it is ever noticed.',
+      body: 'The internal battery that preserves save data and the clock corrodes and leaks after enough years, sometimes damaging the board around it, a quiet failure that erases save files long before it is ever noticed.',
       target: 'shell',
       effect: 'dim',
     },

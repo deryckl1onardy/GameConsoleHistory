@@ -28,7 +28,7 @@ export const wiiU: ConsoleEntry = {
   msrpUsdAdjusted: 420,
   tagline: 'How U will play next.',
   summary:
-    'The Wii U put a 6.2-inch touchscreen into a controller and let a game use it as a map, an inventory, an asymmetric second player\'s view, or a television substitute you could carry to another room. It is a genuinely good idea, and it sold 13.5 million units — less than a seventh of the Wii — because the marketing never made clear that this was a new console at all rather than an accessory for the old one. Nintendo\'s president Satoru Iwata took a 50% pay cut over its performance. Then, five years later, Nintendo shipped the same core idea as a machine where the screen simply detaches and goes with you, and it became one of the best-selling consoles ever made.',
+    'The Wii U put a 6.2-inch touchscreen into a controller and let a game use it as a map, an inventory, an asymmetric second player\'s view, or a television substitute you could carry to another room. It is a genuinely good idea, and it sold 13.5 million units, less than a seventh of the Wii, because the marketing never made clear that this was a new console at all rather than an accessory for the old one. Nintendo\'s president Satoru Iwata took a 50% pay cut over its performance. Then, five years later, Nintendo shipped the same core idea as a machine where the screen simply detaches and goes with you, and it became one of the best-selling consoles ever made.',
 
   specs: {
     cpu: 'IBM PowerPC "Espresso", three cores',
@@ -46,7 +46,7 @@ export const wiiU: ConsoleEntry = {
       label: 'Sales vs. the Wii',
       value: '13.5M vs 101.6M',
       comparison:
-        'A drop of roughly 87% between one console and its direct successor — the steepest generational collapse any major platform holder has recorded.',
+        'A drop of roughly 87% between one console and its direct successor: the steepest generational collapse any major platform holder has recorded.',
     },
     {
       label: 'The GamePad screen',
@@ -69,7 +69,12 @@ export const wiiU: ConsoleEntry = {
   ],
 
   mediaKind: 'optical',
-  mediaArchetype: 'bluray-case',
+  // Not the smaller Blu-ray-case size despite the disc format — the Wii U's
+  // actual retail case is the same 190x135x14mm DVD-sized case as the Wii's
+  // (they shared shelf space), not the 171mm-tall Blu-ray case used by PS3/
+  // PS4/PS5/Xbox One/Xbox Series. See dvd-keepcase's own entry in
+  // media-archetypes.ts.
+  mediaArchetype: 'dvd-keepcase',
   model: '/models/consoles/wii-u.glb',
   // Anchors measured against the rendered GLB (see snes.ts's hardwareDiagram
   // comment). The model lies flat with its front face along +x; the data's
@@ -80,32 +85,32 @@ export const wiiU: ConsoleEntry = {
     renderBox: { x: [-0.132, 0.132], y: [0, 0.0474], z: [-0.086, 0.086] },
     callouts: [
       {
-        label: 'Disc slot — upper centre of the front panel',
+        label: 'Disc slot: upper centre of the front panel',
         anchor: [0.132, 0.03, -0.005],
         labelOffset: [0.03, 0.02, 0],
       },
       {
-        label: 'Eject button — the top-left stack',
+        label: 'Eject button: the top-left stack',
         anchor: [0.107, 0.033, -0.055],
         labelOffset: [0.03, 0.02, -0.01],
       },
       {
-        label: 'Power button — below eject',
+        label: 'Power button: below eject',
         anchor: [0.132, 0.022, -0.05],
         labelOffset: [0.03, 0.02, -0.01],
       },
       {
-        label: 'Sync button — the little red LED',
+        label: 'Sync button: the little red LED',
         anchor: [0.132, 0.016, 0.005],
         labelOffset: [0.03, 0.02, 0],
       },
       {
-        label: 'Wii U logo — bottom-right of the front',
+        label: 'Wii U logo: bottom-right of the front',
         anchor: [0.132, 0.008, 0.05],
         labelOffset: [0.035, -0.015, 0.01],
       },
       {
-        label: 'SD card door — right side of the front panel',
+        label: 'SD card door: right side of the front panel',
         anchor: [0.132, 0.012, 0.06],
         labelOffset: [0.035, 0.015, 0.01],
       },
@@ -140,7 +145,7 @@ export const wiiU: ConsoleEntry = {
       innovations: [
         'A 6.2-inch resistive touchscreen in the middle of the controller, streaming live video from the console over its own wireless link.',
         'Off-television play: the console keeps running while the television is off or in use by somebody else, which is the Switch\'s whole premise five years early.',
-        'A camera, microphone, gyroscope and NFC reader in a controller — hardware later split across the Switch\'s Joy-Cons and amiibo.',
+        'A camera, microphone, gyroscope and NFC reader in a controller: hardware later split across the Switch\'s Joy-Cons and amiibo.',
       ],
       buttons: [
         { id: 'stick-l', mesh: 'stick_l', label: 'Left stick', travel: [0, -0.001, 0], position: [-104, 30], shape: 'stick', sizeMm: 30 },
@@ -175,12 +180,12 @@ export const wiiU: ConsoleEntry = {
     {
       id: 'blueprint-for-switch',
       title: 'It was the Switch, tethered',
-      body: 'A screen in your hands running the console\'s game, so you can keep playing when the television is taken — the Wii U had it in 2012, but the screen only worked within range of the console sitting under the television. The Switch is that idea with the tether cut, and it outsold the Wii U more than tenfold.',
+      body: 'A screen in your hands running the console\'s game, so you can keep playing when the television is taken: the Wii U had it in 2012, but the screen only worked within range of the console sitting under the television. The Switch is that idea with the tether cut, and it outsold the Wii U more than tenfold.',
     },
     {
       id: 'best-games-rescued',
       title: 'Its library was mostly rescued later',
-      body: 'Mario Kart 8, Super Mario 3D World, Splatoon, Bayonetta 2, Pikmin 3 and Donkey Kong Country: Tropical Freeze were all Wii U games first. Almost all of them were re-released on the Switch and sold several times better there — the same games, on a console people bought.',
+      body: 'Mario Kart 8, Super Mario 3D World, Splatoon, Bayonetta 2, Pikmin 3 and Donkey Kong Country: Tropical Freeze were all Wii U games first. Almost all of them were re-released on the Switch and sold several times better there: the same games, on a console people bought.',
     },
   ],
 
@@ -188,7 +193,7 @@ export const wiiU: ConsoleEntry = {
     {
       id: 'nand-corruption',
       name: 'Corrupted system memory',
-      body: 'Cutting power during a system update can corrupt the internal storage and leave the console unable to boot at all — a failure common enough in the first year that Nintendo offered free repairs for it.',
+      body: 'Cutting power during a system update can corrupt the internal storage and leave the console unable to boot at all, a failure common enough in the first year that Nintendo offered free repairs for it.',
       target: 'shell',
       effect: 'dim',
     },
@@ -241,16 +246,16 @@ export const wiiU: ConsoleEntry = {
   },
 
   games: [
-    { rank: 1, title: 'Mario Kart 8', year: 2014, unitsSold: 8_460_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Anti-gravity racing and the console\'s best-seller — then sold another 60 million on the Switch as Deluxe.' },
+    { rank: 1, title: 'Mario Kart 8', year: 2014, unitsSold: 8_460_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Anti-gravity racing and the console\'s best-seller: then sold another 60 million on the Switch as Deluxe.' },
     { rank: 2, title: 'Super Mario 3D World', year: 2013, unitsSold: 5_860_000, developer: 'Nintendo EAD Tokyo', publisher: 'Nintendo', blurb: 'Four-player 3D Mario with a cat suit, widely called the best game almost nobody played at the time.' },
-    { rank: 3, title: 'New Super Mario Bros. U', year: 2012, unitsSold: 5_800_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'The launch title, and one of the few games to use the GamePad as a genuine second role — placing blocks for the other players.' },
+    { rank: 3, title: 'New Super Mario Bros. U', year: 2012, unitsSold: 5_800_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'The launch title, and one of the few games to use the GamePad as a genuine second role: placing blocks for the other players.' },
     { rank: 4, title: 'Super Smash Bros. for Wii U', year: 2014, unitsSold: 5_350_000, developer: 'Sora Ltd. / Bandai Namco', publisher: 'Nintendo', blurb: 'Eight-player matches, the largest the series had ever attempted.' },
-    { rank: 5, title: 'Nintendo Land', year: 2012, unitsSold: 5_200_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'The pack-in, and the clearest demonstration of asymmetric play the console ever got — one player on the screen, everyone else on the television.' },
-    { rank: 6, title: 'Splatoon', year: 2015, unitsSold: 4_930_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'A brand-new Nintendo franchise built around covering ground in ink rather than shooting people — the biggest new idea on the console.' },
+    { rank: 5, title: 'Nintendo Land', year: 2012, unitsSold: 5_200_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'The pack-in, and the clearest demonstration of asymmetric play the console ever got: one player on the screen, everyone else on the television.' },
+    { rank: 6, title: 'Splatoon', year: 2015, unitsSold: 4_930_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'A brand-new Nintendo franchise built around covering ground in ink rather than shooting people: the biggest new idea on the console.' },
     { rank: 7, title: 'Donkey Kong Country: Tropical Freeze', year: 2014, unitsSold: 1_720_000, developer: 'Retro Studios', publisher: 'Nintendo', blurb: 'A punishing platformer that found its real audience on the Switch four years later.' },
     { rank: 8, title: 'The Legend of Zelda: Breath of the Wild', year: 2017, unitsSold: 1_690_000, developer: 'Nintendo EPD', publisher: 'Nintendo', blurb: 'Released the same day as the Switch version, on a console being discontinued that month.' },
     { rank: 9, title: 'Pikmin 3', year: 2013, unitsSold: 1_150_000, developer: 'Nintendo EAD', publisher: 'Nintendo', blurb: 'Nine years after Pikmin 2, using the GamePad as the map the series had always wanted.' },
-    { rank: 10, title: 'Bayonetta 2', year: 2014, unitsSold: 1_040_000, developer: 'PlatinumGames', publisher: 'Nintendo', blurb: 'Existed only because Nintendo funded it after other publishers passed — an unlikely exclusive for a family console.' },
+    { rank: 10, title: 'Bayonetta 2', year: 2014, unitsSold: 1_040_000, developer: 'PlatinumGames', publisher: 'Nintendo', blurb: 'Existed only because Nintendo funded it after other publishers passed: an unlikely exclusive for a family console.' },
   ],
 
   sources: [

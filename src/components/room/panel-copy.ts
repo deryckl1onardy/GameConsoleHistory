@@ -36,10 +36,12 @@ export const COPY = {
   gamesListHint: 'Pick a game from the list.',
   gamesDimensions: 'mm',
   gamesPrecisionExact: 'exact published dimensions',
-  gamesPrecisionApprox: 'approximate — collector consensus',
+  gamesPrecisionApprox: 'approximate: collector consensus',
 
   // Game Artifact view — the games section's detail panel.
+  gameDescription: 'The game',
   gameEditorial: 'Why it matters',
+  gameCriticReception: 'What critics said',
   gameStatAttachRate: 'Attach rate',
   gameStatAfterLaunch: 'After launch',
   gameStatDeveloper: 'Developer',

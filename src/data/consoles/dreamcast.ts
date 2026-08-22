@@ -28,7 +28,7 @@ export const dreamcast: ConsoleEntry = {
   msrpUsdAdjusted: 380,
   tagline: 'It\'s thinking.',
   summary:
-    'The Dreamcast shipped in 1999 with a 56k modem in every single box, at a time when "online console gaming" was a thing almost nobody had done — Sega ran the network itself, mailed out the dial-up software, and let players compete across the country over a phone line. Its memory card was a tiny handheld computer with an LCD screen you could unplug and take with you. Its launch day in North America, 9/9/99, took $98 million in twenty-four hours. And then it stopped: eighteen months later Sega announced it was leaving the hardware business entirely, killing a console that was still reviewing better than anything else on the shelf. It is the rare machine remembered almost entirely for what it started rather than what it finished.',
+    'The Dreamcast shipped in 1999 with a 56k modem in every single box, at a time when "online console gaming" was a thing almost nobody had done. Sega ran the network itself, mailed out the dial-up software, and let players compete across the country over a phone line. Its memory card was a tiny handheld computer with an LCD screen you could unplug and take with you. Its launch day in North America, 9/9/99, took $98 million in twenty-four hours. And then it stopped: eighteen months later Sega announced it was leaving the hardware business entirely, killing a console that was still reviewing better than anything else on the shelf. It is the rare machine remembered almost entirely for what it started rather than what it finished.',
 
   specs: {
     cpu: 'Hitachi SH-4',
@@ -46,13 +46,13 @@ export const dreamcast: ConsoleEntry = {
       label: 'Modem, included',
       value: '56 kbit/s',
       comparison:
-        'Every Dreamcast ever sold had one in the box. The PS2 charged extra for a network adapter, and the Xbox launched two years later — Sega simply assumed the internet was part of a console and priced it in.',
+        'Every Dreamcast ever sold had one in the box. The PS2 charged extra for a network adapter, and the Xbox launched two years later. Sega simply assumed the internet was part of a console and priced it in.',
     },
     {
       label: 'The memory card',
       value: 'Its own screen',
       comparison:
-        'The VMU had an LCD, a d-pad, buttons and a battery. You could unplug your save file and it became a tiny handheld game — nothing before or since has treated a memory card as a device in its own right.',
+        'The VMU had an LCD, a d-pad, buttons and a battery. You could unplug your save file and it became a tiny handheld game. Nothing before or since has treated a memory card as a device in its own right.',
     },
     {
       label: 'Launch day takings',
@@ -69,7 +69,10 @@ export const dreamcast: ConsoleEntry = {
   ],
 
   mediaKind: 'optical',
-  mediaArchetype: 'jewel-cd',
+  // Not the standard tall jewel-cd shell — Dreamcast used a visibly
+  // shorter, squarer case. See the `jewel-square` archetype in
+  // media-archetypes.ts for the sourcing.
+  mediaArchetype: 'jewel-square',
   model: '/models/consoles/dreamcast.glb',
   // Measured against the actual rendered GLB (see snes.ts's hardwareDiagram
   // comment for the method). The front face (ports + SEGA logo) is the +x
@@ -78,22 +81,22 @@ export const dreamcast: ConsoleEntry = {
   hardwareDiagram: {
     callouts: [
       {
-        label: 'Controller ports (×4) — the VMU lives in the pad, not the console',
+        label: 'Controller ports (×4): the VMU lives in the pad, not the console',
         anchor: [0.082, 0.045, 0],
         labelOffset: [0.03, 0.025, 0],
       },
       {
-        label: 'SEGA logo — embossed above the port panel',
+        label: 'SEGA logo: embossed above the port panel',
         anchor: [0.081, 0.055, 0],
         labelOffset: [0.045, 0.005, 0],
       },
       {
-        label: 'Disc lid — the GD-ROM loads through the top',
+        label: 'Disc lid: the GD-ROM loads through the top',
         anchor: [0, 0.0668, 0.02],
         labelOffset: [0, 0.03, 0.02],
       },
       {
-        label: 'Power button — top deck, front-left',
+        label: 'Power button: top deck, front-left',
         anchor: [0.055, 0.061, -0.05],
         labelOffset: [0.015, 0.03, -0.015],
       },
@@ -123,7 +126,7 @@ export const dreamcast: ConsoleEntry = {
       // width 175 (L-R), height 78 (thickness), depth 115 (front-to-back).
       dimensions: { width: 175, height: 78, depth: 115 },
       innovations: [
-        'Two analog triggers on the back — pressure-sensitive rather than on/off, which is why racing games on this console had genuinely progressive braking.',
+        'Two analog triggers on the back: pressure-sensitive rather than on/off, which is why racing games on this console had genuinely progressive braking.',
         'A window in the middle of the pad holding one or two VMUs, so a game could put a second screen in your hands without any extra hardware.',
       ],
       buttons: [
@@ -147,7 +150,7 @@ export const dreamcast: ConsoleEntry = {
     {
       id: 'vmu-second-screen',
       title: 'The memory card was a handheld console',
-      body: 'The Visual Memory Unit slotted into the controller, but pull it out and it was a self-contained device: LCD screen, d-pad, two buttons, a battery and a clock. Games wrote miniature versions of themselves onto it — you could raise a Chao from Sonic Adventure on the bus and plug it back in at home. It also faced the player through a window in the pad, so a game could show you private information the other player could not see.',
+      body: 'The Visual Memory Unit slotted into the controller, but pull it out and it was a self-contained device: LCD screen, d-pad, two buttons, a battery and a clock. Games wrote miniature versions of themselves onto it. You could raise a Chao from Sonic Adventure on the bus and plug it back in at home. It also faced the player through a window in the pad, so a game could show you private information the other player could not see.',
     },
     {
       id: 'online-in-the-box',
@@ -157,12 +160,12 @@ export const dreamcast: ConsoleEntry = {
     {
       id: 'shenmue-budget',
       title: 'The most expensive game ever made, at the time',
-      body: 'Shenmue reportedly cost around $47 million to develop — a figure so far beyond any game before it that it was widely reported as impossible to recoup on a console with nine million owners. It simulated a whole Japanese town with weather, shops that kept opening hours, and hundreds of individually voiced residents.',
+      body: 'Shenmue reportedly cost around $47 million to develop, a figure so far beyond any game before it that it was widely reported as impossible to recoup on a console with nine million owners. It simulated a whole Japanese town with weather, shops that kept opening hours, and hundreds of individually voiced residents.',
     },
     {
       id: 'discontinued-while-winning',
       title: 'Cancelled while it was still good',
-      body: 'Sega announced its exit from hardware in January 2001, barely sixteen months after the North American launch. The company had lost the previous two generations and could not absorb the cost of fighting the PS2, so it became a software publisher instead — and started making Sonic games for Nintendo, which would have been unthinkable a year earlier.',
+      body: 'Sega announced its exit from hardware in January 2001, barely sixteen months after the North American launch. The company had lost the previous two generations and could not absorb the cost of fighting the PS2, so it became a software publisher instead, and started making Sonic games for Nintendo, which would have been unthinkable a year earlier.',
     },
   ],
 
@@ -170,14 +173,14 @@ export const dreamcast: ConsoleEntry = {
     {
       id: 'gd-rom-laser',
       name: 'GD-ROM drive failure',
-      body: 'The Dreamcast\'s drive spins its disc considerably faster than a CD player and is audible from across the room. As the laser assembly ages it loses the ability to read the high-density area of a GD-ROM, so the console boots, shows its swirl, and then simply reports no disc — with the drive still audibly trying.',
+      body: 'The Dreamcast\'s drive spins its disc considerably faster than a CD player and is audible from across the room. As the laser assembly ages it loses the ability to read the high-density area of a GD-ROM, so the console boots, shows its swirl, and then simply reports no disc, with the drive still audibly trying.',
       target: 'disc_lid',
       effect: 'no-signal',
     },
     {
       id: 'dead-clock-battery',
       name: 'Dead clock battery',
-      body: 'A rechargeable cell on the board keeps the date and time. Once it stops holding charge — and after twenty-five years most have — every boot stops at the date-entry screen, and any game that reads the clock behaves as though it is permanently 1998.',
+      body: 'A rechargeable cell on the board keeps the date and time. Once it stops holding charge, and after twenty-five years most have, every boot stops at the date-entry screen, and any game that reads the clock behaves as though it is permanently 1998.',
       target: 'shell',
       effect: 'dim',
     },
@@ -224,15 +227,15 @@ export const dreamcast: ConsoleEntry = {
   },
 
   games: [
-    { rank: 1, title: 'Sonic Adventure', year: 1998, unitsSold: 2_500_000, developer: 'Sonic Team', publisher: 'Sega', blurb: 'The launch title, and the first fully 3D Sonic — it also introduced the Chao you raised on the memory card\'s own screen.' },
+    { rank: 1, title: 'Sonic Adventure', year: 1998, unitsSold: 2_500_000, developer: 'Sonic Team', publisher: 'Sega', blurb: 'The launch title, and the first fully 3D Sonic: it also introduced the Chao you raised on the memory card\'s own screen.' },
     { rank: 2, title: 'Shenmue', year: 1999, unitsSold: 1_200_000, developer: 'Sega AM2', publisher: 'Sega', blurb: 'A revenge story wrapped around a town simulator so detailed it tracked the weather of a real 1986 winter.' },
     { rank: 3, title: 'Crazy Taxi', year: 1999, unitsSold: 1_160_000, developer: 'Hitmaker', publisher: 'Sega', blurb: 'An arcade port that kept its licensed soundtrack and its stopwatch, and became the console\'s shorthand for "pick up and play".' },
     { rank: 4, title: 'Resident Evil – Code: Veronica', year: 2000, unitsSold: 1_140_000, developer: 'Capcom', publisher: 'Capcom', blurb: 'The first Resident Evil built with real-time 3D backgrounds instead of pre-rendered stills.' },
     { rank: 5, title: 'Sonic Adventure 2', year: 2001, unitsSold: 1_000_000, developer: 'Sonic Team', publisher: 'Sega', blurb: 'Released in the console\'s final months, and the last Sonic game Sega ever made for its own hardware.' },
-    { rank: 6, title: 'Soulcalibur', year: 1999, unitsSold: 1_000_000, developer: 'Namco', publisher: 'Namco', blurb: 'Widely held to have surpassed its own arcade original — a claim almost no home port could make at the time.' },
+    { rank: 6, title: 'Soulcalibur', year: 1999, unitsSold: 1_000_000, developer: 'Namco', publisher: 'Namco', blurb: 'Widely held to have surpassed its own arcade original, a claim almost no home port could make at the time.' },
     { rank: 7, title: 'Phantasy Star Online', year: 2000, unitsSold: 900_000, developer: 'Sonic Team', publisher: 'Sega', blurb: 'The first console game to put players from different countries in one persistent world, with a word-selection chat system to bridge the languages.' },
     { rank: 8, title: 'NFL 2K1', year: 2000, unitsSold: 900_000, developer: 'Visual Concepts', publisher: 'Sega', blurb: 'Online console football a full generation before it was normal, priced deliberately under the market leader.' },
-    { rank: 9, title: 'Jet Set Radio', year: 2000, unitsSold: 500_000, developer: 'Smilebit', publisher: 'Sega', blurb: 'The game that put cel-shading on the map — flat ink outlines over 3D geometry, copied everywhere afterwards.' },
+    { rank: 9, title: 'Jet Set Radio', year: 2000, unitsSold: 500_000, developer: 'Smilebit', publisher: 'Sega', blurb: 'The game that put cel-shading on the map: flat ink outlines over 3D geometry, copied everywhere afterwards.' },
     { rank: 10, title: 'Marvel vs. Capcom 2', year: 2000, unitsSold: 500_000, developer: 'Capcom', publisher: 'Capcom', blurb: 'Fifty-six characters and three-on-three tag fighting, still played competitively decades later.' },
   ],
 

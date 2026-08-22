@@ -59,11 +59,11 @@ export function CameraRig() {
     // which shotsFor does not receive) — build it from the same layout the
     // spread renders with, so camera and contents cannot disagree.
     if (mode === 'artifact' && selectedRank !== null) {
-      return artifactShotFor(entry, spec, selectedRank)
+      return artifactShotFor(entry, spec, selectedRank, layout)
     }
     const shotId = MODE_TO_SHOT[mode as keyof typeof MODE_TO_SHOT]
     return shotId ? shots[shotId] : null
-  }, [mode, selectedRank, shots, entry, spec])
+  }, [mode, selectedRank, shots, entry, spec, layout])
 
   /** Every tween runs through here so only one can ever own the camera. */
   const active = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null)
@@ -218,7 +218,7 @@ export function CameraRig() {
   useEffect(() => {
     const c = controls.current
     const apply = () => {
-      const base = frameOffsetFor(width, height, layout, !panelOpen)
+      const base = frameOffsetFor(width, height, layout, !panelOpen, mode !== 'console')
       let t = 1
       if (c && restingShot) {
         const dist = camera.position.distanceTo(c.target)
@@ -233,7 +233,7 @@ export function CameraRig() {
     apply()
     c?.addEventListener('change', apply)
     return () => c?.removeEventListener('change', apply)
-  }, [width, height, layout, panelOpen, camera, setFrameOffset, restingShot, dolly])
+  }, [width, height, layout, panelOpen, camera, setFrameOffset, restingShot, dolly, mode])
 
   /**
    * The reset view: snap the camera back to the resting shot. Wired to the

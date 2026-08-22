@@ -263,14 +263,14 @@ export const GENERATION_BITS: Partial<Record<Generation, string>> = {
 
 /** The era caption shown under each generation heading in the picker. */
 export const GENERATION_ERAS: Partial<Record<Generation, string>> = {
-  2: '1977 — cartridges arrive',
-  3: '1983 — the crash, and the recovery',
-  4: '1990 — 16-bit, and the first console war',
-  5: '1994 — the jump to 3D',
-  6: '1998 — optical discs and online',
-  7: '2005 — high definition',
-  8: '2012 — the living room saturates',
-  9: '2020 — and now',
+  2: '1977: cartridges arrive',
+  3: '1983: the crash, and the recovery',
+  4: '1990: 16-bit, and the first console war',
+  5: '1994: the jump to 3D',
+  6: '1998: optical discs and online',
+  7: '2005: high definition',
+  8: '2012: the living room saturates',
+  9: '2020: and now',
 }
 
 /** Roster grouped by generation, each group ordered by release year. */

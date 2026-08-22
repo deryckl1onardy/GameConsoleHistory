@@ -8,9 +8,12 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "covers": "tsx scripts/fetch-covers.mjs"
+    "covers": "tsx scripts/fetch-covers.mjs",
+    "logos": "tsx scripts/fetch-logos.mjs",
+    "boxart": "tsx scripts/fetch-boxart.mjs"
   },
   "dependencies": {
+    "@gltf-transform/core": "^4.4.2",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
     "@react-three/postprocessing": "^3.0.5",
